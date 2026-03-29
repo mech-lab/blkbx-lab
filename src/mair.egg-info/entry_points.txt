@@ -1,0 +1,3 @@
+[console_scripts]
+mair-validate = mair.cli.validate:main
+mair-write-manifest = mair.cli.write_manifest:main

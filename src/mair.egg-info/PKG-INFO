@@ -1,0 +1,50 @@
+Metadata-Version: 2.4
+Name: mair
+Version: 0.1.0
+Summary: Mechanism Assurance IR schemas, validators, and manifest helpers
+Author: MAIR Contributors
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: jsonschema>=4.23
+Requires-Dist: pyarrow>=17.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.3; extra == "dev"
+Requires-Dist: ruff>=0.6; extra == "dev"
+Requires-Dist: mypy>=1.11; extra == "dev"
+
+# MAIR
+
+MAIR is the canonical artifact contract for the BLT v1 stack.
+
+It owns:
+- typed artifact names and stable filenames
+- deterministic IDs and content hashes
+- manifest generation and validation
+- the tracked cross-repo implementation plan
+
+## Editable install
+The supported local development path is:
+
+```bash
+python -m pip install -e '/Volumes/128/MAIR[dev]' -e '/Volumes/128/BLT[dev]'
+```
+
+That makes these CLIs available without `PYTHONPATH` hacks:
+- `mair-validate`
+- `mair-write-manifest`
+- `blt-run-trace`
+- `blt-fit-grouped-clt`
+- `blt-run-analysis`
+
+For the real Qwen replay backend, also install the BLT model extra or equivalent runtime deps:
+
+```bash
+python -m pip install -e '/Volumes/128/BLT[model]'
+```
+
+## Tools
+- `tools/bootstrap_editable.sh`: installs MAIR and BLT editable for local cross-repo development
+
+## Plan
+- Source of truth: [`PLAN.md`](PLAN.md)

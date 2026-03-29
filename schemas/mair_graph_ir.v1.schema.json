@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["trace_id", "model_family", "model_variant", "nodes", "edges"],
+  "properties": {
+    "trace_id": {"type": "string"},
+    "model_family": {"type": "string"},
+    "model_variant": {"type": "string"},
+    "capture_backend": {"type": "string"},
+    "profile_id": {"type": ["string", "null"]},
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind"],
+        "properties": {
+          "id": {"type": "string"},
+          "kind": {"type": "string"},
+          "block_id": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "target", "edge_class"],
+        "properties": {
+          "source": {"type": "string"},
+          "target": {"type": "string"},
+          "edge_class": {"type": "string"},
+          "weight": {"type": "number"}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

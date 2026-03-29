@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["trace_id", "decision", "gates", "falsifiers", "artifact_inputs"],
+  "properties": {
+    "trace_id": {"type": "string"},
+    "decision": {"type": "string"},
+    "gates": {"type": "object"},
+    "falsifiers": {"type": "object"},
+    "artifact_inputs": {"type": "array", "items": {"type": "object"}},
+    "summary": {"type": "object"}
+  },
+  "additionalProperties": false
+}

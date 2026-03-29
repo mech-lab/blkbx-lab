@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["trace_id", "topology_backend", "scope", "bridge_policy", "intervention_axis", "summary_metrics"],
+  "properties": {
+    "trace_id": {"type": "string"},
+    "topology_backend": {"type": "string", "const": "sketch"},
+    "scope": {"type": "string"},
+    "bridge_policy": {"type": "string"},
+    "intervention_axis": {"type": "string"},
+    "summary_metrics": {"type": "object"}
+  },
+  "additionalProperties": false
+}
