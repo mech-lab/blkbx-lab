@@ -14,7 +14,7 @@ Requires-Dist: ruff>=0.6; extra == "dev"
 Requires-Dist: mypy>=1.11; extra == "dev"
 Provides-Extra: model
 Requires-Dist: torch>=2.2; extra == "model"
-Requires-Dist: transformers>=4.46; extra == "model"
+Requires-Dist: transformers>=4.57.0; extra == "model"
 
 # BLT
 
@@ -39,6 +39,9 @@ For the real replay backend, also install:
 ```bash
 python -m pip install -e '/Volumes/128/BLT[model]'
 ```
+
+`qwen_hybrid_hf` currently requires a `transformers` build that recognizes `model_type=qwen3_5`.
+The local extra declares `transformers>=4.57.0`, but some environments may still require a newer release or a source build before `qwen3_5` is recognized.
 
 ## Built-in profile
 - `configs/qwen3.5-2b.profile.json`: pinned first real hybrid replay target

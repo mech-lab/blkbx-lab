@@ -6,9 +6,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-WORKSPACE = ROOT.parent
-BLT_SRC = WORKSPACE / "BLT" / "src"
-MAIR_SRC = WORKSPACE / "MAIR" / "src"
+BLT_SRC = ROOT / "internal" / "blt" / "src"
+MAIR_SRC = ROOT / "internal" / "mair" / "src"
 
 for path in (str(BLT_SRC), str(MAIR_SRC)):
     if path not in sys.path:

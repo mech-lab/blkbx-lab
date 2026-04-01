@@ -1,0 +1,40 @@
+name: Bug report
+description: Report a user-visible defect in mech-lab.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the defect and the expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Include the command, API call, or minimal steps to reproduce.
+      placeholder: |
+        1. pip install mech-lab
+        2. mechlab ...
+        3. observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: artifacts
+    attributes:
+      label: Artifacts or logs
+      description: Paste relevant manifest paths, receipt output, stack traces, or screenshots.
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Affected surface
+      options:
+        - mechlab CLI
+        - mech_lab Python API
+        - Qwen real-model lane
+        - Internal packaging/release
+    validations:
+      required: true

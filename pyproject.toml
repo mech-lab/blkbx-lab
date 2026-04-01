@@ -11,7 +11,11 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 keywords = ["mechanistic-interpretability", "release-assurance", "evidence-bundles", "numpy", "research"]
-dependencies = ["numpy>=2.0"]
+dependencies = [
+  "jsonschema>=4.23",
+  "numpy>=2.0",
+  "pyarrow>=17.0",
+]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
@@ -37,9 +41,12 @@ mechlab = "mech_lab.cli:main"
 addopts = "-q"
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["hybrid_mechlab*", "mech_lab*"]
+where = [".", "internal/blt/src", "internal/mair/src"]
+include = ["blt*", "hybrid_mechlab*", "mair*", "mech_lab*"]
+exclude = ["internal*", "legacy*"]
 
 [tool.setuptools.package-data]
+blt = ["configs/*.json", "configs/*.md"]
 hybrid_mechlab = ["py.typed", "_rust.pyi"]
+mair = ["schemas/*.json"]
 mech_lab = ["py.typed"]

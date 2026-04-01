@@ -18,5 +18,5 @@ classifiers = [
 ]
 
 [tool.maturin]
-manifest-path = "../rust/hm_pyo3/Cargo.toml"
+manifest-path = "../../rust/hm_pyo3/Cargo.toml"
 features = []

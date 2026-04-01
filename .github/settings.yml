@@ -1,0 +1,10 @@
+repository:
+  name: mech-lab
+  description: Facade-first SDK and CLI for mechanistic evidence bundles, receipts, and comparison packets.
+  default_branch: main
+  topics:
+    - interpretability
+    - mechanistic-analysis
+    - evidence-bundles
+    - release-assurance
+    - model-debugging

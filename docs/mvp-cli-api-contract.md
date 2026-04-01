@@ -1,5 +1,12 @@
 # mech-lab CLI and API Contract
 
+Release-facing identity:
+
+- repository and package name: `mech-lab`
+- CLI name: `mechlab`
+- Python import path: `mech_lab`
+- internal subsystems: `internal/blt` and `internal/mair`
+
 ## Public verbs
 
 | CLI | Python | Input | Output |
@@ -28,7 +35,7 @@ Hard rule:
 
 Status:
 - native `qwen3_5` runtime proof is complete through the public `mechlab` façade
-- the validated real-model rerun is documented in [qwen35-validation-report.md](/Volumes/128/hybridTDA/docs/qwen35-validation-report.md)
+- the validated real-model rerun is documented in [qwen35-validation-report.md](qwen35-validation-report.md)
 - the successful host-local rerun on April 1, 2026 used a public CPU override profile after `device:auto` failed on the `16 GiB` arm64/MPS machine used for validation
 
 Product command:

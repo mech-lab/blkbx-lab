@@ -15,6 +15,9 @@ def repo_root() -> Path:
 
 
 def config_root() -> Path:
+    packaged = Path(__file__).resolve().parent / "configs"
+    if packaged.exists():
+        return packaged
     return repo_root() / "configs"
 
 

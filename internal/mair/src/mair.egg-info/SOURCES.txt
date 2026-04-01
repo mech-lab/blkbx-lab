@@ -2,6 +2,8 @@ README.md
 pyproject.toml
 src/mair/__init__.py
 src/mair/artifacts.py
+src/mair/gates.py
+src/mair/hydrate.py
 src/mair/ids.py
 src/mair/manifest.py
 src/mair/validate.py
@@ -11,8 +13,12 @@ src/mair.egg-info/dependency_links.txt
 src/mair.egg-info/entry_points.txt
 src/mair.egg-info/requires.txt
 src/mair.egg-info/top_level.txt
+src/mair/cli/gate.py
+src/mair/cli/hydrate.py
 src/mair/cli/validate.py
 src/mair/cli/write_manifest.py
+tests/test_gates.py
+tests/test_hydrate.py
 tests/test_ids.py
 tests/test_manifest.py
 tests/test_validate.py

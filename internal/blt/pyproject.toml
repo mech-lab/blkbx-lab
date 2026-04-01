@@ -23,7 +23,7 @@ dev = [
 ]
 model = [
   "torch>=2.2",
-  "transformers>=4.46",
+  "transformers>=4.57.0",
 ]
 
 [project.scripts]
@@ -41,6 +41,9 @@ include-package-data = true
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["blt*"]
+
+[tool.setuptools.package-data]
+blt = ["configs/*.json", "configs/*.md"]
 
 [tool.ruff]
 line-length = 100

@@ -9,13 +9,19 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE_ROOT = REPO_ROOT.parent
+INTERNAL_MAIR_SRC = REPO_ROOT / "internal" / "mair" / "src"
+INTERNAL_BLT_SRC = REPO_ROOT / "internal" / "blt" / "src"
+LEGACY_MAIR_SRC = WORKSPACE_ROOT / "MAIR" / "src"
+LEGACY_BLT_SRC = WORKSPACE_ROOT / "BLT" / "src"
 
 
 def candidate_paths() -> tuple[Path, ...]:
     return (
         REPO_ROOT,
-        WORKSPACE_ROOT / "MAIR" / "src",
-        WORKSPACE_ROOT / "BLT" / "src",
+        INTERNAL_MAIR_SRC,
+        INTERNAL_BLT_SRC,
+        LEGACY_MAIR_SRC,
+        LEGACY_BLT_SRC,
     )
 
 
@@ -29,10 +35,18 @@ def ensure_workspace_imports() -> list[str]:
 
 
 def repo_availability() -> dict[str, bool]:
+    bundled_mair = INTERNAL_MAIR_SRC.exists()
+    bundled_blt = INTERNAL_BLT_SRC.exists()
+    legacy_mair = LEGACY_MAIR_SRC.exists()
+    legacy_blt = LEGACY_BLT_SRC.exists()
     return {
         "hybrid_mechlab": REPO_ROOT.exists(),
-        "mair_repo": (WORKSPACE_ROOT / "MAIR" / "src").exists(),
-        "blt_repo": (WORKSPACE_ROOT / "BLT" / "src").exists(),
+        "mair_repo": bundled_mair or legacy_mair,
+        "blt_repo": bundled_blt or legacy_blt,
+        "bundled_mair_repo": bundled_mair,
+        "bundled_blt_repo": bundled_blt,
+        "legacy_mair_repo": legacy_mair,
+        "legacy_blt_repo": legacy_blt,
     }
 
 
@@ -62,19 +76,30 @@ def doctor_checks() -> list[dict[str, Any]]:
     ensure_workspace_imports()
 
     repo_state = repo_availability()
+    bundled_ready = repo_state.get("bundled_mair_repo", False) and repo_state.get(
+        "bundled_blt_repo", False
+    )
+    legacy_ready = repo_state.get("legacy_mair_repo", False) and repo_state.get(
+        "legacy_blt_repo", False
+    )
+    workspace_message = "Workspace fallbacks unavailable; rely on installed packages"
+    if bundled_ready:
+        workspace_message = "Bundled internal BLT/MAIR subsystems available"
+    elif legacy_ready:
+        workspace_message = "Legacy sibling BLT/MAIR repos available"
     checks.append(
         {
             "name": "workspace",
             "status": "ok" if repo_state["mair_repo"] and repo_state["blt_repo"] else "warning",
-            "message": "Sibling BLT/MAIR repos discovered" if repo_state["mair_repo"] and repo_state["blt_repo"] else "Workspace fallbacks unavailable; rely on installed packages",
+            "message": workspace_message,
             "fix": None,
         }
     )
 
     for module_name, hint in (
-        ("hybrid_mechlab", "Install the SDK repo editable or keep the current workspace layout"),
-        ("mair", "Install with python -m pip install -e '/Volumes/128/MAIR[dev]'"),
-        ("blt", "Install with python -m pip install -e '/Volumes/128/BLT[dev]'"),
+        ("hybrid_mechlab", "Install the unified mech-lab repo editable or run from the repository root"),
+        ("mair", "Install the unified repo dependencies or ensure internal/mair/src is importable"),
+        ("blt", "Install the unified repo dependencies or ensure internal/blt/src is importable"),
     ):
         module, error = import_optional(module_name)
         checks.append(
@@ -106,7 +131,7 @@ def doctor_checks() -> list[dict[str, Any]]:
         try:
             runtime_module = require_module(
                 "blt.runtime",
-                "Install BLT editable or keep the workspace sibling repo available",
+                "Install the unified repo dependencies or ensure internal/blt/src is importable",
             )
             preflight = runtime_module.inspect_native_qwen_runtime()
             transformers_ready = True

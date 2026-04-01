@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["trace_id", "family", "backend", "summary", "diagrams"],
+  "properties": {
+    "trace_id": {"type": "string"},
+    "family": {"type": "string"},
+    "backend": {"type": "string"},
+    "profile_name": {"type": ["string", "null"]},
+    "summary": {
+      "type": "object",
+      "required": ["gluing_defect"],
+      "properties": {
+        "gluing_defect": {"type": "number"},
+        "bridge_dependence": {"type": ["number", "null"]},
+        "tract_retention": {"type": ["number", "null"]},
+        "topological_susceptibility": {"type": ["number", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "diagrams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["homology_degree", "pairs"],
+        "properties": {
+          "homology_degree": {"type": "integer", "minimum": 0},
+          "pairs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["birth", "death"],
+              "properties": {
+                "birth": {"type": "number"},
+                "death": {"type": ["number", "null"]}
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "artifact_refs": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

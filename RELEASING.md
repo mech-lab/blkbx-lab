@@ -1,10 +1,21 @@
-# Releasing `hybrid-mechlab` 0.1.0a1
+# Releasing `mech-lab`
 
-This MVP release publishes only the base `hybrid-mechlab` package.
+This repo publishes one public distribution: `mech-lab`.
 
-- `python-rust/` stays in-repo for internal development.
-- `python-rust/` is not published in this MVP pass.
-- The supported runtime path for the MVP release is `math_backend="python"`.
+Release-facing contract:
+
+- repository and package name: `mech-lab`
+- CLI name: `mechlab`
+- Python import path: `mech_lab`
+
+In-repo but not published as first-class public releases:
+
+- `internal/blt`
+- `internal/mair`
+- `legacy/hybrid-mechlab-python`
+- `legacy/python-rust`
+
+Internal BLT and MAIR changes ship inside the `mech-lab` release notes rather than as separate public releases.
 
 ## Prerequisites
 
@@ -13,18 +24,31 @@ This MVP release publishes only the base `hybrid-mechlab` package.
 - Python tooling installed:
 
 ```bash
-python3 -m pip install build twine
+python3 -m pip install build twine pytest
 ```
 
 ## Pre-release checks
 
 ```bash
-python3 -m pytest
+python3 -m pytest \
+  tests/test_packaging_contracts.py \
+  tests/test_readme_example.py \
+  tests/test_mech_lab_doctor.py \
+  tests/test_mech_lab_product.py \
+  tests/test_mair_import.py \
+  tests/test_version_sync.py
+python3 -m pytest internal/blt/tests/test_trace.py internal/mair/tests/test_manifest.py
 cargo test
 cargo run -q -p hm_examples --bin kernel_fixture > tests/fixtures/rust_kernel_fixture.json
 python3 -m build
 python3 -m twine check dist/*
 ```
+
+Verify that:
+
+- the root build emits only `mech-lab` artifacts
+- the README quickstart examples still run from a fresh environment
+- internal BLT and MAIR tests still pass inside the unified repo
 
 ## Wheel smoke test
 
@@ -35,25 +59,20 @@ source "$tmpdir/venv/bin/activate"
 python -m pip install --upgrade pip
 python -m pip install dist/*.whl
 python - <<'PY'
-from hybrid_mechlab import HybridLab, profiles
-from hybrid_mechlab.topology.offline import compute_persistence
+import mech_lab as ml
 
-lab = HybridLab.attach(
-    model="dummy-qwen",
-    profile=profiles.reference.qwen35(),
-    backend="adapter",
-)
-trace = lab.run(prompts=["Measure topology for a reference hybrid."])
-print(trace.summary())
-report = compute_persistence(trace)
-print(report.summary.h0_pairs)
+bundle = ml.demo(output_dir="artifacts/release-wheel")
+print(bundle.manifest_path)
+print(ml.report(bundle))
 PY
+mechlab doctor >/dev/null
 ```
 
 Verify that:
-- `import hybrid_mechlab` succeeds
-- the README quickstart runs
-- no Rust package is installed or required
+
+- `import mech_lab` succeeds
+- the `mechlab` CLI is installed
+- the README quickstart works without installing any separate BLT or MAIR package
 
 ## sdist smoke test
 
@@ -64,27 +83,23 @@ source "$tmpdir/venv/bin/activate"
 python -m pip install --upgrade pip
 python -m pip install dist/*.tar.gz
 python - <<'PY'
-from hybrid_mechlab import HybridLab, profiles
-from hybrid_mechlab.topology.offline import compute_persistence
+import mech_lab as ml
 
-lab = HybridLab.attach(
-    model="dummy-qwen",
-    profile=profiles.reference.qwen35(),
-    backend="adapter",
-)
-trace = lab.run(prompts=["Measure topology for a reference hybrid."])
-print(trace.summary())
-report = compute_persistence(trace)
-print(report.summary.h0_pairs)
+bundle = ml.demo(output_dir="artifacts/release-sdist")
+print(bundle.manifest_path)
+print(ml.report(bundle))
 PY
 ```
 
 Verify that:
-- `import hybrid_mechlab` succeeds
-- the README quickstart runs
-- no Rust package is installed or required
 
-## Publish
+- `import mech_lab` succeeds
+- the public quickstart works from the source distribution
+- nothing under `internal/` or `legacy/` is published as a separate package
 
-- Upload only the base package artifacts from `dist/`.
-- Do not upload `python-rust/` artifacts in this MVP pass.
+## Tag and publish
+
+- Tag releases as the package version, for example `v0.1.0a1`.
+- GitHub Releases should mirror the PyPI release notes for `mech-lab`.
+- Upload only the root `dist/` artifacts.
+- Do not publish anything from `internal/` or `legacy/`.

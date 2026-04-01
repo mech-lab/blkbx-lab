@@ -7,6 +7,7 @@ import re
 from typing import Any
 
 from .profiles import load_profile
+from .runtime import NativeQwenPreflightError, inspect_native_qwen_runtime
 
 STAGES = ("pre_d1", "post_d1", "post_d2", "post_d3", "post_attention", "block_output")
 
@@ -72,6 +73,12 @@ def _build_mock_trace(
 def _iter_blocks(model: Any) -> list[Any]:
     if hasattr(model, "model") and hasattr(model.model, "layers"):
         return list(model.model.layers)
+    if hasattr(model, "model") and hasattr(model.model, "language_model") and hasattr(model.model.language_model, "layers"):
+        return list(model.model.language_model.layers)
+    if hasattr(model, "language_model") and hasattr(model.language_model, "layers"):
+        return list(model.language_model.layers)
+    if hasattr(model, "text_model") and hasattr(model.text_model, "layers"):
+        return list(model.text_model.layers)
     if hasattr(model, "transformer") and hasattr(model.transformer, "h"):
         return list(model.transformer.h)
     raise CaptureError("unsupported model architecture for hybrid block enumeration")
@@ -104,7 +111,11 @@ def _resolve_device(name: str) -> str:
     try:
         import torch
 
-        return "cuda" if torch.cuda.is_available() else "cpu"
+        if torch.cuda.is_available():
+            return "cuda"
+        if getattr(torch.backends, "mps", None) is not None and torch.backends.mps.is_available():
+            return "mps"
+        return "cpu"
     except Exception:
         return "cpu"
 
@@ -113,21 +124,32 @@ def _resolve_device(name: str) -> str:
 def _load_qwen_backend(model_id: str, device: str, dtype_name: str):
     try:
         import torch
-        from transformers import AutoModelForCausalLM, AutoTokenizer
+        from transformers import AutoConfig, AutoModelForCausalLM, AutoModelForImageTextToText, AutoTokenizer
     except Exception as exc:  # pragma: no cover - exercised in integration usage
         raise CaptureError(
             "qwen_hybrid_hf backend requires torch and transformers. "
-            "Install them with python -m pip install -e '/Volumes/128/BLT[model]'"
+            "Install them from the repo root with python -m pip install -e './internal/blt[model]'"
         ) from exc
+
+    try:
+        inspect_native_qwen_runtime(model_id=model_id)
+    except NativeQwenPreflightError as exc:
+        raise CaptureError(f"native qwen3_5 preflight failed for {model_id}: {exc}") from exc
 
     dtype = _resolve_torch_dtype(dtype_name)
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     if tokenizer.pad_token_id is None and tokenizer.eos_token_id is not None:
         tokenizer.pad_token = tokenizer.eos_token
+    config = AutoConfig.from_pretrained(model_id)
+    architectures = tuple(getattr(config, "architectures", ()) or ())
     kwargs: dict[str, Any] = {}
     if dtype is not None:
         kwargs["torch_dtype"] = dtype
-    model = AutoModelForCausalLM.from_pretrained(model_id, **kwargs)
+    kwargs["low_cpu_mem_usage"] = True
+    if hasattr(config, "text_config") or any("ConditionalGeneration" in item for item in architectures):
+        model = AutoModelForImageTextToText.from_pretrained(model_id, **kwargs)
+    else:
+        model = AutoModelForCausalLM.from_pretrained(model_id, **kwargs)
     resolved_device = _resolve_device(device)
     model.to(resolved_device)
     model.eval()

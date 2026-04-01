@@ -1,5 +1,11 @@
 # mech-lab Public Object Spec
 
+Release-facing identity:
+
+- package: `mech-lab`
+- CLI: `mechlab`
+- Python namespace: `mech_lab`
+
 ## EvidenceBundle
 
 Minimum fields:

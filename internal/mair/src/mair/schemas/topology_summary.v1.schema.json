@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["trace_id", "topology_backend", "scope", "bridge_policy", "intervention_axis", "summary_metrics"],
+  "properties": {
+    "trace_id": {"type": "string"},
+    "topology_backend": {"type": "string", "enum": ["sketch", "exact_persistence", "comparison"]},
+    "scope": {"type": "string"},
+    "bridge_policy": {"type": "string"},
+    "intervention_axis": {"type": "string"},
+    "summary_metrics": {"type": "object"},
+    "gluing_defect": {"type": ["number", "null"]},
+    "bridge_dependence": {"type": ["number", "null"]},
+    "tract_retention": {"type": ["number", "null"]},
+    "artifact_refs": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

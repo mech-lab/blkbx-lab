@@ -1,35 +1,46 @@
 # MAIR
 
-MAIR is the canonical artifact contract for the BLT v1 stack.
+MAIR is the bundled internal artifact contract for `mech-lab`.
 
 It owns:
+
 - typed artifact names and stable filenames
 - deterministic IDs and content hashes
-- manifest generation and validation
-- the tracked cross-repo implementation plan
+- manifest generation and hydration
+- artifact validation and gating
 
-## Editable install
-The supported local development path is:
+## Unified repo development
+
+From the repo root:
 
 ```bash
-python -m pip install -e '/Volumes/128/MAIR[dev]' -e '/Volumes/128/BLT[dev]'
+python -m pip install -e './internal/mair[dev]' -e './internal/blt[dev]'
 ```
 
-That makes these CLIs available without `PYTHONPATH` hacks:
+That makes these CLIs available for local development:
+
 - `mair-validate`
 - `mair-write-manifest`
 - `blt-run-trace`
 - `blt-fit-grouped-clt`
 - `blt-run-analysis`
 
-For the real Qwen replay backend, also install the BLT model extra or equivalent runtime deps:
+For the real Qwen replay backend, also install the BLT model extra:
 
 ```bash
-python -m pip install -e '/Volumes/128/BLT[model]'
+python -m pip install -e './internal/blt[model]'
 ```
 
 ## Tools
-- `tools/bootstrap_editable.sh`: installs MAIR and BLT editable for local cross-repo development
+
+- `tools/bootstrap_editable.sh`: installs the bundled internal MAIR and BLT packages from the unified repo
+
+## Internal status
+
+- This is an internal subsystem, not a separate public release target.
+- Generated caches and local build outputs are disposable.
+- The tracked `src/*.egg-info` policy remains deferred.
 
 ## Plan
+
 - Source of truth: [`PLAN.md`](PLAN.md)

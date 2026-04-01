@@ -7,6 +7,8 @@ import mech_lab as ml
 import mech_lab.api as ml_api
 import mech_lab._workspace as workspace
 
+ROOT = Path(__file__).resolve().parents[1]
+
 
 def test_workspace_doctor_checks_use_native_qwen_preflight(monkeypatch) -> None:
     class FakeRuntimeModule:
@@ -45,10 +47,10 @@ def test_workspace_doctor_checks_use_native_qwen_preflight(monkeypatch) -> None:
 
 
 def test_doctor_keeps_demo_ready_when_native_qwen_preflight_fails(monkeypatch) -> None:
-    qwen_profile_path = Path("/Volumes/128/BLT/configs/qwen3.5-2b.profile.json")
+    qwen_profile_path = ROOT / "internal" / "blt" / "src" / "blt" / "configs" / "qwen3.5-2b.profile.json"
 
     fake_checks = [
-        {"name": "workspace", "status": "ok", "message": "Sibling BLT/MAIR repos discovered", "fix": None},
+        {"name": "workspace", "status": "ok", "message": "Bundled internal BLT/MAIR subsystems available", "fix": None},
         {"name": "hybrid_mechlab", "status": "ok", "message": "hybrid_mechlab importable", "fix": None, "version": "0.1.0a1"},
         {"name": "mair", "status": "ok", "message": "mair importable", "fix": None, "version": "0.1.0"},
         {"name": "blt", "status": "ok", "message": "blt importable", "fix": None, "version": "0.1.0"},

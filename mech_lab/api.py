@@ -98,7 +98,7 @@ def _load_bundle(manifest_path: str | Path) -> dict[str, Any]:
     ensure_workspace_imports()
     mair_hydrate = require_module(
         "mair.hydrate",
-        "Install MAIR editable or keep the workspace sibling repo available",
+        "Install the unified repo dependencies or ensure internal/mair/src is importable",
     )
     return mair_hydrate.load_artifact_bundle(manifest_path)
 
@@ -271,7 +271,10 @@ def _resolve_trace_runtime(
     profile: str | Path | dict[str, Any] | None,
 ) -> tuple[str, str | Path | dict[str, Any] | None, str | None, str | None]:
     ensure_workspace_imports()
-    blt_profiles = require_module("blt.profiles", "Install BLT editable or keep the workspace sibling repo available")
+    blt_profiles = require_module(
+        "blt.profiles",
+        "Install the unified repo dependencies or ensure internal/blt/src is importable",
+    )
 
     normalized_family = _normalize_family(family)
     normalized_model = _normalize_model(model)
@@ -307,14 +310,17 @@ def _load_policy(policy: str | None, profile: dict[str, Any] | str | Path | None
 def doctor() -> DoctorResult:
     checks = doctor_checks()
     ensure_workspace_imports()
-    blt_profiles = require_module("blt.profiles", "Install BLT editable or keep the workspace sibling repo available")
+    blt_profiles = require_module(
+        "blt.profiles",
+        "Install the unified repo dependencies or ensure internal/blt/src is importable",
+    )
     qwen_profile_path = blt_profiles.builtin_profile_path("qwen3.5-2b")
     checks.append(
         {
             "name": "qwen3.5_profile",
             "status": "ok" if qwen_profile_path.exists() else "missing",
             "message": str(qwen_profile_path) if qwen_profile_path.exists() else "builtin Qwen3.5 profile missing",
-            "fix": None if qwen_profile_path.exists() else "Restore BLT configs/qwen3.5-2b.profile.json",
+            "fix": None if qwen_profile_path.exists() else "Restore the bundled BLT qwen3.5-2b profile asset",
         }
     )
     demo_ready = all(check["status"] == "ok" for check in checks if check["name"] in {"hybrid_mechlab", "mair", "blt"})
@@ -353,7 +359,10 @@ def trace(
     model_variant: str | None = None,
 ) -> EvidenceBundle:
     ensure_workspace_imports()
-    blt_export = require_module("blt.export", "Install BLT editable or keep the workspace sibling repo available")
+    blt_export = require_module(
+        "blt.export",
+        "Install the unified repo dependencies or ensure internal/blt/src is importable",
+    )
     root = _default_output_dir("mechlab-trace", output_dir)
     selected_trace_id = trace_id or _default_trace_id("trace-mechlab")
     selected_backend, selected_profile, resolved_family, resolved_model = _resolve_trace_runtime(
@@ -382,7 +391,10 @@ def analyze(
     profile: str | None = None,
 ) -> AnalysisResult:
     ensure_workspace_imports()
-    blt_export = require_module("blt.export", "Install BLT editable or keep the workspace sibling repo available")
+    blt_export = require_module(
+        "blt.export",
+        "Install the unified repo dependencies or ensure internal/blt/src is importable",
+    )
     manifest_path = _coerce_manifest_path(target)
     analyzed_manifest_path = blt_export.run_analysis(manifest_path, output_dir=output_dir)
     return _build_analysis_object(analyzed_manifest_path, profile=profile)
@@ -395,7 +407,10 @@ def compare(
     output_dir: str | Path | None = None,
 ) -> ComparisonPacket:
     ensure_workspace_imports()
-    mair_validate = require_module("mair.validate", "Install MAIR editable or keep the workspace sibling repo available")
+    mair_validate = require_module(
+        "mair.validate",
+        "Install the unified repo dependencies or ensure internal/mair/src is importable",
+    )
     offline = require_module("hybrid_mechlab.topology.offline", "hybrid_mechlab is required for comparison packets")
     mair_integration = require_module("hybrid_mechlab.integrations.mair", "hybrid_mechlab MAIR integration is required")
 
@@ -441,8 +456,14 @@ def gate(
     output_path: str | Path | None = None,
 ) -> ReceiptResult:
     ensure_workspace_imports()
-    mair_gates = require_module("mair.gates", "Install MAIR editable or keep the workspace sibling repo available")
-    mair_manifest = require_module("mair.manifest", "Install MAIR editable or keep the workspace sibling repo available")
+    mair_gates = require_module(
+        "mair.gates",
+        "Install the unified repo dependencies or ensure internal/mair/src is importable",
+    )
+    mair_manifest = require_module(
+        "mair.manifest",
+        "Install the unified repo dependencies or ensure internal/mair/src is importable",
+    )
 
     manifest_path = _coerce_manifest_path(target)
     manifest_root = Path(manifest_path).parent
@@ -490,7 +511,7 @@ def explain(target: str | Path | EvidenceBundle | AnalysisResult | ReceiptResult
     mapping = {
         "has_topology_summary": "The bundle has no topology summary, so it cannot support a release decision. Run `mechlab analyze <manifest>`." ,
         "has_grouped_clt_bundle": "The bundle has no grouped CLT summary, so there is no concise concept-level view. Run `mechlab analyze <manifest>`." ,
-        "has_offline_topology_report": "Exact topology artifacts are missing. Ensure hybrid-mechlab offline topology is available and rerun analysis.",
+        "has_offline_topology_report": "Exact topology artifacts are missing. Ensure the bundled offline topology stack is available and rerun analysis.",
         "bridge_dependence_within_threshold": "Bridge dependence exceeded policy. The run relies too heavily on bridge steps relative to local tract steps.",
         "gluing_defect_within_threshold": "Gluing defect exceeded policy. Local sections do not stitch cleanly into a stable global explanation.",
     }

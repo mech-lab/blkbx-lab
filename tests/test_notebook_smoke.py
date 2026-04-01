@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 
-ROOT = Path("/Volumes/128/hybridTDA")
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _execute_notebook(path: Path, tmp_path: Path, monkeypatch) -> None:

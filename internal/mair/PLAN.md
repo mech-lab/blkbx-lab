@@ -19,10 +19,10 @@ This is the tracked source-of-truth plan for the BLT + MAIR v1 implementation.
 - `featurecircuit-protocol`: MAIR-to-HIF bridge
 
 ## Local development bootstrap
-Supported command:
+Supported command from the unified repo root:
 
 ```bash
-python -m pip install -e '/Volumes/128/MAIR[dev]' -e '/Volumes/128/BLT[dev]'
+python -m pip install -e './internal/mair[dev]' -e './internal/blt[dev]'
 ```
 
 Real Qwen replay additionally requires BLT model dependencies.
@@ -37,8 +37,8 @@ Real Qwen replay additionally requires BLT model dependencies.
 
 ## Real-hook cutover checklist
 - [ ] Keep `mock` backend for CI and fixture coverage only.
-- [ ] Add `qwen_hybrid_hf` backend in BLT.
-- [ ] Pin the first real profile to `Qwen/Qwen3.5-2B`.
+- [x] Add `qwen_hybrid_hf` backend in BLT.
+- [x] Pin the first real profile to `Qwen/Qwen3.5-2B`.
 - [ ] Wire `posthoc` to use `BLT_CAPTURE_BACKEND` and `BLT_MODEL_PROFILE`.
 - [ ] Remove absolute `/Volumes/.../src` import fallbacks from production modules.
 - [ ] Remove absolute cross-repo `sys.path` patching from consumer tests.
@@ -49,4 +49,10 @@ The mock backend remains available, but it is no longer the live `posthoc` path 
 - `posthoc` materializes BLT artifacts through the real replay backend under the same `trace_id`.
 - The real backend writes the full MAIR/BLT artifact set without falling back to `mock`.
 - `hypercircuit`, `Geo-CLT-SAE`, and `featurecircuit-protocol` run against installed packages only.
-- A manual smoke run against `Qwen/Qwen3.5-2B` completes end to end and emits an assurance receipt.
+- [x] A manual smoke run against `Qwen/Qwen3.5-2B` completes end to end and emits an assurance receipt.
+
+## Qwen3.5 milestone status
+- Native `qwen3_5` runtime proof is complete through the public `mechlab` façade.
+- The validated runtime evidence, manifest path, and receipt path are recorded in `../../docs/qwen35-validation-report.md`.
+- On the validated `16 GiB` arm64/MPS host, `device:auto` required a documented CPU override fallback for the successful public rerun.
+- Remaining follow-up is a CLI semantics issue in `mechlab gate --profile`, not a runtime blocker.

@@ -13,7 +13,7 @@ def _toml(path: Path) -> dict:
 
 def test_python_versions_are_synced():
     root_project = _toml(ROOT / "pyproject.toml")
-    rust_project = _toml(ROOT / "python-rust" / "pyproject.toml")
+    rust_project = _toml(ROOT / "legacy" / "python-rust" / "pyproject.toml")
 
     assert root_project["project"]["version"] == "0.1.0a1"
     assert __version__ == "0.1.0a1"

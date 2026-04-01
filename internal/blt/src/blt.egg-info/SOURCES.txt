@@ -14,9 +14,12 @@ src/blt.egg-info/dependency_links.txt
 src/blt.egg-info/entry_points.txt
 src/blt.egg-info/requires.txt
 src/blt.egg-info/top_level.txt
+src/blt/cli/export_hm_trace.py
 src/blt/cli/fit_grouped_clt.py
 src/blt/cli/run_analysis.py
 src/blt/cli/run_trace.py
+src/blt/integrations/hybrid_mechlab.py
 src/blt/integrations/posthoc.py
 tests/test_analysis.py
+tests/test_hybrid_mechlab_bridge.py
 tests/test_trace.py

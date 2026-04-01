@@ -17,6 +17,9 @@ from .artifacts import (
 
 
 def _schema_dir() -> Path:
+    packaged = Path(__file__).resolve().parent / "schemas"
+    if packaged.exists():
+        return packaged
     return Path(__file__).resolve().parents[2] / "schemas"
 
 
