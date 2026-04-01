@@ -26,6 +26,7 @@ dev = [
 mair-validate = "mair.cli.validate:main"
 mair-write-manifest = "mair.cli.write_manifest:main"
 mair-hydrate = "mair.cli.hydrate:main"
+mair-gate = "mair.cli.gate:main"
 
 [tool.setuptools]
 include-package-data = true

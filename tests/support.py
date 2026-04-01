@@ -174,7 +174,7 @@ def write_full_artifact_set(root: Path) -> None:
                 "gates": {"trace_completeness": True},
                 "falsifiers": {"replay_determinism": False},
                 "artifact_inputs": [{"artifact_type": "mair_graph_ir", "artifact_id": "id-1"}],
-                "summary": {"status": "ok"},
+                "summary": {"passed": ["trace_completeness"], "failed": [], "notes": ["fixture receipt"]},
             }
         ),
         encoding="utf-8",
