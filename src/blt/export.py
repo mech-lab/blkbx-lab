@@ -18,6 +18,7 @@ from .extract import (
 )
 from .topology import build_topology_summary
 from .codes import run_grouped_clt_analysis
+from .integrations.hybrid_mechlab import write_hybrid_mechlab_record
 
 ensure_mair_importable()
 from mair.manifest import write_manifest  # noqa: E402
@@ -73,3 +74,10 @@ def run_trace(
 
 def run_analysis(manifest_path: str | Path, output_dir: str | Path | None = None) -> Path:
     return run_grouped_clt_analysis(manifest_path, output_dir=output_dir)
+
+
+def export_hybrid_mechlab_trace(
+    manifest_path: str | Path,
+    output_path: str | Path | None = None,
+) -> Path:
+    return write_hybrid_mechlab_record(manifest_path, output_path=output_path)

@@ -30,6 +30,7 @@ model = [
 blt-run-trace = "blt.cli.run_trace:main"
 blt-fit-grouped-clt = "blt.cli.fit_grouped_clt:main"
 blt-run-analysis = "blt.cli.run_analysis:main"
+blt-export-hm-trace = "blt.cli.export_hm_trace:main"
 
 [tool.setuptools]
 include-package-data = true
