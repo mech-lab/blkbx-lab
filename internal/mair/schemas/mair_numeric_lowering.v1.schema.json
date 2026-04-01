@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["trace_id", "backend", "recurrence_kernel", "bridge_realization", "precision"],
+  "properties": {
+    "trace_id": {"type": "string"},
+    "backend": {"type": "string"},
+    "recurrence_kernel": {"type": "string"},
+    "bridge_realization": {"type": "string"},
+    "precision": {"type": "string"},
+    "fused_kernels": {"type": "boolean"},
+    "equivalence_witness": {"type": "string"},
+    "profile_id": {"type": ["string", "null"]}
+  },
+  "additionalProperties": false
+}
