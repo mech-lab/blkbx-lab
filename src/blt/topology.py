@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from pathlib import Path
 from typing import Any
 
 
@@ -25,3 +26,20 @@ def build_topology_summary(trace: dict[str, Any], blt_code_rows: list[dict[str, 
             "block_count": trace["block_count"],
         },
     }
+
+
+def write_exact_topology_artifacts(
+    manifest_path: str | Path,
+    *,
+    output_dir: str | Path | None = None,
+) -> dict[str, Path] | None:
+    try:
+        from hybrid_mechlab.integrations.mair import load_trace_from_mair_manifest
+        from hybrid_mechlab.topology.offline import export_mair_topology_artifacts
+    except ImportError:
+        return None
+
+    root = Path(output_dir) if output_dir is not None else Path(manifest_path).parent
+    trace = load_trace_from_mair_manifest(manifest_path)
+    written = export_mair_topology_artifacts(trace, str(root))
+    return {artifact_type: Path(path) for artifact_type, path in written.items()}

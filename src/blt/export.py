@@ -16,12 +16,12 @@ from .extract import (
     build_semantic_trace,
     build_tract_state_rows,
 )
-from .topology import build_topology_summary
+from .topology import build_topology_summary, write_exact_topology_artifacts
 from .codes import run_grouped_clt_analysis
 from .integrations.hybrid_mechlab import write_hybrid_mechlab_record
 
 ensure_mair_importable()
-from mair.manifest import write_manifest  # noqa: E402
+from mair.manifest import load_manifest, write_manifest  # noqa: E402
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -73,7 +73,14 @@ def run_trace(
 
 
 def run_analysis(manifest_path: str | Path, output_dir: str | Path | None = None) -> Path:
-    return run_grouped_clt_analysis(manifest_path, output_dir=output_dir)
+    analysis_manifest = run_grouped_clt_analysis(manifest_path, output_dir=output_dir)
+    exact_paths = write_exact_topology_artifacts(manifest_path, output_dir=output_dir)
+    if exact_paths is None:
+        return analysis_manifest
+
+    root = Path(output_dir) if output_dir is not None else Path(manifest_path).parent
+    trace_id = load_manifest(analysis_manifest)["trace_id"]
+    return write_manifest(root, trace_id=trace_id, producer="blt:analysis:0.1.0")
 
 
 def export_hybrid_mechlab_trace(
