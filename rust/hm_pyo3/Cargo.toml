@@ -1,0 +1,16 @@
+[package]
+name = "hm_pyo3"
+version = "0.1.0-alpha.1"
+edition = "2021"
+license = "MIT"
+
+[lib]
+name = "hm_pyo3"
+crate-type = ["cdylib"]
+path = "src/lib.rs"
+
+[dependencies]
+pyo3 = { version = "0.23", features = ["extension-module"] }
+hm_core = { path = "../hm_core", default-features = false, features = ["std"] }
+hm_liger = { path = "../hm_liger" }
+hm_std = { path = "../hm_std" }

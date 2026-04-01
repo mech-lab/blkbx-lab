@@ -1,0 +1,13 @@
+.target/
+venv/
+build/
+dist/
+__pycache__/
+*.pyc
+.mypy_cache/
+.pytest_cache/
+*.egg-info/
+target/
+.eggs/
+.DS_Store
+*.ipynb_checkpoints

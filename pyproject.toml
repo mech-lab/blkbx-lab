@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mech-lab"
+version = "0.1.0a1"
+description = "Façade-first SDK and CLI for mechanistic evidence bundles, receipts, and comparison packets"
+authors = [{name = "mech-lab team"}]
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+keywords = ["mechanistic-interpretability", "release-assurance", "evidence-bundles", "numpy", "research"]
+dependencies = ["numpy>=2.0"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Typing :: Typed",
+]
+
+[project.optional-dependencies]
+viz = []
+offline-topology = []
+dev = ["build", "pyright", "pytest", "ruff", "twine"]
+
+[project.scripts]
+mechlab = "mech_lab.cli:main"
+
+[tool.pytest.ini_options]
+addopts = "-q"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hybrid_mechlab*", "mech_lab*"]
+
+[tool.setuptools.package-data]
+hybrid_mechlab = ["py.typed", "_rust.pyi"]
+mech_lab = ["py.typed"]

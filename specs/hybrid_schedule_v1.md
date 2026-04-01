@@ -1,0 +1,21 @@
+# Hybrid Schedule v1
+
+- Treat hybrid models as typed sequences of transport regimes, not just layer indices.
+- The canonical schedule surface is now family-aware:
+  - `TransportFamilyKind`
+  - `TransportRegimeKind`
+  - `FamilyDescriptor`
+  - `BridgeSpec`
+  - `KernelConformanceReport`
+- A `HybridSchedule` binds cadence to a family descriptor, so a ratio is only one field of a larger contract.
+- Native-core families:
+  - `Gated DeltaNet`
+  - `HGRN2`
+  - `RetNet`
+  - `Hawk`
+  - `TransNormerLLM`
+- Understanding-first reference profiles:
+  - `Qwen3.5`
+  - `OLMo Hybrid`
+  - `Kimi Linear`
+- Design rule: topology, sheaf, trace, and comparison layers consume the same schedule/trace schema regardless of whether execution came from `adapter`, `native`, or `liger`.

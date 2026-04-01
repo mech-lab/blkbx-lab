@@ -1,0 +1,14 @@
+[workspace]
+members = [
+  "rust/hm_core",
+  "rust/hm_std",
+  "rust/hm_liger",
+  "rust/hm_pyo3",
+  "rust/hm_examples",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+authors = ["hybrid-mechlab team"]
+license = "MIT"
