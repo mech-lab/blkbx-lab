@@ -6,6 +6,7 @@
     "trace_id": {"type": "string"},
     "model_family": {"type": "string"},
     "model_variant": {"type": "string"},
+    "basis": {"type": ["string", "null"]},
     "groups": {
       "type": "array",
       "items": {
@@ -16,12 +17,15 @@
           "size": {"type": "integer", "minimum": 1},
           "reconstruction_divergence": {"type": "number"},
           "bridge_dependence": {"type": "number"},
-          "centroid": {"type": "array", "items": {"type": "number"}}
+          "centroid": {"type": "array", "items": {"type": "number"}},
+          "lineage_ids": {"type": "array", "items": {"type": "string"}},
+          "topology_metrics": {"type": "object"}
         },
         "additionalProperties": true
       }
     },
-    "summary_metrics": {"type": "object"}
+    "summary_metrics": {"type": "object"},
+    "artifact_refs": {"type": "array", "items": {"type": "string"}}
   },
   "additionalProperties": false
 }

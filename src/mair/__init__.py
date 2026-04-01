@@ -9,6 +9,7 @@ from .artifacts import (
     artifact_path_for_type,
 )
 from .ids import derive_artifact_id, file_sha256, stable_hash
+from .hydrate import iter_artifacts, load_artifact_bundle, load_artifact_by_type
 from .manifest import build_manifest, load_manifest, write_manifest
 from .validate import validate_artifact, validate_manifest
 
@@ -24,6 +25,9 @@ __all__ = [
     "derive_artifact_id",
     "file_sha256",
     "stable_hash",
+    "iter_artifacts",
+    "load_artifact_bundle",
+    "load_artifact_by_type",
     "build_manifest",
     "load_manifest",
     "write_manifest",
