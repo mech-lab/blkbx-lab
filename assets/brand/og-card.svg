@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+  <title id="title">mech-lab open graph card</title>
+  <desc id="desc">Open graph card for mech-lab with brand colors, logo geometry, and one verified proof accent.</desc>
+  <rect width="1280" height="640" fill="#0D0F0E"/>
+  <rect x="72" y="72" width="160" height="160" rx="18" fill="none" stroke="#F0EDE6" stroke-width="4"/>
+  <path d="M104 204V100M132 204V132M172 204V132M200 204V100" fill="none" stroke="#F0EDE6" stroke-width="8" stroke-linecap="square"/>
+  <path d="M132 132L152 156L172 132" fill="none" stroke="#F0EDE6" stroke-width="8" stroke-linecap="square"/>
+  <circle cx="152" cy="156" r="42" fill="none" stroke="#1C6B5A" stroke-width="4" stroke-dasharray="8 10"/>
+  <text x="72" y="306" fill="#F0EDE6" font-family="'IBM Plex Mono', monospace" font-size="20" letter-spacing="3">MECH-LAB</text>
+  <text x="72" y="386" fill="#F0EDE6" font-family="'DM Serif Display', Georgia, serif" font-size="62">Mechanistic interpretability</text>
+  <text x="72" y="454" fill="#F0EDE6" font-family="'DM Serif Display', Georgia, serif" font-size="62">that ships.</text>
+  <text x="72" y="514" fill="#6B7068" font-family="'IBM Plex Sans', Arial, sans-serif" font-size="24">Evidence Bundles, Receipts, and Comparison Packets backed by MAIR.</text>
+  <text x="72" y="552" fill="#6B7068" font-family="'IBM Plex Sans', Arial, sans-serif" font-size="24">Native Qwen3.5 proof through the public mechlab path.</text>
+  <rect x="874" y="92" width="286" height="44" rx="22" fill="#B8FF57"/>
+  <text x="900" y="120" fill="#0D0F0E" font-family="'IBM Plex Mono', monospace" font-size="18" letter-spacing="2">QWEN3.5 PUBLIC-PATH PROOF</text>
+  <circle cx="1018" cy="364" r="112" fill="none" stroke="#1C6B5A" stroke-width="10" stroke-dasharray="10 18"/>
+  <circle cx="1018" cy="364" r="14" fill="#F0EDE6"/>
+  <path d="M944 456L1018 364L1092 456" fill="none" stroke="#F0EDE6" stroke-width="8" stroke-linecap="square"/>
+  <path d="M944 456H1092" fill="none" stroke="#F0EDE6" stroke-width="8" stroke-linecap="square"/>
+</svg>

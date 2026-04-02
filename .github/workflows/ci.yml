@@ -22,9 +22,15 @@ jobs:
           python -m pip install -e .[dev]
           python -m pip install build twine
 
+      - name: Check release readiness
+        run: |
+          python scripts/check_release_readiness.py
+
       - name: Run focused test suite
         run: |
           python -m pytest \
+            tests/test_release_readiness.py \
+            tests/test_brand_release_assets.py \
             tests/test_packaging_contracts.py \
             tests/test_readme_example.py \
             tests/test_mech_lab_doctor.py \

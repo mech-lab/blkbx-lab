@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="40" viewBox="0 0 180 40" role="img" aria-label="SLSA L3">
+  <rect width="180" height="40" rx="8" fill="#F0EDE6" stroke="#0D0F0E"/>
+  <path d="M20 10V30M14 16H26M14 24H26" fill="none" stroke="#1C6B5A" stroke-width="2" stroke-linecap="square"/>
+  <text x="44" y="25" fill="#0D0F0E" font-family="'IBM Plex Mono', monospace" font-size="16" letter-spacing="1">SLSA L3</text>
+</svg>

@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mech-lab"
 version = "0.1.0a1"
-description = "Façade-first SDK and CLI for mechanistic evidence bundles, receipts, and comparison packets"
+description = "Mechanistic interpretability that ships: MAIR-backed evidence bundles, receipts, and comparison packets"
 authors = [{name = "mech-lab team"}]
-readme = "README.md"
+readme = {file = "docs/pypi.md", content-type = "text/markdown"}
 license = "MIT"
 requires-python = ">=3.10"
-keywords = ["mechanistic-interpretability", "release-assurance", "evidence-bundles", "numpy", "research"]
+keywords = ["mechanistic-interpretability", "release-assurance", "evidence-bundles", "holonomy", "mair", "research", "slsa"]
 dependencies = [
   "jsonschema>=4.23",
   "numpy>=2.0",

@@ -18,10 +18,18 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Build artifacts
+      - name: Install release dependencies
         run: |
           python -m pip install --upgrade pip
+          python -m pip install -e .[dev]
           python -m pip install build twine
+
+      - name: Check release readiness
+        run: |
+          python scripts/check_release_readiness.py
+
+      - name: Build artifacts
+        run: |
           python -m build
           python -m twine check dist/*
 
@@ -43,12 +51,24 @@ jobs:
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mech-lab-dist
-          path: dist/*
+          name: mech-lab-release-assets
+          path: |
+            dist/*
+            assets/brand/og-card.png
+            assets/brand/og-card.svg
+            assets/brand/launch-card.svg
+            assets/brand/release-header.svg
 
       - name: Create GitHub release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          generate_release_notes: true
-          files: dist/*
+          name: ${{ github.ref_name }}
+          draft: true
+          body_path: .github/RELEASE_TEMPLATE.md
+          files: |
+            dist/*
+            assets/brand/og-card.png
+            assets/brand/og-card.svg
+            assets/brand/launch-card.svg
+            assets/brand/release-header.svg

@@ -1,10 +1,14 @@
+# Manual live-host setting: use assets/brand/og-card.png as the repository social preview image.
 repository:
   name: mech-lab
-  description: Facade-first SDK and CLI for mechanistic evidence bundles, receipts, and comparison packets.
+  description: Mechanistic interpretability that ships: MAIR-backed evidence bundles, receipts, and comparison packets.
   default_branch: main
   topics:
+    - ai-safety-infrastructure
     - interpretability
     - mechanistic-analysis
     - evidence-bundles
+    - mair
     - release-assurance
     - model-debugging
+    - slsa

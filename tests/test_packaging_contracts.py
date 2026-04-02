@@ -5,11 +5,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_root_package_is_mech_lab_and_numpy_only():
+def test_root_package_is_mech_lab_with_release_metadata():
     data = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert data["build-system"]["build-backend"] == "setuptools.build_meta"
     assert data["project"]["name"] == "mech-lab"
     assert data["project"]["version"] == "0.1.0a1"
+    assert data["project"]["description"] == "Mechanistic interpretability that ships: MAIR-backed evidence bundles, receipts, and comparison packets"
+    assert data["project"]["readme"] == {"file": "docs/pypi.md", "content-type": "text/markdown"}
     assert sorted(data["project"]["dependencies"]) == ["jsonschema>=4.23", "numpy>=2.0", "pyarrow>=17.0"]
     dependency_blob = " ".join(sorted(data["project"]["dependencies"])).lower()
     assert "torch" not in dependency_blob

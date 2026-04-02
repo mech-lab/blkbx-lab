@@ -1,0 +1,68 @@
+:root {
+  --ml-ink: #0d0f0e;
+  --ml-chalk: #f0ede6;
+  --ml-slate: #6b7068;
+  --ml-acid: #b8ff57;
+  --ml-deep-teal: #1c6b5a;
+  --ml-error-red: #c73a2a;
+
+  --ml-font-display: "DM Serif Display", Georgia, serif;
+  --ml-font-sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --ml-font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+  --ml-space-1: 4px;
+  --ml-space-2: 8px;
+  --ml-space-3: 12px;
+  --ml-space-4: 16px;
+  --ml-space-5: 24px;
+  --ml-space-6: 32px;
+  --ml-space-7: 48px;
+  --ml-space-8: 64px;
+}
+
+body {
+  background: var(--ml-chalk);
+  color: var(--ml-ink);
+  font-family: var(--ml-font-sans);
+}
+
+h1,
+h2,
+h3,
+.ml-display {
+  color: var(--ml-ink);
+  font-family: var(--ml-font-display);
+}
+
+code,
+pre,
+kbd,
+samp,
+.ml-mono {
+  font-family: var(--ml-font-mono);
+}
+
+.ml-verified {
+  border: 1px solid var(--ml-ink);
+  color: var(--ml-ink);
+  background: var(--ml-chalk);
+  box-shadow: inset 0 -3px 0 var(--ml-acid);
+}
+
+.ml-transport {
+  border-left: 4px solid var(--ml-deep-teal);
+  padding-left: var(--ml-space-4);
+}
+
+.ml-error {
+  border-left: 4px solid var(--ml-error-red);
+  padding-left: var(--ml-space-4);
+}
+
+.ml-kicker {
+  color: var(--ml-slate);
+  font-family: var(--ml-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}

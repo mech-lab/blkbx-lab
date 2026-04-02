@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">mech-lab logo mark</title>
+  <desc id="desc">Square mech-lab mark with stalk geometry, a teal orbit, and a single acid node.</desc>
+  <rect x="12" y="12" width="104" height="104" rx="12" fill="none" stroke="#0D0F0E" stroke-width="4"/>
+  <path d="M28 92V28M46 92V46M82 92V46M100 92V28" fill="none" stroke="#0D0F0E" stroke-width="6" stroke-linecap="square"/>
+  <path d="M46 46L64 64L82 46" fill="none" stroke="#0D0F0E" stroke-width="6" stroke-linecap="square" stroke-linejoin="miter"/>
+  <circle cx="64" cy="64" r="24" fill="none" stroke="#1C6B5A" stroke-width="3" stroke-dasharray="5 6"/>
+  <circle cx="64" cy="64" r="6" fill="#B8FF57"/>
+</svg>
