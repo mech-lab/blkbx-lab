@@ -32,6 +32,9 @@ def test_release_workflow_uses_authored_template():
     assert "body_path: .github/RELEASE_TEMPLATE.md" in workflow
     assert "generate_release_notes: true" not in workflow
     assert "assets/brand/og-card.png" in workflow
+    assert "pypa/gh-action-pypi-publish@release/v1" in workflow
+    assert "name: pypi" in workflow
+    assert "id-token: write" in workflow
 
 
 def test_host_ready_social_preview_asset_exists():

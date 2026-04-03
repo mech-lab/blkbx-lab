@@ -37,6 +37,14 @@ dev = ["build", "pyright", "pytest", "ruff", "twine"]
 [project.scripts]
 mechlab = "mech_lab.cli:main"
 
+[project.urls]
+Homepage = "https://github.com/mech-lab/mech-lab"
+Documentation = "https://github.com/mech-lab/mech-lab/tree/main/docs"
+Repository = "https://github.com/mech-lab/mech-lab"
+Issues = "https://github.com/mech-lab/mech-lab/issues"
+Changelog = "https://github.com/mech-lab/mech-lab/releases"
+"Validation Report" = "https://github.com/mech-lab/mech-lab/blob/main/docs/qwen35-validation-report.md"
+
 [tool.pytest.ini_options]
 addopts = "-q"
 

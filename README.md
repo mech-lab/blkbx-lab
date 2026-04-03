@@ -19,6 +19,8 @@
 pip install mech-lab
 ```
 
+While the release channel is still alpha-only, `pip install --pre mech-lab` is the explicit prerelease form.
+
 From a source checkout, `mech-lab` auto-discovers the bundled `internal/blt` and `internal/mair` trees.
 
 ## 60-second quickstart

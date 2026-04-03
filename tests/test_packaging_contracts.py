@@ -12,6 +12,14 @@ def test_root_package_is_mech_lab_with_release_metadata():
     assert data["project"]["version"] == "0.1.0a1"
     assert data["project"]["description"] == "Mechanistic interpretability that ships: MAIR-backed evidence bundles, receipts, and comparison packets"
     assert data["project"]["readme"] == {"file": "docs/pypi.md", "content-type": "text/markdown"}
+    assert data["project"]["urls"] == {
+        "Homepage": "https://github.com/mech-lab/mech-lab",
+        "Documentation": "https://github.com/mech-lab/mech-lab/tree/main/docs",
+        "Repository": "https://github.com/mech-lab/mech-lab",
+        "Issues": "https://github.com/mech-lab/mech-lab/issues",
+        "Changelog": "https://github.com/mech-lab/mech-lab/releases",
+        "Validation Report": "https://github.com/mech-lab/mech-lab/blob/main/docs/qwen35-validation-report.md",
+    }
     assert sorted(data["project"]["dependencies"]) == ["jsonschema>=4.23", "numpy>=2.0", "pyarrow>=17.0"]
     dependency_blob = " ".join(sorted(data["project"]["dependencies"])).lower()
     assert "torch" not in dependency_blob

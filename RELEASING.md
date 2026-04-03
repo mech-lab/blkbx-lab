@@ -25,6 +25,13 @@ Brand release kit:
 - brand tokens and usage rules live under [`docs/brand/`](docs/brand)
 - `assets/brand/og-card.png` is the live GitHub social preview export; the SVG assets remain the design source of truth
 
+PyPI publish path:
+
+- tagged releases publish to PyPI from [`.github/workflows/release.yml`](.github/workflows/release.yml)
+- the same workflow can also publish manually through `workflow_dispatch`
+- the publish job uses GitHub trusted publishing through the `pypi` environment
+- `pip install mech-lab` will not resolve until the PyPI-side trusted publisher is configured
+
 Release readiness gate:
 
 - the git worktree must be clean before any public tag
@@ -40,6 +47,24 @@ Release readiness gate:
 ```bash
 python3 -m pip install build twine pytest
 ```
+
+## First-Time PyPI Setup
+
+Before the first public PyPI publish, create a pending trusted publisher for project `mech-lab` on PyPI with these values:
+
+- project name: `mech-lab`
+- GitHub owner: `mech-lab`
+- GitHub repository: `mech-lab`
+- workflow file: `release.yml`
+- environment name: `pypi`
+
+Repo-side requirements:
+
+- the GitHub environment `pypi` must exist on the `mech-lab/mech-lab` repository
+- [`.github/workflows/release.yml`](.github/workflows/release.yml) must stay on the default branch
+- the first publish should run from a release tag such as `v0.1.0a1`
+
+Once the PyPI pending publisher is approved, either rerun the `Release` workflow manually from `main` to publish the current version or push the next release tag.
 
 ## Pre-release checks
 
@@ -124,6 +149,7 @@ Verify that:
 - Tag releases as the package version, for example `v0.1.0a1`.
 - GitHub Releases should mirror the PyPI release notes for `mech-lab`.
 - The release workflow creates a draft release from `.github/RELEASE_TEMPLATE.md`; edit the draft body before publishing it.
+- Tagged releases publish `dist/*` to PyPI through the `pypi` environment, and `workflow_dispatch` can publish the same distributions manually when needed.
 - Upload only the root `dist/` artifacts.
 - Attach the branded launch assets from `assets/brand/og-card.svg`, `assets/brand/og-card.png`, `assets/brand/launch-card.svg`, and `assets/brand/release-header.svg`.
 - Do not publish anything from `internal/` or `legacy/`.
@@ -137,3 +163,4 @@ Before publishing the draft release, verify the live host state:
 - the release draft includes the branded asset attachments and a readable body
 - the repository social preview uses `assets/brand/og-card.png`
 - the social preview and attached SVG assets remain legible in GitHub light and dark themes
+- the PyPI trusted publisher matches `mech-lab / mech-lab / release.yml / pypi`
