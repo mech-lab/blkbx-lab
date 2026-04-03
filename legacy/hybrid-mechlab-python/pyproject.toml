@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hybrid-mechlab-python"
-version = "0.1.0a1"
+version = "0.1.0a2"
 description = "Minimal NumPy-first Python split of hybrid-mechlab"
 authors = [{name = "hybrid-mechlab team"}]
 readme = "README.md"

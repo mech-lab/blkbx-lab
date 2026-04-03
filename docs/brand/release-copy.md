@@ -30,7 +30,7 @@ Proof line:
 
 ## Social Launch Caption
 
-`mech-lab v0.1.0a1 is live. Install the public package, generate an Evidence Bundle, and inspect the native Qwen3.5 proof path through mechlab. Mechanistic interpretability that ships.`
+`mech-lab v0.1.0a2 is live. Install the public package, generate an Evidence Bundle, and inspect the native Qwen3.5 proof path through mechlab. Mechanistic interpretability that ships.`
 
 ## Known-Limit Language
 

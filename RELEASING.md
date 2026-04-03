@@ -62,7 +62,7 @@ Repo-side requirements:
 
 - the GitHub environment `pypi` must exist on the `mech-lab/mech-lab` repository
 - [`.github/workflows/release.yml`](.github/workflows/release.yml) must stay on the default branch
-- the first publish should run from a release tag such as `v0.1.0a1`
+- the first publish should run from a release tag such as `v0.1.0a2`
 
 Once the PyPI pending publisher is approved, either rerun the `Release` workflow manually from `main` to publish the current version or push the next release tag.
 
@@ -146,7 +146,7 @@ Verify that:
 
 ## Tag and publish
 
-- Tag releases as the package version, for example `v0.1.0a1`.
+- Tag releases as the package version, for example `v0.1.0a2`.
 - GitHub Releases should mirror the PyPI release notes for `mech-lab`.
 - The release workflow creates a draft release from `.github/RELEASE_TEMPLATE.md`; edit the draft body before publishing it.
 - Tagged releases publish `dist/*` to PyPI through the `pypi` environment, and `workflow_dispatch` can publish the same distributions manually when needed.

@@ -22,11 +22,11 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
 name = "hm_core"
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.2"
 
 [[package]]
 name = "hm_examples"
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.2"
 dependencies = [
  "hm_core",
  "hm_std",
@@ -35,14 +35,14 @@ dependencies = [
 
 [[package]]
 name = "hm_liger"
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.2"
 dependencies = [
  "hm_core",
 ]
 
 [[package]]
 name = "hm_pyo3"
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.2"
 dependencies = [
  "hm_core",
  "hm_liger",
@@ -52,7 +52,7 @@ dependencies = [
 
 [[package]]
 name = "hm_std"
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.2"
 dependencies = [
  "hm_core",
 ]

@@ -23,7 +23,7 @@ def test_workspace_doctor_checks_use_native_qwen_preflight(monkeypatch) -> None:
             }
 
     fake_modules = {
-        "hybrid_mechlab": (SimpleNamespace(__version__="0.1.0a1"), None),
+        "hybrid_mechlab": (SimpleNamespace(__version__="0.1.0a2"), None),
         "mair": (SimpleNamespace(__version__="0.1.0"), None),
         "blt": (SimpleNamespace(__version__="0.1.0"), None),
         "torch": (SimpleNamespace(__version__="2.11.0"), None),
@@ -51,7 +51,7 @@ def test_doctor_keeps_demo_ready_when_native_qwen_preflight_fails(monkeypatch) -
 
     fake_checks = [
         {"name": "workspace", "status": "ok", "message": "Bundled internal BLT/MAIR subsystems available", "fix": None},
-        {"name": "hybrid_mechlab", "status": "ok", "message": "hybrid_mechlab importable", "fix": None, "version": "0.1.0a1"},
+        {"name": "hybrid_mechlab", "status": "ok", "message": "hybrid_mechlab importable", "fix": None, "version": "0.1.0a2"},
         {"name": "mair", "status": "ok", "message": "mair importable", "fix": None, "version": "0.1.0"},
         {"name": "blt", "status": "ok", "message": "blt importable", "fix": None, "version": "0.1.0"},
         {"name": "torch", "status": "ok", "message": "Real model replay available", "fix": None, "version": "2.11.0"},

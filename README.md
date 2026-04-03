@@ -16,10 +16,8 @@
 ## Install
 
 ```bash
-pip install mech-lab
+pip install --pre mech-lab
 ```
-
-While the release channel is still alpha-only, `pip install --pre mech-lab` is the explicit prerelease form.
 
 From a source checkout, `mech-lab` auto-discovers the bundled `internal/blt` and `internal/mair` trees.
 
@@ -60,7 +58,7 @@ The public surface stays MAIR-backed. `mech-lab` does not introduce a second dis
 
 Proof story:
 
-- install: `pip install mech-lab`
+- install: `pip install --pre mech-lab`
 - first artifact: `mechlab demo`
 - real-model proof: native Qwen3.5 public-path rerun through `mechlab`
 - trust anchor: MAIR-backed artifacts plus release assurance receipts

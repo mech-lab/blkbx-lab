@@ -9,10 +9,8 @@ Mechanistic interpretability that ships.
 ## Install
 
 ```bash
-pip install mech-lab
+pip install --pre mech-lab
 ```
-
-While the public channel is still alpha-only, `pip install --pre mech-lab` is the explicit prerelease form.
 
 ## Quickstart
 

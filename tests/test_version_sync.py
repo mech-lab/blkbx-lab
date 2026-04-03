@@ -15,9 +15,9 @@ def test_python_versions_are_synced():
     root_project = _toml(ROOT / "pyproject.toml")
     rust_project = _toml(ROOT / "legacy" / "python-rust" / "pyproject.toml")
 
-    assert root_project["project"]["version"] == "0.1.0a1"
-    assert __version__ == "0.1.0a1"
-    assert rust_project["project"]["version"] == "0.1.0a1"
+    assert root_project["project"]["version"] == "0.1.0a2"
+    assert __version__ == "0.1.0a2"
+    assert rust_project["project"]["version"] == "0.1.0a2"
 
 
 def test_cargo_versions_are_synced():
@@ -29,5 +29,5 @@ def test_cargo_versions_are_synced():
         ROOT / "rust" / "hm_examples" / "Cargo.toml",
     )
     versions = {_toml(path)["package"]["version"] for path in cargo_paths}
-    assert versions == {"0.1.0-alpha.1"}
-    assert RUST_CORE_VERSION == "0.1.0-alpha.1"
+    assert versions == {"0.1.0-alpha.2"}
+    assert RUST_CORE_VERSION == "0.1.0-alpha.2"
