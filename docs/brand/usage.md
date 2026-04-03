@@ -26,7 +26,8 @@ Avoid:
 
 ## Naming
 
-- Use `mech-lab` for the package and repo.
+- Use `mech-lab` for the product and repo.
+- Use `mechlab-sdk` for the published package.
 - Use `mechlab` for the CLI.
 - Use `mech_lab` for the Python namespace.
 - Do not use `HybridTDA`, `hybridtda`, or `pip install hybridtda` in release-facing materials.

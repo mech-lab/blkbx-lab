@@ -15,7 +15,7 @@
   <text x="152" y="708" fill="#F0EDE6" font-family="'DM Serif Display', Georgia, serif" font-size="92">that ships.</text>
   <text x="152" y="808" fill="#6B7068" font-family="'IBM Plex Sans', Arial, sans-serif" font-size="30">Install the public package. Generate an Evidence Bundle.</text>
   <text x="152" y="852" fill="#6B7068" font-family="'IBM Plex Sans', Arial, sans-serif" font-size="30">Inspect the native Qwen3.5 proof path through mechlab.</text>
-  <text x="152" y="958" fill="#F0EDE6" font-family="'IBM Plex Mono', monospace" font-size="24">pip install --pre mech-lab</text>
+  <text x="152" y="958" fill="#F0EDE6" font-family="'IBM Plex Mono', monospace" font-size="24">pip install --pre mechlab-sdk</text>
   <text x="152" y="996" fill="#F0EDE6" font-family="'IBM Plex Mono', monospace" font-size="24">mechlab demo</text>
   <circle cx="926" cy="786" r="116" fill="none" stroke="#1C6B5A" stroke-width="10" stroke-dasharray="12 16"/>
   <path d="M850 878L926 786L1002 878" fill="none" stroke="#F0EDE6" stroke-width="8" stroke-linecap="square"/>

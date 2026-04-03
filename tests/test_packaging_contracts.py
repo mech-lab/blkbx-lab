@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_root_package_is_mech_lab_with_release_metadata():
     data = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert data["build-system"]["build-backend"] == "setuptools.build_meta"
-    assert data["project"]["name"] == "mech-lab"
+    assert data["project"]["name"] == "mechlab-sdk"
     assert data["project"]["version"] == "0.1.0a2"
     assert data["project"]["description"] == "Mechanistic interpretability that ships: MAIR-backed evidence bundles, receipts, and comparison packets"
     assert data["project"]["readme"] == {"file": "docs/pypi.md", "content-type": "text/markdown"}

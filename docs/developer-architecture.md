@@ -36,4 +36,4 @@ That keeps local source checkouts runnable without publishing BLT or MAIR separa
 
 ## Release rule
 
-Only the root `mech-lab` package is published from this repo. Internal subsystem changes are released through that package and should not be documented as independent public deliverables.
+Only the root `mechlab-sdk` distribution is published from this repo. Internal subsystem changes are released through that package and should not be documented as independent public deliverables.

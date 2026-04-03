@@ -9,7 +9,7 @@ Mechanistic interpretability that ships.
 ## Install
 
 ```bash
-pip install --pre mech-lab
+pip install --pre mechlab-sdk
 ```
 
 ## Quickstart
@@ -42,7 +42,7 @@ print(ml.report(bundle))
 
 ## Public Contract
 
-- package name: `mech-lab`
+- package name: `mechlab-sdk`
 - CLI: `mechlab`
 - Python namespace: `mech_lab`
 - disk contract: MAIR-backed artifacts only

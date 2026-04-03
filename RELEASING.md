@@ -1,10 +1,11 @@
 # Releasing `mech-lab`
 
-This repo publishes one public distribution: `mech-lab`.
+This repo publishes one public distribution: `mechlab-sdk`.
 
 Release-facing contract:
 
-- repository and package name: `mech-lab`
+- repository and product name: `mech-lab`
+- published package name: `mechlab-sdk`
 - CLI name: `mechlab`
 - Python import path: `mech_lab`
 
@@ -30,7 +31,7 @@ PyPI publish path:
 - tagged releases publish to PyPI from [`.github/workflows/release.yml`](.github/workflows/release.yml)
 - the same workflow can also publish manually through `workflow_dispatch`
 - the publish job uses GitHub trusted publishing through the `pypi` environment
-- `pip install mech-lab` will not resolve until the PyPI-side trusted publisher is configured
+- `pip install mechlab-sdk` will not resolve until the PyPI-side trusted publisher is configured
 
 Release readiness gate:
 
@@ -50,9 +51,9 @@ python3 -m pip install build twine pytest
 
 ## First-Time PyPI Setup
 
-Before the first public PyPI publish, create a pending trusted publisher for project `mech-lab` on PyPI with these values:
+Before the first public PyPI publish, create a pending trusted publisher for project `mechlab-sdk` on PyPI with these values:
 
-- project name: `mech-lab`
+- project name: `mechlab-sdk`
 - GitHub owner: `mech-lab`
 - GitHub repository: `mech-lab`
 - workflow file: `release.yml`
@@ -89,7 +90,7 @@ python3 -m twine check dist/*
 Verify that:
 
 - `python scripts/check_release_readiness.py` passes on a clean tree
-- the root build emits only `mech-lab` artifacts
+- the root build emits only `mechlab-sdk` distribution artifacts
 - the README quickstart examples still run from a fresh environment
 - internal BLT and MAIR tests still pass inside the unified repo
 - the brand asset tests pass
@@ -147,7 +148,7 @@ Verify that:
 ## Tag and publish
 
 - Tag releases as the package version, for example `v0.1.0a2`.
-- GitHub Releases should mirror the PyPI release notes for `mech-lab`.
+- GitHub Releases should mirror the PyPI release notes for `mechlab-sdk`.
 - The release workflow creates a draft release from `.github/RELEASE_TEMPLATE.md`; edit the draft body before publishing it.
 - Tagged releases publish `dist/*` to PyPI through the `pypi` environment, and `workflow_dispatch` can publish the same distributions manually when needed.
 - Upload only the root `dist/` artifacts.
@@ -163,4 +164,4 @@ Before publishing the draft release, verify the live host state:
 - the release draft includes the branded asset attachments and a readable body
 - the repository social preview uses `assets/brand/og-card.png`
 - the social preview and attached SVG assets remain legible in GitHub light and dark themes
-- the PyPI trusted publisher matches `mech-lab / mech-lab / release.yml / pypi`
+- the PyPI trusted publisher matches `mechlab-sdk / mech-lab / release.yml / pypi`

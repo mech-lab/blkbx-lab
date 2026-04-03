@@ -29,7 +29,7 @@
 ## Install
 
 ```bash
-pip install mech-lab==<version>
+pip install mechlab-sdk==<version>
 mechlab demo
 ```
 

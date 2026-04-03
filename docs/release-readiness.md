@@ -30,7 +30,7 @@ Manual checks before tagging:
 - confirm the repository social preview uses [`assets/brand/og-card.png`](../assets/brand/og-card.png)
 - confirm the social preview and branded badges are readable in both GitHub light and dark themes
 - confirm the PyPI long description still matches [`docs/pypi.md`](pypi.md)
-- confirm the PyPI pending publisher is configured for `mech-lab / mech-lab / release.yml / pypi`
+- confirm the PyPI pending publisher is configured for `mechlab-sdk / mech-lab / release.yml / pypi`
 
 Current source-of-truth docs:
 

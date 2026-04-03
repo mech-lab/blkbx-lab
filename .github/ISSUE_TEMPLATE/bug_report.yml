@@ -17,7 +17,7 @@ body:
       label: Reproduction
       description: Include the command, API call, or minimal steps to reproduce.
       placeholder: |
-        1. pip install mech-lab
+        1. pip install --pre mechlab-sdk
         2. mechlab ...
         3. observe ...
     validations:

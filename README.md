@@ -16,7 +16,7 @@
 ## Install
 
 ```bash
-pip install --pre mech-lab
+pip install --pre mechlab-sdk
 ```
 
 From a source checkout, `mech-lab` auto-discovers the bundled `internal/blt` and `internal/mair` trees.
@@ -58,7 +58,7 @@ The public surface stays MAIR-backed. `mech-lab` does not introduce a second dis
 
 Proof story:
 
-- install: `pip install --pre mech-lab`
+- install: `pip install --pre mechlab-sdk`
 - first artifact: `mechlab demo`
 - real-model proof: native Qwen3.5 public-path rerun through `mechlab`
 - trust anchor: MAIR-backed artifacts plus release assurance receipts
@@ -75,7 +75,7 @@ mechlab CLI / mech_lab SDK
         +-- hybrid_mechlab compatibility and topology/runtime helpers
 ```
 
-`mech-lab` is the only release-facing package. `BLT` and `MAIR` remain in-repo as internal subsystems, and `hybrid_mechlab` remains import-compatible during the transition without becoming the primary public identity.
+`mech-lab` remains the public product and repo identity, while `mechlab-sdk` is the published distribution package. `BLT` and `MAIR` remain in-repo as internal subsystems, and `hybrid_mechlab` remains import-compatible during the transition without becoming the primary public identity.
 
 ## Docs And Status
 
@@ -89,7 +89,7 @@ mechlab CLI / mech_lab SDK
 
 Release status:
 
-- Alpha release surface: one public package, `mech-lab`
+- Alpha release surface: product repo `mech-lab`, published package `mechlab-sdk`
 - Public CLI: `mechlab`
 - Public Python namespace: `mech_lab`
 - Internal subsystem trees: `internal/blt` and `internal/mair`

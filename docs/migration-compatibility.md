@@ -2,7 +2,7 @@
 
 ## Unified repo target
 
-The public GitHub release target is a single repo and package named `mech-lab`.
+The public GitHub release target is a single repo named `mech-lab` with a published distribution package named `mechlab-sdk`.
 
 The unified tree keeps:
 

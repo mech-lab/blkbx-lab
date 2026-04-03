@@ -35,7 +35,14 @@ def test_release_workflow_uses_authored_template():
     assert "pypa/gh-action-pypi-publish@release/v1" in workflow
     assert "name: pypi" in workflow
     assert "id-token: write" in workflow
+    assert "https://pypi.org/p/mechlab-sdk" in workflow
 
 
 def test_host_ready_social_preview_asset_exists():
     assert (ROOT / "assets" / "brand" / "og-card.png").exists()
+
+
+def test_bug_report_template_uses_published_package_name():
+    template = (ROOT / ".github" / "ISSUE_TEMPLATE" / "bug_report.yml").read_text(encoding="utf-8")
+    assert "pip install --pre mechlab-sdk" in template
+    assert "pip install mech-lab" not in template

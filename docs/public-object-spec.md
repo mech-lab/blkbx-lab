@@ -2,7 +2,8 @@
 
 Release-facing identity:
 
-- package: `mech-lab`
+- product repo: `mech-lab`
+- published package: `mechlab-sdk`
 - CLI: `mechlab`
 - Python namespace: `mech_lab`
 

@@ -2,7 +2,8 @@
 
 Release-facing identity:
 
-- repository and package name: `mech-lab`
+- repository and product name: `mech-lab`
+- published package name: `mechlab-sdk`
 - CLI name: `mechlab`
 - Python import path: `mech_lab`
 - internal subsystems: `internal/blt` and `internal/mair`

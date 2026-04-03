@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mech-lab"
+name = "mechlab-sdk"
 version = "0.1.0a2"
 description = "Mechanistic interpretability that ships: MAIR-backed evidence bundles, receipts, and comparison packets"
 authors = [{name = "mech-lab team"}]
