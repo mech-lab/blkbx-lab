@@ -1,0 +1,6 @@
+policy: claim-denial-gate
+rules:
+  - if: action.type == "draft_claim_denial_email"
+    then: block
+  - if: action.type != "draft_claim_denial_email"
+    then: pass

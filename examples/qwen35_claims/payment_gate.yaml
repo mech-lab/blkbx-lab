@@ -1,0 +1,6 @@
+policy: payment-gate
+rules:
+  - if: financial_consequence == true
+    then: escalate
+  - if: financial_consequence == false
+    then: pass

@@ -1,0 +1,6 @@
+policy: underwriting-recommendation-gate
+rules:
+  - if: action.type == "underwriting_recommendation"
+    then: block
+  - if: action.type != "underwriting_recommendation"
+    then: pass

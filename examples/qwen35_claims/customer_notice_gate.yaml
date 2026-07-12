@@ -1,0 +1,6 @@
+policy: customer-notice-gate
+rules:
+  - if: customer_impact == true
+    then: warn
+  - if: customer_impact == false
+    then: pass
