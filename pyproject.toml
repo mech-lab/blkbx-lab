@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mechlab-sdk"
+name = "blkbx-lab"
 version = "0.1.0a2"
-description = "Mechanistic interpretability that ships: MAIR-backed evidence bundles, receipts, and comparison packets"
+description = "Open-source Ink Receipt gates for accountable AI agents"
 authors = [{name = "mech-lab team"}]
 readme = {file = "docs/pypi.md", content-type = "text/markdown"}
 license = "MIT"
@@ -35,26 +35,26 @@ offline-topology = []
 dev = ["build", "pyright", "pytest", "ruff", "twine"]
 
 [project.scripts]
-mechlab = "mech_lab.cli:main"
+blkbx-lab = "blkbx_lab.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/mech-lab/mech-lab"
-Documentation = "https://github.com/mech-lab/mech-lab/tree/main/docs"
-Repository = "https://github.com/mech-lab/mech-lab"
-Issues = "https://github.com/mech-lab/mech-lab/issues"
-Changelog = "https://github.com/mech-lab/mech-lab/releases"
-"Validation Report" = "https://github.com/mech-lab/mech-lab/blob/main/docs/qwen35-validation-report.md"
+Homepage = "https://github.com/mech-lab/blkbx-lab"
+Documentation = "https://github.com/mech-lab/blkbx-lab/tree/main/docs"
+Repository = "https://github.com/mech-lab/blkbx-lab"
+Issues = "https://github.com/mech-lab/blkbx-lab/issues"
+Changelog = "https://github.com/mech-lab/blkbx-lab/releases"
+"Validation Report" = "https://github.com/mech-lab/blkbx-lab/blob/main/docs/qwen35-validation-report.md"
 
 [tool.pytest.ini_options]
 addopts = "-q"
 
 [tool.setuptools.packages.find]
 where = [".", "internal/blt/src", "internal/mair/src"]
-include = ["blt*", "hybrid_mechlab*", "mair*", "mech_lab*"]
+include = ["blt*", "hybrid_mechlab*", "mair*", "blkbx_lab*"]
 exclude = ["internal*", "legacy*"]
 
 [tool.setuptools.package-data]
 blt = ["configs/*.json", "configs/*.md"]
 hybrid_mechlab = ["py.typed", "_rust.pyi"]
 mair = ["schemas/*.json"]
-mech_lab = ["py.typed"]
+blkbx_lab = ["py.typed"]
