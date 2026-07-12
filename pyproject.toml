@@ -49,12 +49,13 @@ Changelog = "https://github.com/mech-lab/blkbx-lab/releases"
 addopts = "-q"
 
 [tool.setuptools.packages.find]
-where = [".", "internal/blt/src", "internal/mair/src"]
-include = ["blt*", "hybrid_mechlab*", "mair*", "blkbx_lab*"]
-exclude = ["internal*", "legacy*"]
+where = ["."]
+include = ["blkbx_lab*", "internal*", "adapters*"]
+
+exclude = ["legacy*"]
 
 [tool.setuptools.package-data]
-blt = ["configs/*.json", "configs/*.md"]
+
 hybrid_mechlab = ["py.typed", "_rust.pyi"]
-mair = ["schemas/*.json"]
+
 blkbx_lab = ["py.typed"]

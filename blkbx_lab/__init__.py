@@ -1,22 +1,15 @@
-"""Public mech-lab SDK surface."""
+from __future__ import annotations
 
-from hybrid_mechlab._version import __version__
-
-from mech_lab.api import analyze, compare, demo, doctor, explain, gate, report, trace
-from mech_lab.objects import (
-    AnalysisResult,
-    ComparisonPacket,
+from blkbx_lab.api import analyze, compare, demo, doctor, explain, gate, report, trace, verify, tamper
+from blkbx_lab.objects import (
+    ActionEvidenceBundle,
+    GateAnalysisResult,
+    InkReceiptResult,
+    ReceiptComparisonPacket,
     DoctorResult,
-    EvidenceBundle,
-    ReceiptResult,
 )
 
 __all__ = [
-    "AnalysisResult",
-    "ComparisonPacket",
-    "DoctorResult",
-    "EvidenceBundle",
-    "ReceiptResult",
     "analyze",
     "compare",
     "demo",
@@ -25,5 +18,11 @@ __all__ = [
     "gate",
     "report",
     "trace",
-    "__version__",
+    "verify",
+    "tamper",
+    "ActionEvidenceBundle",
+    "GateAnalysisResult",
+    "InkReceiptResult",
+    "ReceiptComparisonPacket",
+    "DoctorResult",
 ]
