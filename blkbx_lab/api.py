@@ -18,6 +18,7 @@ from internal.ink.verify import verify_receipt
 from internal.ink.manifest import write_manifest
 from internal.ink.canonical import hash_text, canonical_json_hash
 from adapters.base import get_adapter
+import adapters.qwen35
 
 _VERSION = "0.1.0"
 
