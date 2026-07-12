@@ -24,7 +24,7 @@ Example:
 ```json
 {
   "trace_id": "trace-sdk-docs",
-  "manifest_path": "artifacts/mechlab-demo/mair_manifest.v1.json",
+  "manifest_path": "artifacts/mechlab-demo/ink_manifest.v1.json",
   "output_dir": "artifacts/mechlab-demo",
   "bundle_digest": "3e5f1a9b0c2d4411",
   "receipt_path": null,
@@ -48,9 +48,9 @@ Example:
 ```json
 {
   "trace_id": "trace-sdk-docs",
-  "manifest_path": "artifacts/mechlab-demo/mair_manifest.v1.json",
+  "manifest_path": "artifacts/mechlab-demo/ink_manifest.v1.json",
   "profile": "qwen3.5-hybrid",
-  "receipt_path": "artifacts/mechlab-demo/assurance_receipt.v1.json",
+  "receipt_path": "artifacts/mechlab-demo/ink_receipt.v1.json",
   "summary": {
     "hook_validation": {
       "required": ["pre-D1", "post-D1", "post-D2", "post-D3", "post-attention", "block-output"],
@@ -75,9 +75,9 @@ Example:
 
 ```json
 {
-  "comparison_path": "artifacts/compare/backend_comparison.v1.json",
-  "left_manifest_path": "run-a/mair_manifest.v1.json",
-  "right_manifest_path": "run-b/mair_manifest.v1.json",
+  "comparison_path": "artifacts/compare/receipt_comparison.v1.json",
+  "left_manifest_path": "run-a/ink_manifest.v1.json",
+  "right_manifest_path": "run-b/ink_manifest.v1.json",
   "summary": {
     "left_trace_id": "trace-left",
     "right_trace_id": "trace-right",
@@ -105,8 +105,8 @@ Example:
 ```json
 {
   "trace_id": "trace-sdk-docs",
-  "receipt_path": "artifacts/mechlab-demo/assurance_receipt.v1.json",
-  "manifest_path": "artifacts/mechlab-demo/mair_manifest.v1.json",
+  "receipt_path": "artifacts/mechlab-demo/ink_receipt.v1.json",
+  "manifest_path": "artifacts/mechlab-demo/ink_manifest.v1.json",
   "decision": "pass",
   "summary": {
     "passed": ["manifest_valid", "has_topology_summary"],

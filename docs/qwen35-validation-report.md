@@ -64,15 +64,15 @@ mechlab trace \
 ```
 
 - result: success through the public `mechlab` facade only
-- manifest: `artifacts/qwen35-real-run/mair_manifest.v1.json`
-- receipt: `artifacts/qwen35-real-run/assurance_receipt.v1.json`
+- manifest: `artifacts/qwen35-real-run/ink_manifest.v1.json`
+- receipt: `artifacts/qwen35-real-run/ink_receipt.v1.json`
 
 Public follow-up commands that succeeded:
 
 ```bash
-mechlab analyze artifacts/qwen35-real-run/mair_manifest.v1.json --profile qwen3.5-hybrid --output-dir artifacts/qwen35-real-run
-mechlab report artifacts/qwen35-real-run/mair_manifest.v1.json --kind tract-vs-bridge
-mechlab gate artifacts/qwen35-real-run/mair_manifest.v1.json --policy release-assurance
+mechlab analyze artifacts/qwen35-real-run/ink_manifest.v1.json --profile qwen3.5-hybrid --output-dir artifacts/qwen35-real-run
+mechlab report artifacts/qwen35-real-run/ink_manifest.v1.json --kind tract-vs-bridge
+mechlab gate artifacts/qwen35-real-run/ink_manifest.v1.json --policy release-assurance
 ```
 
 Analyzed artifacts present in the MAIR-backed bundle:
@@ -86,7 +86,7 @@ Analyzed artifacts present in the MAIR-backed bundle:
 - `grouped_clt_bundle.v1.json`
 - `offline_topology_report.v1.json`
 - `intervention_sweep.v1.jsonl`
-- `assurance_receipt.v1.json`
+- `ink_receipt.v1.json`
 
 Required hook coverage validated from the real run:
 
@@ -128,8 +128,8 @@ Exact recorded local runtime and artifact paths:
 - native runtime root: `/Volumes/2.5SSDDD128/mechlab-qwen35-native`
 - transformers source checkout: `/Volumes/2.5SSDDD128/mechlab-qwen35-native/src/transformers-upstream`
 - auto-device failure log: `/Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run-auto.log`
-- successful manifest: `/Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run/mair_manifest.v1.json`
-- successful receipt: `/Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run/assurance_receipt.v1.json`
+- successful manifest: `/Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run/ink_manifest.v1.json`
+- successful receipt: `/Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run/ink_receipt.v1.json`
 
 Recorded environment variables:
 
@@ -149,7 +149,7 @@ mechlab trace \
   --prompt "Measure the 3:1 tract bridge rhythm." \
   --output-dir /Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run
 
-mechlab analyze /Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run/mair_manifest.v1.json --profile qwen3.5-hybrid --output-dir /Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run
-mechlab report /Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run/mair_manifest.v1.json --kind tract-vs-bridge
-mechlab gate /Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run/mair_manifest.v1.json --policy release-assurance
+mechlab analyze /Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run/ink_manifest.v1.json --profile qwen3.5-hybrid --output-dir /Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run
+mechlab report /Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run/ink_manifest.v1.json --kind tract-vs-bridge
+mechlab gate /Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run/ink_manifest.v1.json --policy release-assurance
 ```
