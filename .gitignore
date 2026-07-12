@@ -1,5 +1,6 @@
 .target/
 venv/
+.venv/
 build/
 dist/
 __pycache__/
@@ -11,3 +12,6 @@ target/
 .eggs/
 .DS_Store
 *.ipynb_checkpoints
+blkbx-trace-*/
+blkbx-compare-*/
+qwen35-claims-*/
