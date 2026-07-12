@@ -26,61 +26,81 @@ class DoctorResult:
 
 
 @dataclass(slots=True)
-class EvidenceBundle:
-    trace_id: str
+class ActionEvidenceBundle:
+    action_id: str
     manifest_path: str
     output_dir: str
     summary: dict[str, Any]
     report: str
-    bundle_digest: str
+    evidence_hashes: list[str]
     receipt_path: str | None = None
-    report_kinds: tuple[str, ...] = field(default_factory=tuple)
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "trace_id": self.trace_id,
+            "action_id": self.action_id,
             "manifest_path": self.manifest_path,
             "output_dir": self.output_dir,
             "summary": self.summary,
             "report": self.report,
-            "bundle_digest": self.bundle_digest,
+            "evidence_hashes": self.evidence_hashes,
             "receipt_path": self.receipt_path,
-            "report_kinds": list(self.report_kinds),
         }
 
 
 @dataclass(slots=True)
-class AnalysisResult:
-    trace_id: str
+class GateAnalysisResult:
+    action_id: str
     manifest_path: str
     output_dir: str
+    risk_tier: str
+    required_controls: list[str]
+    missing_controls: list[str]
+    recommended_decision: str
     summary: dict[str, Any]
     report: str
-    bundle_digest: str
-    profile: str | None
-    receipt_path: str | None = None
-    report_kinds: tuple[str, ...] = field(default_factory=tuple)
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "trace_id": self.trace_id,
+            "action_id": self.action_id,
             "manifest_path": self.manifest_path,
             "output_dir": self.output_dir,
+            "risk_tier": self.risk_tier,
+            "required_controls": self.required_controls,
+            "missing_controls": self.missing_controls,
+            "recommended_decision": self.recommended_decision,
             "summary": self.summary,
             "report": self.report,
-            "bundle_digest": self.bundle_digest,
-            "profile": self.profile,
-            "receipt_path": self.receipt_path,
-            "report_kinds": list(self.report_kinds),
         }
 
 
 @dataclass(slots=True)
-class ComparisonPacket:
+class InkReceiptResult:
+    action_id: str
+    receipt_path: str
+    manifest_path: str
+    decision: str
+    summary: dict[str, Any]
+    verification: dict[str, Any]
+    report: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "action_id": self.action_id,
+            "receipt_path": self.receipt_path,
+            "manifest_path": self.manifest_path,
+            "decision": self.decision,
+            "summary": self.summary,
+            "verification": self.verification,
+            "report": self.report,
+        }
+
+
+@dataclass(slots=True)
+class ReceiptComparisonPacket:
     comparison_path: str
     output_dir: str
-    left_manifest_path: str
-    right_manifest_path: str
+    left_receipt_path: str
+    right_receipt_path: str
     summary: dict[str, Any]
     report: str
 
@@ -88,32 +108,12 @@ class ComparisonPacket:
         return {
             "comparison_path": self.comparison_path,
             "output_dir": self.output_dir,
-            "left_manifest_path": self.left_manifest_path,
-            "right_manifest_path": self.right_manifest_path,
+            "left_receipt_path": self.left_receipt_path,
+            "right_receipt_path": self.right_receipt_path,
             "summary": self.summary,
             "report": self.report,
         }
 
 
-@dataclass(slots=True)
-class ReceiptResult:
-    trace_id: str
-    receipt_path: str
-    manifest_path: str
-    decision: str
-    summary: dict[str, Any]
-    report: str
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "trace_id": self.trace_id,
-            "receipt_path": self.receipt_path,
-            "manifest_path": self.manifest_path,
-            "decision": self.decision,
-            "summary": self.summary,
-            "report": self.report,
-        }
-
-
-PublicArtifact = EvidenceBundle | AnalysisResult | ComparisonPacket | ReceiptResult
+PublicArtifact = ActionEvidenceBundle | GateAnalysisResult | ReceiptComparisonPacket | InkReceiptResult
 PublicTarget = str | Path | PublicArtifact
