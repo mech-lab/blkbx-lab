@@ -1,46 +1,33 @@
 name: CI
 
 on:
-  pull_request:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  test-and-build:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e .[dev]
-          python -m pip install build twine
-
-      - name: Check release readiness
-        run: |
-          python scripts/check_release_readiness.py
-
-      - name: Run focused test suite
-        run: |
-          python -m pytest \
-            tests/test_release_readiness.py \
-            tests/test_brand_release_assets.py \
-            tests/test_packaging_contracts.py \
-            tests/test_readme_example.py \
-            tests/test_mech_lab_doctor.py \
-            tests/test_mech_lab_product.py \
-            tests/test_mair_import.py \
-            tests/test_version_sync.py \
-            internal/blt/tests/test_trace.py \
-            internal/mair/tests/test_manifest.py
-
-      - name: Build distribution
-        run: |
-          python -m build
-          python -m twine check dist/*
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    - name: Run ruff
+      run: ruff check .
+    - name: Run pyright
+      run: pyright
+    - name: Run pytest
+      run: pytest
+    - name: Demo smoke test
+      run: |
+        blkbx-lab demo qwen35-claims --output-dir /tmp/qwen35-claims
+        blkbx-lab verify /tmp/qwen35-claims/ink_receipt.v1.json
+        blkbx-lab tamper /tmp/qwen35-claims/ink_receipt.v1.json
+        ! blkbx-lab verify /tmp/qwen35-claims/ink_receipt.tampered.json
