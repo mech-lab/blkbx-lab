@@ -1,0 +1,8 @@
+policy: action-gate
+rules:
+  - if: customer_impact == true
+    then: warn
+  - if: financial_consequence == true
+    then: warn
+  - if: customer_impact == true and financial_consequence == true
+    then: block

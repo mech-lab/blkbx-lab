@@ -56,17 +56,22 @@ def trace(
     adapter = get_adapter(adapter_name)
     action = adapter.propose_action("draft_claim_denial_email", [])
     
+    action_hash = canonical_json_hash(action)
+    prompt_hash = hash_text(prompt)
+    
+    (root / "action.json").write_text(json.dumps(action))
+    (root / "prompt.txt").write_text(prompt)
+    
     manifest_path = root / "ink_manifest.v1.json"
     manifest_data = {
         "schema": "ink.manifest.v1",
         "action_id": action_id,
         "artifacts": [
-            {"artifact_type": "action_proposal", "content_hash": canonical_json_hash(action), "path": "action.json"}
+            {"artifact_type": "action_proposal", "content_hash": action_hash, "path": "action.json"},
+            {"artifact_type": "prompt", "content_hash": prompt_hash, "path": "prompt.txt"}
         ]
     }
     write_manifest(manifest_path, manifest_data)
-    
-    (root / "action.json").write_text(json.dumps(action))
     
     return ActionEvidenceBundle(
         action_id=action_id,
@@ -74,7 +79,7 @@ def trace(
         output_dir=str(root),
         summary={"action": action},
         report=f"Traced action: {action['type']}",
-        evidence_hashes=[canonical_json_hash(action)]
+        evidence_hashes=[action_hash, prompt_hash]
     )
 
 def analyze(
@@ -110,6 +115,9 @@ def gate(
     
     decision = evaluate_gate(policy or "action-gate", action)
     
+    manifest_data = json.loads(Path(manifest_path).read_text())
+    input_hashes = [a["content_hash"] for a in manifest_data.get("artifacts", [])]
+    
     receipt_data = {
         "schema": "ink.receipt.v1",
         "receipt_id": f"ink_rcpt_{_timestamp_slug()}",
@@ -134,7 +142,7 @@ def gate(
             "reason": decision["reason"]
         },
         "evidence": {
-            "input_hashes": [a["content_hash"] for a in json.loads(Path(manifest_path).read_text()).get("artifacts", [])],
+            "input_hashes": input_hashes,
             "policy_refs": ["policy.claims.v0.1"],
             "tool_call_hashes": []
         }
@@ -233,7 +241,16 @@ def demo(
 ) -> InkReceiptResult:
     root = _default_output_dir(demo_name, output_dir)
     
-    traced = trace("draft claim denial", output_dir=root)
+    # Load demo fixtures
+    examples_dir = Path(__file__).parent.parent / "examples" / "qwen35_claims"
+    if examples_dir.exists():
+        claim_text = (examples_dir / "claim_001.md").read_text()
+        policy_text = (examples_dir / "policy_001.md").read_text()
+        prompt = f"Review claim:\n{claim_text}\n\nAgainst policy:\n{policy_text}\n\nDraft denial email."
+    else:
+        prompt = "draft claim denial"
+    
+    traced = trace(prompt, output_dir=root)
     analyzed = analyze(traced.manifest_path, output_dir=root)
     receipt = gate(traced.manifest_path, policy="action-gate", output_path=root / "ink_receipt.v1.json")
     

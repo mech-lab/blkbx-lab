@@ -1,0 +1,5 @@
+{
+  "mandate_id": "mand8.claims_assistant.v0.1",
+  "agent_id": "claims_assistant_demo",
+  "allowed_actions": ["draft_claim_denial_email", "request_more_info"]
+}
