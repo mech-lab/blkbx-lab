@@ -1,5 +1,0 @@
-[console_scripts]
-mair-gate = mair.cli.gate:main
-mair-hydrate = mair.cli.hydrate:main
-mair-validate = mair.cli.validate:main
-mair-write-manifest = mair.cli.write_manifest:main
