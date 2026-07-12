@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Gate Decision",
+  "type": "object",
+  "properties": {
+    "schema": { "type": "string", "const": "gate.decision.v1" },
+    "policy": { "type": "string" },
+    "decision": { "type": "string", "enum": ["pass", "warn", "escalate", "block"] },
+    "reason": { "type": "string" }
+  },
+  "required": ["schema", "policy", "decision", "reason"]
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Receipt Comparison",
+  "type": "object",
+  "properties": {
+    "schema": { "type": "string", "const": "receipt.comparison.v1" },
+    "left_receipt_id": { "type": "string" },
+    "right_receipt_id": { "type": "string" },
+    "decision_match": { "type": "boolean" },
+    "action_match": { "type": "boolean" }
+  },
+  "required": ["schema", "left_receipt_id", "right_receipt_id", "decision_match", "action_match"]
+}
