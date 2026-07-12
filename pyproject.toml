@@ -6,11 +6,11 @@ build-backend = "setuptools.build_meta"
 name = "blkbx-lab"
 version = "0.1.0a2"
 description = "Open-source Ink Receipt gates for accountable AI agents"
-authors = [{name = "mech-lab team"}]
+authors = [{name = "BLKBX Lab contributors"}]
 readme = {file = "docs/pypi.md", content-type = "text/markdown"}
 license = "MIT"
 requires-python = ">=3.10"
-keywords = ["mechanistic-interpretability", "release-assurance", "evidence-bundles", "holonomy", "mair", "research", "slsa"]
+keywords = ["accountable-ai", "ai-agents", "ink-receipts", "receipt-gates", "qwen35", "gated-deltanet", "hybrid-ai", "insurtech"]
 dependencies = [
   "jsonschema>=4.23",
   "numpy>=2.0",
@@ -18,7 +18,7 @@ dependencies = [
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
-  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
