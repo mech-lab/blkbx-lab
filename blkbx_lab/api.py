@@ -16,6 +16,7 @@ from internal.gates.policies import evaluate_gate
 from internal.ink.signing import sign_receipt
 from internal.ink.verify import verify_receipt
 from internal.ink.manifest import write_manifest
+from internal.ink.canonical import hash_text, canonical_json_hash
 from adapters.qwen35 import Qwen35Adapter
 
 _VERSION = "0.1.0"
@@ -59,7 +60,7 @@ def trace(
         "schema": "ink.manifest.v1",
         "action_id": action_id,
         "artifacts": [
-            {"artifact_type": "action_proposal", "content_hash": "sha256:mock", "path": "action.json"}
+            {"artifact_type": "action_proposal", "content_hash": canonical_json_hash(action), "path": "action.json"}
         ]
     }
     write_manifest(manifest_path, manifest_data)
@@ -72,7 +73,7 @@ def trace(
         output_dir=str(root),
         summary={"action": action},
         report=f"Traced action: {action['type']}",
-        evidence_hashes=["sha256:mock"]
+        evidence_hashes=[canonical_json_hash(action)]
     )
 
 def analyze(
@@ -132,9 +133,9 @@ def gate(
             "reason": decision["reason"]
         },
         "evidence": {
-            "input_hashes": ["sha256:mock"],
+            "input_hashes": [a["content_hash"] for a in json.loads(Path(manifest_path).read_text()).get("artifacts", [])],
             "policy_refs": ["policy.claims.v0.1"],
-            "tool_call_hashes": ["sha256:mock"]
+            "tool_call_hashes": []
         }
     }
     
