@@ -1,39 +1,35 @@
 # Developer Architecture
 
-## Public entrypoints
+BLKBX Lab is structured into the following layers:
 
-- `blkbx_lab/` is the release-facing SDK and CLI package.
-- `blkbx-lab` is the only supported public CLI entrypoint.
-- `hybrid_blkbx-lab/` remains in-repo for compatibility and topology/runtime helpers, but it is not the primary release identity.
+```text
+blkbx-lab CLI / blkbx_lab SDK
+        |
+        +-- internal/trace   model event capture, action proposal capture
+        |
+        +-- internal/ink     manifest, canonicalization, signing, verification
+        |
+        +-- internal/gates   gate policies, decisions, receipt issuance
+        |
+        +-- adapters/        qwen35, vllm, sglang, openai-compatible
+```
 
-## Unified repo layout
+## Public Facade (`blkbx_lab/`)
 
-- `blkbx_lab/`: public facade, public objects, rendering, CLI wiring
-- `hybrid_blkbx-lab/`: compatibility layer and topology/runtime helpers used by the facade
-- `internal/blt/`: imported BLT history plus current working-tree snapshot
-- `internal/mair/`: imported MAIR history plus current working-tree snapshot
-- `legacy/hybrid-blkbx-lab-python/`: legacy Python-only package surface kept for transition work
-- `legacy/python-rust/`: legacy Rust companion packaging kept for transition work
-- `docs/`, `specs/`, `rust/`: repo-wide documentation and native code
+The public SDK and CLI. This is the only layer users should interact with directly.
 
-## Import resolution
+## Internal Trace Layer (`internal/trace/`)
 
-`blkbx_lab._workspace` prefers the bundled internal subsystems:
+Responsible for capturing model events and action proposals.
 
-1. repo root
-2. `internal/mair/src`
-3. `internal/blt/src`
-4. legacy sibling repo fallbacks, if present outside the unified repo
+## Internal Ink Layer (`internal/ink/`)
 
-That keeps local source checkouts runnable without publishing BLT or MAIR separately while still allowing transitional workstation layouts during migration.
+Handles the core Ink Receipt logic: manifests, canonicalization, signing, and verification.
 
-## Runtime flow
+## Internal Gates Layer (`internal/gates/`)
 
-1. `blkbx-lab` or `blkbx_lab` normalizes the public request into a MAIR-backed workflow.
-2. `internal/blt` captures or replays traces and exports MAIR-native artifacts.
-3. `internal/mair` validates manifests, hydrates bundles, and writes receipts.
-4. `hybrid_blkbx-lab` provides offline topology and compatibility helpers used by comparison, analysis, and reporting paths.
+Evaluates actions against policies and makes decisions (pass, warn, escalate, block).
 
-## Release rule
+## Adapters (`adapters/`)
 
-Only the root `blkbx-lab-sdk` distribution is published from this repo. Internal subsystem changes are released through that package and should not be documented as independent public deliverables.
+Provides a thin-waist interface to different models and runtimes.
