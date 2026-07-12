@@ -115,7 +115,7 @@ def gate(
         "issued_at": datetime.now(UTC).isoformat(),
         "issuer": {
             "name": "BLKBX Lab",
-            "key_id": "ed25519:dev"
+            "key_id": "dev-signature"
         },
         "model": {
             "provider": "qwen",

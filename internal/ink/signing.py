@@ -3,7 +3,7 @@ from typing import Any
 from .canonical import canonicalize
 
 # Dev key for demo purposes
-DEV_KEY_ID = "ed25519:dev"
+DEV_KEY_ID = "dev-signature"
 DEV_SECRET = b"dev-secret-key-do-not-use-in-prod"
 
 def sign_receipt(receipt_data: dict[str, Any]) -> dict[str, Any]:
@@ -16,7 +16,7 @@ def sign_receipt(receipt_data: dict[str, Any]) -> dict[str, Any]:
     
     # Mock signature for demo
     signature_input = canonical_bytes + DEV_SECRET
-    signature = f"ed25519:{hashlib.sha512(signature_input).hexdigest()[:64]}"
+    signature = f"dev-signature:{hashlib.sha512(signature_input).hexdigest()[:64]}"
     
     receipt_data["integrity"] = {
         "canonicalization": "jcs-rfc8785",

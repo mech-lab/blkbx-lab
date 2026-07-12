@@ -19,7 +19,7 @@ def verify_receipt(receipt_data: dict[str, Any]) -> dict[str, Any]:
         
     # Mock signature verification
     signature_input = canonical_bytes + DEV_SECRET
-    expected_signature = f"ed25519:{hashlib.sha512(signature_input).hexdigest()[:64]}"
+    expected_signature = f"dev-signature:{hashlib.sha512(signature_input).hexdigest()[:64]}"
     
     if integrity.get("signature") != expected_signature:
         return {"valid": False, "reason": "Signature mismatch"}
