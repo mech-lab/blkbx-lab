@@ -1,6 +1,6 @@
 # Contributing to BLKBX Lab
 
-Thank you for your interest in contributing to BLKBX Lab!
+BLKBX Lab’s public contract is `blkbx-lab` / `blkbx_lab` plus Ink artifacts. New examples, docs, and tests should target that surface unless a change is explicitly about migration compatibility.
 
 ## Development Setup
 
@@ -11,7 +11,18 @@ Thank you for your interest in contributing to BLKBX Lab!
 
 ## Testing
 
-Run the test suite using `pytest`:
+Run the targeted public-contract checks while editing docs, release metadata, or examples:
+
+```bash
+python3 -m pytest \
+  tests/test_readme_example.py \
+  tests/test_packaging_contracts.py \
+  tests/test_release_readiness.py \
+  tests/test_mech_lab_product.py \
+  tests/test_mech_lab_doctor.py
+```
+
+Run the full suite when touching broader runtime code:
 
 ```bash
 pytest
@@ -26,3 +37,10 @@ ruff check .
 ruff format .
 pyright
 ```
+
+## Documentation Rules
+
+- Use `blkbx-lab` for the package and CLI.
+- Use `blkbx_lab` for the Python namespace.
+- Treat deprecated compatibility shims as migration-only surfaces.
+- Use `ink_manifest.v1.json`, `ink_receipt.v1.json`, and `receipt_comparison.v1.json` when referring to public artifacts.

@@ -9,8 +9,8 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE_ROOT = REPO_ROOT.parent
-INTERNAL_MAIR_SRC = REPO_ROOT / "internal" / "mair" / "src"
-INTERNAL_BLT_SRC = REPO_ROOT / "internal" / "blt" / "src"
+INTERNAL_MAIR_SRC = REPO_ROOT / "internal" / "ink" / "legacy_mair" / "src"
+INTERNAL_BLT_SRC = REPO_ROOT / "internal" / "trace" / "legacy_blt" / "src"
 LEGACY_MAIR_SRC = WORKSPACE_ROOT / "MAIR" / "src"
 LEGACY_BLT_SRC = WORKSPACE_ROOT / "BLT" / "src"
 
@@ -84,9 +84,9 @@ def doctor_checks() -> list[dict[str, Any]]:
     )
     workspace_message = "Workspace fallbacks unavailable; rely on installed packages"
     if bundled_ready:
-        workspace_message = "Bundled internal BLT/MAIR subsystems available"
+        workspace_message = "Bundled legacy trace and ink subsystem sources available"
     elif legacy_ready:
-        workspace_message = "Legacy sibling BLT/MAIR repos available"
+        workspace_message = "Legacy sibling BLT and MAIR repos available"
     checks.append(
         {
             "name": "workspace",
@@ -97,9 +97,9 @@ def doctor_checks() -> list[dict[str, Any]]:
     )
 
     for module_name, hint in (
-        ("hybrid_mechlab", "Install the unified mech-lab repo editable or run from the repository root"),
-        ("mair", "Install the unified repo dependencies or ensure internal/mair/src is importable"),
-        ("blt", "Install the unified repo dependencies or ensure internal/blt/src is importable"),
+        ("hybrid_mechlab", "Install the unified blkbx-lab repo editable or run from the repository root"),
+        ("mair", "Install the unified repo dependencies or ensure internal/ink/legacy_mair/src is importable"),
+        ("blt", "Install the unified repo dependencies or ensure internal/trace/legacy_blt/src is importable"),
     ):
         module, error = import_optional(module_name)
         checks.append(
@@ -131,7 +131,7 @@ def doctor_checks() -> list[dict[str, Any]]:
         try:
             runtime_module = require_module(
                 "blt.runtime",
-                "Install the unified repo dependencies or ensure internal/blt/src is importable",
+                "Install the unified repo dependencies or ensure internal/trace/legacy_blt/src is importable",
             )
             preflight = runtime_module.inspect_native_qwen_runtime()
             transformers_ready = True

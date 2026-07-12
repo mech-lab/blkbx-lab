@@ -8,8 +8,10 @@ Only the latest alpha release is currently supported with security updates.
 
 Please report security vulnerabilities privately to the maintainers. Do not open a public issue.
 
-## Dev Signing vs Production Signing
+## Current Signing Model
 
-BLKBX Lab currently uses a hardcoded "dev-signature" key (`ed25519:dev`) for demonstration purposes. **Do not use this key in production.**
+BLKBX Lab currently uses a built-in demo signing key (`dev-signature`) for generated Ink Receipts. That key exists to make local verification and tamper detection easy to inspect during development. It is not a production trust model.
 
-In a future release, we will introduce support for real Ed25519 signing via `cryptography` or `pynacl`, allowing you to provide your own secure keys for signing Ink Receipts.
+## Production Use
+
+Do not use the built-in demo key for production workflows. A future release will add support for real signing-key management so teams can provide their own secure keys for receipt issuance.

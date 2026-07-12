@@ -1,5 +1,5 @@
 name: Feature request
-description: Propose a product or developer-facing improvement for mech-lab.
+description: Propose a product or developer-facing improvement for BLKBX Lab.
 title: "[Feature]: "
 labels:
   - enhancement
@@ -22,4 +22,4 @@ body:
     id: contract
     attributes:
       label: Public contract impact
-      description: Note any CLI, API, artifact, or release-surface changes.
+      description: Note any package, CLI, Python API, artifact, or release-surface changes.

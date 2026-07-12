@@ -4,34 +4,38 @@
 
 Short tagline:
 
-`Mechanistic interpretability that ships.`
+`Open-source Ink Receipt gates for accountable AI agents.`
+
+Product line:
+
+`Qwen3.5 is the installed demo. Receipt gates are the standard.`
 
 Technical strapline:
 
-`Architecture-agnostic IR · Sheaf holonomy · SLSA L3 provenance`
+`Signed actions · Verifiable receipts · Local policy gates`
 
 Lead paragraph:
 
-`mech-lab` turns mechanistic analysis into Evidence Bundles, Receipts, and Comparison Packets that other engineers can verify offline. The public trust anchor is concrete: the native Qwen3.5 lane runs through `mechlab` and emits MAIR-backed artifacts.
+`BLKBX Lab` lets developers wrap agent actions with signed, verifiable policy gates. The public release surface ships a Qwen3.5 claims demo, writes Ink artifacts locally, and keeps verification small enough to inspect from the CLI or Python.
 
 ## PyPI Description
 
 Short description:
 
-`Mechanistic interpretability that ships: MAIR-backed evidence bundles, receipts, and comparison packets`
+`Open-source Ink Receipt gates for accountable AI agents`
 
 Proof line:
 
-`The public Qwen3.5 lane runs through mechlab and emits MAIR-backed artifacts from the native qwen3_5 runtime path.`
+`The public surface ships a Qwen3.5 claims demo that emits ink_manifest.v1.json and ink_receipt.v1.json locally.`
 
 ## GitHub Release Lead
 
-`This release sharpens the public mech-lab path: install, generate an Evidence Bundle, and verify the result against MAIR-backed artifacts and release assurance receipts.`
+`This release updates the BLKBX Lab public contract: install blkbx-lab, generate a signed receipt, and verify the result from the canonical CLI or Python surface.`
 
 ## Social Launch Caption
 
-`mech-lab v0.1.0a2 is live. Install the public package, generate an Evidence Bundle, and inspect the native Qwen3.5 proof path through mechlab. Mechanistic interpretability that ships.`
+`BLKBX Lab v0.1.0a2 is live. Install blkbx-lab, run the Qwen3.5 claims demo, and inspect the Ink receipt artifacts locally.`
 
 ## Known-Limit Language
 
-`On the validated 16 GiB arm64/MPS host, the successful public Qwen rerun used the documented CPU override after device:auto failed before artifact emission.`
+`This release surface ships the bundled demo adapter and built-in demo signing key. Production signing and broader adapter coverage remain future work.`

@@ -20,7 +20,7 @@ def _fmt_path(path: str | Path | None) -> str:
 
 
 def render_doctor(result: dict[str, Any]) -> str:
-    lines = ["mech-lab doctor", f"Status: {result['status']}", ""]
+    lines = ["blkbx-lab doctor", f"Status: {result['status']}", ""]
     for check in result["checks"]:
         line = f"- {check['name']}: {check['status']}"
         if check.get("version"):
@@ -40,7 +40,7 @@ def render_doctor(result: dict[str, Any]) -> str:
 
 def render_receipt(receipt: dict[str, Any], *, receipt_path: str | Path | None = None) -> str:
     lines = [
-        "mech-lab Receipt",
+        "BLKBX Lab Receipt",
         f"Trace: {receipt['trace_id']}",
         f"Decision: {receipt['decision']}",
         f"Receipt: {_fmt_path(receipt_path)}",
@@ -69,7 +69,7 @@ def render_bundle_summary(
     *,
     manifest_path: str | Path | None = None,
     receipt_path: str | Path | None = None,
-    title: str = "mech-lab Evidence Bundle",
+    title: str = "BLKBX Lab Evidence Bundle",
 ) -> str:
     hook_validation = summary.get("hook_validation", {})
     report_kinds = summary.get("report_kinds", [])
@@ -114,9 +114,9 @@ def render_bundle_summary(
         [
             "",
             "Next steps:",
-            f"- mechlab report {manifest_path}" if manifest_path else "- mechlab report <manifest>",
-            f"- mechlab explain {receipt_path}" if receipt_path else "- mechlab explain <receipt>",
-            "- mechlab doctor",
+            f"- blkbx-lab report {manifest_path}" if manifest_path else "- blkbx-lab report <manifest>",
+            f"- blkbx-lab explain {receipt_path}" if receipt_path else "- blkbx-lab explain <receipt>",
+            "- blkbx-lab doctor",
         ]
     )
     return "\n".join(lines)
@@ -124,7 +124,7 @@ def render_bundle_summary(
 
 def render_comparison(summary: dict[str, Any], *, comparison_path: str | Path | None = None) -> str:
     lines = [
-        "mech-lab Comparison Packet",
+        "BLKBX Lab Comparison Packet",
         f"Left trace: {summary['left_trace_id']}",
         f"Right trace: {summary['right_trace_id']}",
         f"Packet: {_fmt_path(comparison_path)}",
@@ -145,10 +145,10 @@ def render_comparison(summary: dict[str, Any], *, comparison_path: str | Path | 
 def render_report_kind(kind: str, summary: dict[str, Any], *, path: str | Path | None = None) -> str:
     kind = kind or "release-summary"
     if kind == "release-summary":
-        return render_bundle_summary(summary, manifest_path=path, receipt_path=summary.get("receipt_path"), title="mech-lab Release Summary")
+        return render_bundle_summary(summary, manifest_path=path, receipt_path=summary.get("receipt_path"), title="BLKBX Lab Release Summary")
     if kind == "tract-vs-bridge":
         lines = [
-            "mech-lab Report: tract-vs-bridge",
+            "BLKBX Lab Report: tract-vs-bridge",
             f"Trace: {summary['trace_id']}",
             f"Manifest: {_fmt_path(path)}",
             f"Tract retention: {summary.get('tract_retention', 'n/a')}",
@@ -160,7 +160,7 @@ def render_report_kind(kind: str, summary: dict[str, Any], *, path: str | Path |
     if kind == "bridge-necessity":
         strongest = summary.get("strongest_bridge_necessity") or {}
         lines = [
-            "mech-lab Report: bridge-necessity",
+            "BLKBX Lab Report: bridge-necessity",
             f"Trace: {summary['trace_id']}",
             f"Manifest: {_fmt_path(path)}",
             f"Intervention rows: {summary.get('intervention_count', 0)}",
@@ -171,7 +171,7 @@ def render_report_kind(kind: str, summary: dict[str, Any], *, path: str | Path |
         return "\n".join(lines)
     if kind == "compression-forgetting":
         lines = [
-            "mech-lab Report: compression-forgetting",
+            "BLKBX Lab Report: compression-forgetting",
             f"Trace: {summary['trace_id']}",
             f"Manifest: {_fmt_path(path)}",
             f"Mean reconstruction divergence: {summary.get('mean_reconstruction_divergence', 'n/a')}",

@@ -18,7 +18,8 @@ def test_brand_tokens_match_release_palette():
         "deep_teal": "#1C6B5A",
         "error_red": "#C73A2A",
     }
-    assert data["copy"]["short_tagline"] == "Mechanistic interpretability that ships."
+    assert data["copy"]["short_tagline"] == "Open-source Ink Receipt gates for accountable AI agents."
+    assert data["copy"]["technical_strapline"] == "Signed actions · Verifiable receipts · Local policy gates"
     assert "HybridTDA" in data["rules"]["forbidden_release_terms"]
 
 
@@ -64,11 +65,21 @@ def test_public_release_surfaces_use_current_brand_names():
         ROOT / "README.md",
         ROOT / "RELEASING.md",
         ROOT / "docs" / "pypi.md",
-        ROOT / "docs" / "qwen35-validation-report.md",
+        ROOT / "docs" / "research" / "qwen35-validation-report.md",
         ROOT / "docs" / "release-readiness.md",
         ROOT / ".github" / "RELEASE_TEMPLATE.md",
     )
-    forbidden = ("HybridTDA", "hybridtda", "pip install hybridtda")
+    forbidden = (
+        "HybridTDA",
+        "hybridtda",
+        "pip install hybridtda",
+        "mechlab-sdk",
+        "`mechlab`",
+        "`mech_lab`",
+        "mair_manifest.v1.json",
+        "assurance_receipt.v1.json",
+        "backend_comparison.v1.json",
+    )
     for path in checked_files:
         text = path.read_text(encoding="utf-8")
         for token in forbidden:
@@ -78,10 +89,10 @@ def test_public_release_surfaces_use_current_brand_names():
 def test_readme_and_release_template_use_brand_lines():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     template = (ROOT / ".github" / "RELEASE_TEMPLATE.md").read_text(encoding="utf-8")
-    assert "Mechanistic interpretability that ships." in readme
-    assert "Architecture-agnostic IR" in readme
-    assert "Mechanistic interpretability that ships." in template
-    assert "Real Model Proof" in template
+    assert "Open-source Ink Receipt gates for accountable AI agents." in readme
+    assert "Qwen3.5 is the installed demo. Receipt gates are the standard." in readme
+    assert "Open-source Ink Receipt gates for accountable AI agents." in template
+    assert "Qwen3.5 is the installed demo. Receipt gates are the standard." in template
 
 
 def test_release_workflow_uploads_host_ready_preview_asset():

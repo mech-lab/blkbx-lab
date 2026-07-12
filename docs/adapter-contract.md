@@ -1,17 +1,17 @@
 # Adapter Contract
 
-BLKBX Lab requires action metadata, not activation access.
+BLKBX Lab adapters provide action metadata and model identity to the public trace and demo flows.
 
 ## ModelAdapter Protocol
 
 ```python
 class ModelAdapter(Protocol):
-    def model_info(self) -> dict: ...
-    def architecture_profile(self) -> dict: ...
-    def propose_action(self, task: str, context: list[dict]) -> dict: ...
+    def model_info(self) -> dict[str, Any]: ...
+    def architecture_profile(self) -> dict[str, Any]: ...
+    def propose_action(self, task: str, context: list[dict[str, Any]]) -> dict[str, Any]: ...
 ```
 
-## Minimum model metadata
+## Minimum Model Metadata
 
 ```json
 {
@@ -27,8 +27,12 @@ class ModelAdapter(Protocol):
 }
 ```
 
-## Supported Runtimes
+## Installed Public Adapter
 
-- Qwen3.5 (native)
-- vLLM (via OpenAI compatible endpoint)
-- SGLang (via OpenAI compatible endpoint)
+- `qwen35`
+
+## Current Scope
+
+- Adapter lookup is currently based on registered adapter names.
+- The public release surface does not yet promise a stable family-to-adapter or model-to-adapter mapping layer.
+- Additional runtimes should not be documented as supported until they are registered in `adapters/` and exercised by the public contract tests.

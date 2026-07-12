@@ -41,23 +41,25 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install dist/*.whl
           python - <<'PY'
-          import mech_lab as ml
+          import blkbx_lab as bl
 
-          bundle = ml.demo(output_dir="artifacts/release-ci")
-          print(bundle.manifest_path)
-          print(ml.report(bundle))
+          result = bl.demo(output_dir="artifacts/release-ci")
+          print(result.manifest_path)
+          print(result.receipt_path)
+          print(bl.verify(result.receipt_path).report)
           PY
+          blkbx-lab doctor >/dev/null
 
       - name: Upload distribution artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mech-lab-dist
+          name: blkbx-lab-dist
           path: dist/*
 
       - name: Upload release assets
         uses: actions/upload-artifact@v4
         with:
-          name: mech-lab-release-assets
+          name: blkbx-lab-release-assets
           path: |
             assets/brand/og-card.png
             assets/brand/og-card.svg
@@ -86,12 +88,12 @@ jobs:
       id-token: write
     environment:
       name: pypi
-      url: https://pypi.org/p/mechlab-sdk
+      url: https://pypi.org/p/blkbx-lab
     steps:
       - name: Download distribution artifacts
         uses: actions/download-artifact@v4
         with:
-          name: mech-lab-dist
+          name: blkbx-lab-dist
           path: dist
 
       - name: Publish to PyPI

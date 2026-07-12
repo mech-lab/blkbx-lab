@@ -17,6 +17,8 @@ def test_readme_quickstart_example_executes(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     namespace = {"__name__": "__readme__"}
     exec(source, namespace, namespace)
-    bundle = namespace["bundle"]
-    assert bundle.manifest_path.endswith("mair_manifest.v1.json")
-    assert Path(bundle.manifest_path).exists()
+    result = namespace["result"]
+    assert result.manifest_path.endswith("ink_manifest.v1.json")
+    assert result.receipt_path.endswith("ink_receipt.v1.json")
+    assert Path(result.manifest_path).exists()
+    assert Path(result.receipt_path).exists()

@@ -18,7 +18,7 @@ def test_release_readiness_script_passes_without_clean_tree_enforcement():
 
 
 def test_qwen_report_scopes_workstation_paths_to_appendix():
-    report = (ROOT / "docs" / "qwen35-validation-report.md").read_text(encoding="utf-8")
+    report = (ROOT / "docs" / "research" / "qwen35-validation-report.md").read_text(encoding="utf-8")
     marker = "## Reproducibility Appendix"
     assert marker in report
     main_body, appendix = report.split(marker, maxsplit=1)
@@ -35,7 +35,7 @@ def test_release_workflow_uses_authored_template():
     assert "pypa/gh-action-pypi-publish@release/v1" in workflow
     assert "name: pypi" in workflow
     assert "id-token: write" in workflow
-    assert "https://pypi.org/p/mechlab-sdk" in workflow
+    assert "https://pypi.org/p/blkbx-lab" in workflow
 
 
 def test_host_ready_social_preview_asset_exists():
@@ -44,5 +44,6 @@ def test_host_ready_social_preview_asset_exists():
 
 def test_bug_report_template_uses_published_package_name():
     template = (ROOT / ".github" / "ISSUE_TEMPLATE" / "bug_report.yml").read_text(encoding="utf-8")
-    assert "pip install --pre mechlab-sdk" in template
-    assert "pip install mech-lab" not in template
+    assert "pip install --pre blkbx-lab" in template
+    assert "mechlab-sdk" not in template
+    assert "mechlab ..." not in template

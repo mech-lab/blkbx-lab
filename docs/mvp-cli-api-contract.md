@@ -1,70 +1,58 @@
-# blkbx-lab CLI and API Contract
+# BLKBX Lab CLI and API Contract
 
 Release-facing identity:
 
 - repository and product name: `blkbx-lab`
-- published package name: `blkbx-lab-sdk`
+- published package name: `blkbx-lab`
 - CLI name: `blkbx-lab`
 - Python import path: `blkbx_lab`
-- internal subsystems: `internal/blt` and `internal/mair`
 
-## Public verbs
+## Public Verbs
 
 | CLI | Python | Input | Output |
 | --- | --- | --- | --- |
-| `blkbx-lab demo` | `ml.demo()` | optional prompt/output dir | `AnalysisResult` backed by `ink_manifest.v1.json` and `ink_receipt.v1.json` |
-| `blkbx-lab doctor` | `ml.doctor()` | none | `DoctorResult` describing local readiness |
-| `blkbx-lab trace` | `ml.trace()` | prompt plus optional family/model/backend/profile | `EvidenceBundle` backed by `ink_manifest.v1.json` |
-| `blkbx-lab analyze` | `ml.analyze()` | one bundle/manifest | `AnalysisResult` backed by an updated `ink_manifest.v1.json` |
-| `blkbx-lab compare` | `ml.compare()` | two bundles/manifests | `ComparisonPacket` backed by `receipt_comparison.v1.json` |
-| `blkbx-lab gate` | `ml.gate()` | one bundle/manifest plus policy/profile | `ReceiptResult` backed by `ink_receipt.v1.json` |
-| `blkbx-lab explain` | `ml.explain()` | one receipt/bundle | plain-language string |
-| `blkbx-lab report` | `ml.report()` | one bundle/receipt/comparison packet plus optional kind | rendered string |
+| `blkbx-lab demo` | `bl.demo()` | optional demo name and output dir | `InkReceiptResult` backed by `ink_manifest.v1.json` and `ink_receipt.v1.json` |
+| `blkbx-lab doctor` | `bl.doctor()` | none | `DoctorResult` |
+| `blkbx-lab trace` | `bl.trace()` | prompt plus optional output dir, trace id, backend, family, model, profile | `ActionEvidenceBundle` backed by `ink_manifest.v1.json` |
+| `blkbx-lab analyze` | `bl.analyze()` | manifest path plus optional output dir/profile | `GateAnalysisResult` |
+| `blkbx-lab compare` | `bl.compare()` | two manifest or receipt targets plus optional output dir | `ReceiptComparisonPacket` backed by `receipt_comparison.v1.json` |
+| `blkbx-lab gate` | `bl.gate()` | manifest path plus optional policy/profile/output path | `InkReceiptResult` backed by `ink_receipt.v1.json` |
+| `blkbx-lab verify` | `bl.verify()` | receipt path | `InkReceiptResult` with verification status |
+| `blkbx-lab tamper` | `bl.tamper()` | receipt path | `InkReceiptResult` for the tampered output |
+| `blkbx-lab explain` | `bl.explain()` | receipt path | plain-language string |
+| `blkbx-lab report` | `bl.report()` | path or public artifact plus optional kind | plain string |
 
-## Artifact mapping lock
+## Artifact Mapping
 
-- Evidence Bundle -> `ink_manifest.v1.json` plus required MAIR artifacts
+- Action Evidence Bundle -> `ink_manifest.v1.json`
 - Receipt -> `ink_receipt.v1.json`
-- Replay Pack -> analyzed/intervention-enriched MAIR bundle
 - Comparison Packet -> `receipt_comparison.v1.json`
 
-Hard rule:
-- no product-specific disk schema
-- no raw BLT-native structures in the public API
-
-## Qwen3.5 product lane
-
-Status:
-- native `qwen3_5` runtime proof is complete through the public `blkbx-lab` façade
-- the validated real-model rerun is documented in [qwen35-validation-report.md](qwen35-validation-report.md)
-- the successful host-local rerun on April 1, 2026 used a public CPU override profile after `device:auto` failed on the `16 GiB` arm64/MPS machine used for validation
-
-Product command:
+## Quickstart Commands
 
 ```bash
-blkbx-lab trace --family qwen3.5 --model qwen3.5-2b --prompt "Measure the 3:1 tract bridge rhythm."
+blkbx-lab demo qwen35-claims --output-dir artifacts/qwen35-claims
+blkbx-lab verify artifacts/qwen35-claims/ink_receipt.v1.json
+blkbx-lab tamper artifacts/qwen35-claims/ink_receipt.v1.json
+blkbx-lab verify artifacts/qwen35-claims/ink_receipt.tampered.json
 ```
-
-Product analysis profile:
 
 ```bash
-blkbx-lab analyze run/ink_manifest.v1.json --profile qwen3.5-hybrid
+blkbx-lab trace --prompt "Capture a CLI trace." --output-dir artifacts/trace --trace-id trace-cli
+blkbx-lab analyze artifacts/trace/ink_manifest.v1.json
+blkbx-lab compare --left artifacts/trace/ink_manifest.v1.json --right artifacts/trace/ink_manifest.v1.json --output-dir artifacts/compare
 ```
 
-Required hooks:
-- `pre-D1`
-- `post-D1`
-- `post-D2`
-- `post-D3`
-- `post-attention`
-- `block-output`
+## Current Scope
 
-Report kinds:
-- `bridge-necessity`
-- `compression-forgetting`
-- `tract-vs-bridge`
-- `release-summary`
-- `comparison-summary`
+- The installed adapter registry ships with `qwen35`.
+- The Qwen3.5 claims demo is the public teaching path.
+- `demo()` returns an `InkReceiptResult`, not a separate bundle object.
+- `analyze()` currently returns a result object derived from the existing manifest directory; it does not emit a second public artifact file.
+- `report()` is present but intentionally minimal in this release surface.
 
-Current CLI follow-up:
-- `blkbx-lab gate --profile qwen3.5-hybrid` is not yet normalized with the named public profile vocabulary used by `analyze`; use `blkbx-lab gate <manifest> --policy release-assurance` until that semantics bug is fixed
+## Current Limits
+
+- `family` and `model` flags are accepted by the CLI and API but are not yet a stable public adapter registry interface.
+- The public docs do not promise hook-coverage reports, replay packs, or a real-model replay workflow through `blkbx_lab`.
+- Deprecated compatibility shims remain available for migration only.

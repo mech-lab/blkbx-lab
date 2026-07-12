@@ -1,36 +1,35 @@
 <!-- Drafted automatically from the authored template. Replace bracketed text before publishing. -->
 
-> Mechanistic interpretability that ships.
+> Open-source Ink Receipt gates for accountable AI agents.
 >
-> `Architecture-agnostic IR · Sheaf holonomy · SLSA L3 provenance`
+> Qwen3.5 is the installed demo. Receipt gates are the standard.
 
 ## What Shipped
 
 - [One sentence on the release intent.]
 - [One sentence on the user-visible result.]
 
-## Real Model Proof
+## Public Contract
 
-- [State whether this release changes the native Qwen3.5 lane.]
-- [Link the current validation evidence when Qwen support is claimed.]
-- [Note any host-specific limitation or fallback explicitly.]
-
-## CLI And API Notes
-
-- [List public CLI changes, if any.]
-- [List public Python API changes, if any.]
+- [List package, CLI, API, or artifact changes.]
 - [Say `No public contract change.` when nothing changed.]
+
+## Qwen3.5 Demo Status
+
+- [State whether this release changes the installed Qwen3.5 demo path.]
+- [Link the validation report when that path changed materially.]
+- [State any current limit explicitly.]
 
 ## Artifact Contract
 
-- [Summarize any Evidence Bundle, Receipt, Replay Pack, or Comparison Packet impact.]
-- [Say `No MAIR-backed artifact contract change.` when nothing changed.]
+- [Summarize any Ink manifest, receipt, or comparison packet impact.]
+- [Say `No Ink artifact contract change.` when nothing changed.]
 
 ## Install
 
 ```bash
-pip install mechlab-sdk==<version>
-mechlab demo
+pip install blkbx-lab==<version>
+blkbx-lab demo qwen35-claims
 ```
 
 ## Known Limits

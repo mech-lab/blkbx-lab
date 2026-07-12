@@ -1,22 +1,25 @@
 # Qwen3.5 Tract/Bridge Interpretation
 
-This document preserves the advanced mechanistic interpretability module for Qwen3.5, focusing on the tract/bridge architecture.
+This document preserves the advanced tract/bridge interpretation model as research context. It is not part of the current canonical `blkbx-lab` public contract.
 
 ## Overview
 
-The Qwen3.5 architecture can be analyzed using a tract/bridge model, where:
-- **Tracts** represent local, specialized processing units.
-- **Bridges** represent global communication pathways between tracts.
+The tract/bridge framing treats Qwen3.5 as a system where:
 
-## Metrics
+- **Tracts** represent local, specialized processing paths.
+- **Bridges** represent global communication paths between tracts.
 
-The following metrics are available as optional evidence enrichments:
+## Research Metrics
 
-- **Bridge Dependence:** Measures how much a tract relies on information from other tracts via bridges.
-- **Tract vs Bridge Report:** A detailed breakdown of computation distribution between tracts and bridges.
-- **Compression-Forgetting Report:** Analyzes information loss during compression within tracts.
-- **Hook Validation:** Ensures that the necessary hooks are present for accurate tract/bridge analysis.
+Historically associated metrics include:
 
-## Usage
+- **Bridge Dependence:** how strongly a tract relies on bridge-mediated information
+- **Tract vs Bridge Report:** a comparative breakdown of local and global computation
+- **Compression-Forgetting Report:** information loss during tract-side compression
+- **Hook Validation:** whether the required observation points exist for analysis
 
-These metrics are not required for the core BLKBX Lab SDK functionality. They are intended for advanced users who need deeper insights into model behavior.
+## Current Status
+
+- These metrics are preserved as research context.
+- They are not required for the core BLKBX Lab SDK functionality.
+- The current `blkbx_lab` public docs do not promise this analysis surface.

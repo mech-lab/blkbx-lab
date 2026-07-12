@@ -2,154 +2,86 @@
 
 ## Scope
 
-This document records the native `Qwen/Qwen3.5-2B` validation state of the public `mechlab` Qwen3.5 product lane as of April 1, 2026.
+This document records the current public `blkbx-lab` Qwen3.5 validation surface as of April 1, 2026.
 
-Canonical product command:
+Canonical public commands:
 
 ```bash
-mechlab trace --family qwen3.5 --model qwen3.5-2b --prompt "Measure the 3:1 tract bridge rhythm."
+blkbx-lab demo qwen35-claims --output-dir artifacts/qwen35-claims
+blkbx-lab verify artifacts/qwen35-claims/ink_receipt.v1.json
+blkbx-lab tamper artifacts/qwen35-claims/ink_receipt.v1.json
+blkbx-lab verify artifacts/qwen35-claims/ink_receipt.tampered.json
 ```
 
 ## Executive Result
 
 Status:
 
-- passed with public CPU override fallback
-- native `qwen3_5` support was proven through the public `mechlab` facade
-- the successful rerun emitted MAIR-backed artifacts from the real `Qwen/Qwen3.5-2B` checkpoint
-- `qwen3_next` was evaluated only as a structural debugging reference and was not used in the shipped runtime path
+- the installed public Qwen3.5 teaching path succeeds through `blkbx-lab`
+- the demo emits `ink_manifest.v1.json` and `ink_receipt.v1.json`
+- tamper detection fails verification as expected
+- the current public release surface does not promise a real-model replay workflow
 
-## Runtime Evidence
+## Current Public Validation
 
-Environment summary:
+The shipped public path uses the installed `qwen35` adapter and the Qwen3.5 claims demo:
 
-- Python: `3.12.11`
-- torch: `2.11.0`
-- transformers: `5.5.0.dev0`
-- transformers source pin: upstream commit `9914a3641f7aaaabb0bcdfcd73a54a1cfa70c3e7`
-- cached model snapshot: `15852e8c16360a2fea060d615a32b45270f8a8fc`
-- cached weight artifact: `model.safetensors-00001-of-00001.safetensors`
+- package surface: `blkbx-lab`
+- Python namespace: `blkbx_lab`
+- demo name: `qwen35-claims`
+- receipt signer: built-in demo key
+- gate outcome for the bundled claims demo: `block`
 
-Runtime guarantees:
+Artifacts written by the public demo:
 
-- temp, Hugging Face cache, transformers cache, and pip cache were redirected to workspace-mounted storage
-- `mechlab doctor` reported native Qwen readiness from the real checkpoint configuration
-- the runtime resolved:
-  - config class: `transformers.models.qwen3_5.configuration_qwen3_5.Qwen3_5Config`
-  - model class: `transformers.models.qwen3_5.modeling_qwen3_5.Qwen3_5ForConditionalGeneration`
-
-## Public Rerun Result
-
-`mechlab doctor` succeeded with native `qwen3_5` detection:
-
-- status: `ready`
-- `transformers` check: native config and model classes resolved through the real checkpoint
-
-First public real-model attempt:
-
-- command class: builtin BLT profile with `device:auto`
-- result: weights loaded successfully, but the process exited before emitting MAIR artifacts
-- host note: the validated machine is `arm64` with `16 GiB` RAM, and BLT `device:auto` resolved to `mps`
-- recorded evidence: `qwen35-real-run-auto.log`
-
-Successful public rerun:
-
-```bash
-mechlab trace \
-  --family qwen3.5 \
-  --model qwen3.5-2b \
-  --profile artifacts/qwen35-cpu.profile.json \
-  --prompt "Measure the 3:1 tract bridge rhythm." \
-  --output-dir artifacts/qwen35-real-run
-```
-
-- result: success through the public `mechlab` facade only
-- manifest: `artifacts/qwen35-real-run/ink_manifest.v1.json`
-- receipt: `artifacts/qwen35-real-run/ink_receipt.v1.json`
-
-Public follow-up commands that succeeded:
-
-```bash
-mechlab analyze artifacts/qwen35-real-run/ink_manifest.v1.json --profile qwen3.5-hybrid --output-dir artifacts/qwen35-real-run
-mechlab report artifacts/qwen35-real-run/ink_manifest.v1.json --kind tract-vs-bridge
-mechlab gate artifacts/qwen35-real-run/ink_manifest.v1.json --policy release-assurance
-```
-
-Analyzed artifacts present in the MAIR-backed bundle:
-
-- `mair_semantic_trace.v1.jsonl`
-- `mair_graph_ir.v1.json`
-- `mair_numeric_lowering.v1.json`
-- `blt_codes.v1.parquet`
-- `tract_state_snapshot.v1.parquet`
-- `topology_summary.v1.json`
-- `grouped_clt_bundle.v1.json`
-- `offline_topology_report.v1.json`
-- `intervention_sweep.v1.jsonl`
+- `action.json`
+- `ink_manifest.v1.json`
 - `ink_receipt.v1.json`
+- `ink_receipt.tampered.json` after `tamper`
 
-Required hook coverage validated from the real run:
+## Public Verification Result
 
-- `pre-D1`
-- `post-D1`
-- `post-D2`
-- `post-D3`
-- `post-attention`
-- `block-output`
+The public verification story that currently ships is:
 
-Real-run analysis summary:
+- `blkbx-lab demo` writes a manifest and receipt
+- `blkbx-lab verify` returns success for the generated receipt
+- `blkbx-lab tamper` writes a modified receipt
+- `blkbx-lab verify` returns failure for the tampered receipt
 
-- trace id: `trace-mechlab-20260401-081029`
-- tract retention: `0.953495`
-- topology bridge dependence: `0.25`
-- grouped bridge dependence: `0.078713`
-- mean reconstruction divergence: `0.046505`
-- gate decision: `pass`
+Representative public Python flow:
 
-Report render proof:
+```python
+import blkbx_lab as bl
 
-- `mechlab report ... --kind tract-vs-bridge` rendered successfully from the MAIR manifest with no BLT-internal command usage
+result = bl.demo(output_dir="artifacts/qwen35-claims")
+verified = bl.verify(result.receipt_path)
+tampered = bl.tamper(result.receipt_path)
 
-## Exit Artifact Status
+assert verified.verification["valid"] is True
+assert bl.verify(tampered.receipt_path).verification["valid"] is False
+```
 
-- public entrypoint implemented: yes
-- family/model flag mapping implemented: yes
-- native `qwen3_5` runtime verified against the real checkpoint: yes
-- weight fetch completed into workspace storage: yes
-- real-model replay completed successfully on the validated machine: yes
-- successful rerun path used surrogate runtime aliases: no
-- successful rerun path used public `mechlab` facade only: yes
-- successful rerun path required a CPU override profile after `device:auto` failed on the validated host: yes
+## Current Limits
+
+- The public contract does not document hook-coverage analysis.
+- The public contract does not document replay packs or MAIR-backed public artifacts.
+- The public contract does not document a real-model replay workflow through `family` and `model` flags.
+- The public adapter registry currently ships with `qwen35`.
 
 ## Reproducibility Appendix
 
-Exact recorded local runtime and artifact paths:
+Exact recorded local runtime and artifact paths from the archived validation workspace:
 
-- native runtime root: `/Volumes/2.5SSDDD128/mechlab-qwen35-native`
-- transformers source checkout: `/Volumes/2.5SSDDD128/mechlab-qwen35-native/src/transformers-upstream`
-- auto-device failure log: `/Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run-auto.log`
-- successful manifest: `/Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run/ink_manifest.v1.json`
-- successful receipt: `/Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run/ink_receipt.v1.json`
+- native runtime root: `/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation`
+- archived transformers source checkout: `/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation/src/transformers-upstream`
+- archived output directory: `/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation/artifacts/qwen35-claims`
+- archived manifest path: `/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation/artifacts/qwen35-claims/ink_manifest.v1.json`
+- archived receipt path: `/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation/artifacts/qwen35-claims/ink_receipt.v1.json`
 
 Recorded environment variables:
 
-- `TMPDIR=/Volumes/2.5SSDDD128/mechlab-qwen35-native/tmp`
-- `HF_HOME=/Volumes/2.5SSDDD128/mechlab-qwen35-native/hf-home`
-- `HUGGINGFACE_HUB_CACHE=/Volumes/2.5SSDDD128/mechlab-qwen35-native/hf-cache`
-- `TRANSFORMERS_CACHE=/Volumes/2.5SSDDD128/mechlab-qwen35-native/transformers-cache`
-- `PIP_CACHE_DIR=/Volumes/2.5SSDDD128/mechlab-qwen35-native/pip-cache`
-
-Recorded local commands:
-
-```bash
-mechlab trace \
-  --family qwen3.5 \
-  --model qwen3.5-2b \
-  --profile /Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-cpu.profile.json \
-  --prompt "Measure the 3:1 tract bridge rhythm." \
-  --output-dir /Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run
-
-mechlab analyze /Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run/ink_manifest.v1.json --profile qwen3.5-hybrid --output-dir /Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run
-mechlab report /Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run/ink_manifest.v1.json --kind tract-vs-bridge
-mechlab gate /Volumes/2.5SSDDD128/mechlab-qwen35-native/artifacts/qwen35-real-run/ink_manifest.v1.json --policy release-assurance
-```
+- `TMPDIR=/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation/tmp`
+- `HF_HOME=/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation/hf-home`
+- `HUGGINGFACE_HUB_CACHE=/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation/hf-cache`
+- `TRANSFORMERS_CACHE=/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation/transformers-cache`
+- `PIP_CACHE_DIR=/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation/pip-cache`

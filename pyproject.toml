@@ -43,7 +43,7 @@ Documentation = "https://github.com/mech-lab/blkbx-lab/tree/main/docs"
 Repository = "https://github.com/mech-lab/blkbx-lab"
 Issues = "https://github.com/mech-lab/blkbx-lab/issues"
 Changelog = "https://github.com/mech-lab/blkbx-lab/releases"
-"Validation Report" = "https://github.com/mech-lab/blkbx-lab/blob/main/docs/qwen35-validation-report.md"
+"Validation Report" = "https://github.com/mech-lab/blkbx-lab/blob/main/docs/research/qwen35-validation-report.md"
 
 [tool.pytest.ini_options]
 addopts = "-q"

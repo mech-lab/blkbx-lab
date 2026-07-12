@@ -1,10 +1,8 @@
 # BLKBX Lab
 
-Mechanistic interpretability that ships.
+Open-source Ink Receipt gates for accountable AI agents.
 
-`Architecture-agnostic IR · Sheaf holonomy · SLSA L3 provenance`
-
-`BLKBX Lab` produces Evidence Bundles, Receipts, Replay Packs, and Comparison Packets that other engineers can verify offline. The public trust anchor is concrete: the native Qwen3.5 lane runs through `blkbx-lab` and emits MAIR-backed artifacts.
+`BLKBX Lab` wraps agent actions with local policy gates and emits signed artifacts that another engineer can verify offline. The current public surface is intentionally small: it ships a Qwen3.5 claims demo, writes Ink manifests and receipts, and keeps the release contract centered on `blkbx-lab` / `blkbx_lab`.
 
 ## Install
 
@@ -15,34 +13,43 @@ pip install --pre blkbx-lab
 ## Quickstart
 
 ```bash
-blkbx-lab demo --output-dir artifacts/blkbx-lab-demo
-blkbx-lab report artifacts/blkbx-lab-demo/ink_manifest.v1.json --kind release-summary
+blkbx-lab demo qwen35-claims --output-dir artifacts/blkbx-lab-demo
+blkbx-lab verify artifacts/blkbx-lab-demo/ink_receipt.v1.json
+blkbx-lab tamper artifacts/blkbx-lab-demo/ink_receipt.v1.json
+blkbx-lab verify artifacts/blkbx-lab-demo/ink_receipt.tampered.json
 ```
 
 ```python
-import blkbx_lab as ml
+import blkbx_lab as bl
 
-bundle = ml.demo(output_dir="artifacts/blkbx-lab-demo")
-print(bundle.manifest_path)
-print(ml.report(bundle))
+result = bl.demo(output_dir="artifacts/blkbx-lab-demo")
+print(result.manifest_path)
+print(result.receipt_path)
+print(bl.verify(result.receipt_path).report)
 ```
 
 ## What You Get
 
-- Evidence Bundle: `ink_manifest.v1.json` plus required MAIR-backed run artifacts
+- Action Evidence Bundle: `ink_manifest.v1.json`
 - Receipt: `ink_receipt.v1.json`
-- Replay Pack: analyzed MAIR bundle with hook validation and intervention outputs
 - Comparison Packet: `receipt_comparison.v1.json`
-
-## Real Model Proof
-
-- native `qwen3_5` runtime proof is complete through the public `blkbx-lab` facade
-- the validated rerun used the real `Qwen/Qwen3.5-2B` checkpoint
-- the validated host-local rerun used a documented CPU override after `device:auto` failed before artifact emission on the recorded machine
 
 ## Public Contract
 
 - package name: `blkbx-lab`
 - CLI: `blkbx-lab`
 - Python namespace: `blkbx_lab`
-- disk contract: MAIR-backed artifacts only
+- canonical demo result: `InkReceiptResult`
+
+## Current Scope
+
+- The bundled adapter registry ships with `qwen35`.
+- The Qwen3.5 claims demo is the installed teaching path.
+- `report()` is available but currently minimal.
+- Deprecated compatibility shims remain for migration only.
+
+## Current Limits
+
+- Production signing keys are not part of this release surface.
+- The public docs do not promise a real-model replay workflow through the `blkbx_lab` facade.
+- Legacy MAIR and BLT histories remain in-repo for research and migration context, not as first-class public release surfaces.

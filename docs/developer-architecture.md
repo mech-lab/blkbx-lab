@@ -5,31 +5,46 @@ BLKBX Lab is structured into the following layers:
 ```text
 blkbx-lab CLI / blkbx_lab SDK
         |
-        +-- internal/trace   model event capture, action proposal capture
+        +-- blkbx_lab/              public API, CLI parser, result objects
         |
-        +-- internal/ink     manifest, canonicalization, signing, verification
+        +-- internal/trace/         action capture and preserved legacy trace code
         |
-        +-- internal/gates   gate policies, decisions, receipt issuance
+        +-- internal/ink/           manifest, canonicalization, signing, verification
         |
-        +-- adapters/        qwen35, vllm, sglang, openai-compatible
+        +-- internal/gates/         gate policy evaluation
+        |
+        +-- adapters/               installed adapter registry (ships with qwen35)
+        |
+        +-- hybrid_mechlab/         research and compatibility namespace
 ```
 
 ## Public Facade (`blkbx_lab/`)
 
-The public SDK and CLI. This is the only layer users should interact with directly.
+This is the canonical SDK and CLI surface. Release-facing docs, examples, and tests should target this layer.
 
-## Internal Trace Layer (`internal/trace/`)
+## Trace Layer (`internal/trace/`)
 
-Responsible for capturing model events and action proposals.
+This layer captures action proposals and preserves the historical trace subsystem under `internal/trace/legacy_blt/`. It is kept in-repo for continuity, not as a first-class public package.
 
-## Internal Ink Layer (`internal/ink/`)
+## Ink Layer (`internal/ink/`)
 
-Handles the core Ink Receipt logic: manifests, canonicalization, signing, and verification.
+This layer owns the current public artifact contract:
 
-## Internal Gates Layer (`internal/gates/`)
+- `ink_manifest.v1.json`
+- `ink_receipt.v1.json`
+- `receipt_comparison.v1.json`
 
-Evaluates actions against policies and makes decisions (pass, warn, escalate, block).
+The old MAIR implementation remains under `internal/ink/legacy_mair/` for historical context.
+
+## Gates Layer (`internal/gates/`)
+
+This layer evaluates actions against policies and produces gate decisions and receipt content.
 
 ## Adapters (`adapters/`)
 
-Provides a thin-waist interface to different models and runtimes.
+This layer exposes the thin adapter registry used by the public trace and demo flows. The current installed public adapter is `qwen35`.
+
+## Compatibility Surfaces
+
+- `hybrid_mechlab/` stays in-repo for research and legacy workflows.
+- Deprecated compatibility shims delegate to the canonical `blkbx_lab` surface and emit deprecation warnings.

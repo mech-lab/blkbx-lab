@@ -1,6 +1,19 @@
 # Public Object Spec
 
-BLKBX Lab exposes the following public objects for interacting with the SDK.
+BLKBX Lab exposes the following public result objects from `blkbx_lab.objects`.
+
+## DoctorResult
+
+```python
+@dataclass(slots=True)
+class DoctorResult:
+    status: str
+    checks: list[dict[str, Any]]
+    notes: list[str]
+    demo_ready: bool
+    real_replay_ready: bool
+    report: str
+```
 
 ## ActionEvidenceBundle
 
@@ -58,3 +71,11 @@ class ReceiptComparisonPacket:
     summary: dict[str, Any]
     report: str
 ```
+
+## Shared Conventions
+
+- All result objects provide `to_dict()`.
+- `demo()` returns `InkReceiptResult`.
+- `trace()` returns `ActionEvidenceBundle`.
+- `analyze()` returns `GateAnalysisResult`.
+- `compare()` returns `ReceiptComparisonPacket`.

@@ -1,14 +1,14 @@
 # Manual live-host setting: use assets/brand/og-card.png as the repository social preview image.
 repository:
-  name: mech-lab
-  description: Mechanistic interpretability that ships: MAIR-backed evidence bundles, receipts, and comparison packets.
+  name: blkbx-lab
+  description: Open-source Ink Receipt gates for accountable AI agents.
   default_branch: main
   topics:
-    - ai-safety-infrastructure
-    - interpretability
-    - mechanistic-analysis
-    - evidence-bundles
-    - mair
-    - release-assurance
-    - model-debugging
-    - slsa
+    - accountable-ai
+    - ai-agents
+    - ink-receipts
+    - receipt-gates
+    - qwen35
+    - gated-deltanet
+    - hybrid-ai
+    - insurtech

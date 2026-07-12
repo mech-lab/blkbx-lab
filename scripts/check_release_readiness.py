@@ -12,15 +12,26 @@ PUBLIC_RELEASE_SURFACES = (
     ROOT / "README.md",
     ROOT / "RELEASING.md",
     ROOT / "docs" / "pypi.md",
-    ROOT / "docs" / "qwen35-validation-report.md",
+    ROOT / "docs" / "research" / "qwen35-validation-report.md",
     ROOT / "docs" / "release-readiness.md",
     ROOT / ".github" / "RELEASE_TEMPLATE.md",
 )
-FORBIDDEN_RELEASE_TERMS = ("HybridTDA", "hybridtda", "pip install hybridtda")
+FORBIDDEN_RELEASE_TERMS = (
+    "HybridTDA",
+    "hybridtda",
+    "pip install hybridtda",
+    "mechlab-sdk",
+    "`mechlab`",
+    "`mech_lab`",
+    "mair_manifest.v1.json",
+    "assurance_receipt.v1.json",
+    "backend_comparison.v1.json",
+)
 ABSOLUTE_PATH_MARKERS = ("/Volumes/", "/Users/")
 QWEN_APPENDIX_MARKER = "## Reproducibility Appendix"
 RELEASE_TEMPLATE_PATH = ".github/RELEASE_TEMPLATE.md"
 HOST_SOCIAL_PREVIEW = ROOT / "assets" / "brand" / "og-card.png"
+VALIDATION_REPORT = ROOT / "docs" / "research" / "qwen35-validation-report.md"
 
 
 def _check(condition: bool, message: str) -> None:
@@ -47,7 +58,7 @@ def ensure_public_release_terms() -> None:
 
 
 def ensure_qwen_report_scopes_absolute_paths() -> None:
-    report = (ROOT / "docs" / "qwen35-validation-report.md").read_text(encoding="utf-8")
+    report = VALIDATION_REPORT.read_text(encoding="utf-8")
     _check(QWEN_APPENDIX_MARKER in report, "Qwen validation report is missing the reproducibility appendix marker")
     main_body, appendix = report.split(QWEN_APPENDIX_MARKER, maxsplit=1)
     for marker in ABSOLUTE_PATH_MARKERS:
@@ -63,6 +74,7 @@ def ensure_release_workflow_uses_authored_notes() -> None:
     _check("pypa/gh-action-pypi-publish@release/v1" in workflow, "release workflow does not publish tagged distributions to PyPI")
     _check("name: pypi" in workflow, "release workflow is missing the pypi environment")
     _check("id-token: write" in workflow, "release workflow is missing the id-token permission required for trusted publishing")
+    _check("https://pypi.org/p/blkbx-lab" in workflow, "release workflow does not point to the blkbx-lab PyPI project")
 
 
 def ensure_host_ready_assets() -> None:

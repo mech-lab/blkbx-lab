@@ -1,41 +1,47 @@
 # Internal Subsystem Map
 
-## `internal/blt`
+## `internal/trace`
 
 Role:
 
-- trace capture and replay
-- native Qwen preflight
-- analysis export into MAIR artifacts
-- grouped CLT and topology summary generation
+- action capture and manifest inputs
+- preserved legacy trace history under `legacy_blt`
+- CLI-facing evidence generation support
 
 Key paths:
 
-- `internal/blt/src/blt/`
-- `internal/blt/configs/`
-- `internal/blt/tests/`
+- `internal/trace/`
+- `internal/trace/legacy_blt/`
+- `internal/trace/legacy_blt/src/blt/`
 
-## `internal/mair`
+## `internal/ink`
 
 Role:
 
-- artifact schemas and canonical filenames
-- manifest writing and hydration
-- artifact validation
-- release and replay gating
+- public Ink schemas and canonical filenames
+- manifest writing
+- receipt signing and verification
+- preserved legacy MAIR history under `legacy_mair`
 
 Key paths:
 
-- `internal/mair/src/mair/`
-- `internal/mair/schemas/`
-- `internal/mair/tests/`
+- `internal/ink/`
+- `internal/ink/schemas/`
+- `internal/ink/legacy_mair/`
+
+## `internal/gates`
+
+Role:
+
+- gate policy evaluation
+- gate decision reasons
+- receipt decision inputs
 
 ## `hybrid_mechlab`
 
 Role:
 
-- compatibility namespace retained during transition
-- MAIR integration helpers
+- research and compatibility namespace retained in-repo
 - topology and offline analysis helpers
 - Rust bridge shims and version coordination
 
@@ -45,5 +51,3 @@ Contents:
 
 - `legacy/hybrid-mechlab-python/`: older Python package surface kept for migration reference
 - `legacy/python-rust/`: older Rust companion packaging kept for migration reference
-
-These trees remain in-repo but are outside the first public release surface.

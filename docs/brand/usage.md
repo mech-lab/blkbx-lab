@@ -5,17 +5,18 @@ Use this when editing release-facing docs, release notes, launch cards, or repo 
 ## Voice
 
 - Name things exactly.
-- State proof directly.
+- State the public contract directly.
 - Explain limits concretely.
 - Do not use hype, hedging, or value-signaling filler.
 
 Preferred phrasing:
 
-- `Evidence Bundle`
+- `Ink Receipt`
+- `Action Evidence Bundle`
 - `Receipt`
 - `Comparison Packet`
-- `native Qwen3.5 public-path proof`
-- `MAIR-backed artifacts`
+- `Qwen3.5 claims demo`
+- `local policy gate`
 
 Avoid:
 
@@ -26,16 +27,16 @@ Avoid:
 
 ## Naming
 
-- Use `mech-lab` for the product and repo.
-- Use `mechlab-sdk` for the published package.
-- Use `mechlab` for the CLI.
-- Use `mech_lab` for the Python namespace.
+- Use `BLKBX Lab` for the product.
+- Use `blkbx-lab` for the published package and CLI.
+- Use `blkbx_lab` for the Python namespace.
+- Keep deprecated pre-BLKBX public names inside migration-specific material only.
 - Do not use `HybridTDA`, `hybridtda`, or `pip install hybridtda` in release-facing materials.
 
 ## Visual Rules
 
 - Ink and Chalk are the default structural colors.
-- Teal carries transport, topology, and holonomy meaning.
+- Teal carries verification and flow accents.
 - Acid is the verification signal and should appear once per composition.
 - Error red is reserved for failure or obstruction states.
 - Use IBM Plex Mono for commands, code, metrics, labels, and terminal snippets.
@@ -44,6 +45,6 @@ Avoid:
 ## Release Notes
 
 - Lead with what shipped.
-- State the proof story early.
-- State public CLI/API impact explicitly.
+- State the public contract early.
+- State CLI and API impact explicitly.
 - State current limits without hedging.
