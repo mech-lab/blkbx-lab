@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 
 from hybrid_mechlab._version import __version__
-from mech_lab.api import analyze, compare, demo, doctor, explain, gate, report, trace
+from blkbx_lab.api import analyze, compare, demo, doctor, explain, gate, report, trace, verify, tamper
 
 
 def _resolve_prompt(args: argparse.Namespace, parser: argparse.ArgumentParser) -> str:
@@ -14,20 +14,19 @@ def _resolve_prompt(args: argparse.Namespace, parser: argparse.ArgumentParser) -
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="mech-lab CLI")
+    parser = argparse.ArgumentParser(description="blkbx-lab CLI")
     parser.add_argument("--version", action="store_true")
     subparsers = parser.add_subparsers(dest="command")
 
-    demo_parser = subparsers.add_parser("demo", help="Generate a deterministic evidence bundle and receipt")
+    demo_parser = subparsers.add_parser("demo", help="Run installed demo")
+    demo_parser.add_argument("demo_name", nargs="?", default="qwen35-claims")
     demo_parser.add_argument("--output-dir", default=None)
-    demo_parser.add_argument("--trace-id", default=None)
-    demo_parser.add_argument("--prompt", dest="prompt_text", default=None)
     demo_parser.set_defaults(func=_cmd_demo)
 
-    doctor_parser = subparsers.add_parser("doctor", help="Check local mech-lab readiness")
+    doctor_parser = subparsers.add_parser("doctor", help="Check runtime, schemas, signing, adapters")
     doctor_parser.set_defaults(func=_cmd_doctor)
 
-    trace_parser = subparsers.add_parser("trace", help="Capture a trace and emit a portable evidence bundle")
+    trace_parser = subparsers.add_parser("trace", help="Capture model/action event")
     trace_parser.add_argument("prompt", nargs="?")
     trace_parser.add_argument("--prompt", dest="prompt_text", default=None)
     trace_parser.add_argument("--output-dir", default=None)
@@ -38,38 +37,47 @@ def build_parser() -> argparse.ArgumentParser:
     trace_parser.add_argument("--profile", default=None)
     trace_parser.set_defaults(func=_cmd_trace)
 
-    analyze_parser = subparsers.add_parser("analyze", help="Run grouped CLT and topology analysis for one bundle")
+    analyze_parser = subparsers.add_parser("analyze", help="Classify risk and required controls")
     analyze_parser.add_argument("manifest_path")
     analyze_parser.add_argument("--output-dir", default=None)
     analyze_parser.add_argument("--profile", default=None)
     analyze_parser.set_defaults(func=_cmd_analyze)
 
-    compare_parser = subparsers.add_parser("compare", help="Emit a MAIR-backed comparison packet from two bundles")
+    gate_parser = subparsers.add_parser("gate", help="Evaluate gate and issue receipt")
+    gate_parser.add_argument("manifest_path")
+    gate_parser.add_argument("--policy", default="action-gate")
+    gate_parser.add_argument("--profile", default=None)
+    gate_parser.add_argument("--output-path", default=None)
+    gate_parser.set_defaults(func=_cmd_gate)
+
+    verify_parser = subparsers.add_parser("verify", help="Verify signature/hash/schema")
+    verify_parser.add_argument("receipt_path")
+    verify_parser.set_defaults(func=_cmd_verify)
+
+    tamper_parser = subparsers.add_parser("tamper", help="Produce tampered receipt for demo")
+    tamper_parser.add_argument("receipt_path")
+    tamper_parser.set_defaults(func=_cmd_tamper)
+
+    explain_parser = subparsers.add_parser("explain", help="Explain pass/warn/escalate/block")
+    explain_parser.add_argument("receipt_path")
+    explain_parser.set_defaults(func=_cmd_explain)
+
+    report_parser = subparsers.add_parser("report", help="Render human-readable packet")
+    report_parser.add_argument("target")
+    report_parser.add_argument("--kind", default=None)
+    report_parser.set_defaults(func=_cmd_report)
+
+    compare_parser = subparsers.add_parser("compare", help="Compare receipts/runs/policies")
     compare_parser.add_argument("--left", required=True)
     compare_parser.add_argument("--right", required=True)
     compare_parser.add_argument("--output-dir", default=None)
     compare_parser.set_defaults(func=_cmd_compare)
 
-    gate_parser = subparsers.add_parser("gate", help="Evaluate release gates and emit a receipt")
-    gate_parser.add_argument("manifest_path")
-    gate_parser.add_argument("--policy", default="release-assurance")
-    gate_parser.add_argument("--profile", default=None)
-    gate_parser.add_argument("--output-path", default=None)
-    gate_parser.set_defaults(func=_cmd_gate)
-
-    explain_parser = subparsers.add_parser("explain", help="Explain a receipt in plain language")
-    explain_parser.add_argument("receipt_path")
-    explain_parser.set_defaults(func=_cmd_explain)
-
-    report_parser = subparsers.add_parser("report", help="Render a human-readable report")
-    report_parser.add_argument("target")
-    report_parser.add_argument("--kind", default=None)
-    report_parser.set_defaults(func=_cmd_report)
     return parser
 
 
 def _cmd_demo(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
-    result = demo(output_dir=args.output_dir, trace_id=args.trace_id, prompt=args.prompt_text or "Produce a deterministic mechanistic evidence bundle for a hybrid trace.")
+    result = demo(args.demo_name, output_dir=args.output_dir)
     print(result.report)
     print("")
     print(f"Manifest: {result.manifest_path}")
@@ -106,18 +114,22 @@ def _cmd_analyze(args: argparse.Namespace, parser: argparse.ArgumentParser) -> i
     return 0
 
 
-def _cmd_compare(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
-    result = compare(left=args.left, right=args.right, output_dir=args.output_dir)
-    print(result.report)
-    print("")
-    print(f"Comparison packet: {result.comparison_path}")
-    return 0
-
-
 def _cmd_gate(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
     result = gate(args.manifest_path, policy=args.policy, profile=args.profile, output_path=args.output_path)
     print(result.report)
     return 0 if result.decision == "pass" else 1
+
+
+def _cmd_verify(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
+    result = verify(args.receipt_path)
+    print(result.report)
+    return 0 if result.verification.get("valid") else 1
+
+
+def _cmd_tamper(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
+    result = tamper(args.receipt_path)
+    print(result.report)
+    return 0
 
 
 def _cmd_explain(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
@@ -130,11 +142,19 @@ def _cmd_report(args: argparse.Namespace, parser: argparse.ArgumentParser) -> in
     return 0
 
 
+def _cmd_compare(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
+    result = compare(left=args.left, right=args.right, output_dir=args.output_dir)
+    print(result.report)
+    print("")
+    print(f"Comparison packet: {result.comparison_path}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.version:
-        print(f"mech-lab {__version__}")
+        print(f"blkbx-lab {__version__}")
         return 0
     func = getattr(args, "func", None)
     if func is None:
