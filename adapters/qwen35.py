@@ -1,9 +1,5 @@
-from typing import Any, Protocol
-
-class ModelAdapter(Protocol):
-    def model_info(self) -> dict[str, Any]: ...
-    def architecture_profile(self) -> dict[str, Any]: ...
-    def propose_action(self, task: str, context: list[dict[str, Any]]) -> dict[str, Any]: ...
+from typing import Any
+from .base import ModelAdapter, register_adapter
 
 class Qwen35Adapter:
     def model_info(self) -> dict[str, Any]:
@@ -36,3 +32,5 @@ class Qwen35Adapter:
             "financial_consequence": False,
             "binding_effect": False
         }
+
+register_adapter("qwen35", Qwen35Adapter)

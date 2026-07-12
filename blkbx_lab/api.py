@@ -17,7 +17,7 @@ from internal.ink.signing import sign_receipt
 from internal.ink.verify import verify_receipt
 from internal.ink.manifest import write_manifest
 from internal.ink.canonical import hash_text, canonical_json_hash
-from adapters.qwen35 import Qwen35Adapter
+from adapters.base import get_adapter
 
 _VERSION = "0.1.0"
 
@@ -52,7 +52,8 @@ def trace(
     root = _default_output_dir("blkbx-trace", output_dir)
     action_id = trace_id or f"action-{_timestamp_slug()}"
     
-    adapter = Qwen35Adapter()
+    adapter_name = model or family or "qwen35"
+    adapter = get_adapter(adapter_name)
     action = adapter.propose_action("draft_claim_denial_email", [])
     
     manifest_path = root / "ink_manifest.v1.json"
