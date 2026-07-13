@@ -162,7 +162,7 @@ def export_mair_topology_artifacts(
 
 
 def _build_persistence_input(trace: TraceHandle) -> ExactPersistenceInput:
-    graph, path_edges, bridge_edges = _trace_graph_inputs(trace)
+    graph, path_edges, bridge_edges = trace_graph_inputs(trace)
     complex_ = build_trace_complex(graph)
     vertex_values = vertex_filtration(len(graph.nodes), trace.transport_digest.retention_score)
     edge_values = edge_filtration(
@@ -190,7 +190,7 @@ def _build_persistence_input(trace: TraceHandle) -> ExactPersistenceInput:
     )
 
 
-def _trace_graph_inputs(trace: TraceHandle) -> tuple[Graph, list[tuple[int, int]], set[tuple[int, int]]]:
+def trace_graph_inputs(trace: TraceHandle) -> tuple[Graph, list[tuple[int, int]], set[tuple[int, int]]]:
     graph_ir = trace.profile.metadata.get("mair_graph_ir")
     if isinstance(graph_ir, dict):
         nodes = graph_ir.get("nodes", [])

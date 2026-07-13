@@ -1,4 +1,4 @@
-"""Hybrid model research SDK: Python surface."""
+"""Experimental hybrid model research SDK kept for compatibility and research."""
 
 from hybrid_mechlab.api import HybridLab, TraceHandle
 from hybrid_mechlab import kernel
@@ -10,4 +10,5 @@ __all__ = [
     "TraceHandle",
     "kernel",
     "profiles",
+    "__version__",
 ]

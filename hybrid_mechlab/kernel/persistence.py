@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from typing import Any, TYPE_CHECKING
+from typing import Any
 
 import numpy as np
 
@@ -16,9 +16,6 @@ from hybrid_mechlab.kernel.metrics import (
 )
 from hybrid_mechlab.kernel.simplicial import SimplicialComplex
 from hybrid_mechlab.kernel.topology import SignedSketch
-
-if TYPE_CHECKING:
-    from hybrid_mechlab.kernel.backend import MathKernelBackend
 
 
 @dataclass(frozen=True)

@@ -12,7 +12,7 @@ Run:
 This executes:
 
 ```bash
-python -m pip install -e './internal/mair[dev]' -e './internal/blt[dev]'
+python -m pip install -e './internal/ink/legacy_mair[dev]' -e './internal/trace/legacy_blt[dev]'
 ```
 
 It installs the packages and their CLIs for local development without `PYTHONPATH` injections.

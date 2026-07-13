@@ -33,6 +33,7 @@ class ModelAdapter(Protocol):
 
 ## Current Scope
 
-- Adapter lookup is currently based on registered adapter names.
-- The public release surface does not yet promise a stable family-to-adapter or model-to-adapter mapping layer.
+- Registered adapter names remain canonical for the public surface.
+- Shipped Qwen selectors `qwen35`, `qwen3.5`, `qwen3.5-2b`, and `Qwen/Qwen3.5-2B` resolve to the installed `qwen35` adapter.
+- Unsupported `family` or `model` values fail with a clear supported-adapters error.
 - Additional runtimes should not be documented as supported until they are registered in `adapters/` and exercised by the public contract tests.

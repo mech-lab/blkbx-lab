@@ -6,6 +6,6 @@ def ensure_mair_importable() -> None:
         return
     except Exception as exc:  # pragma: no cover - exercised in integration usage
         raise ImportError(
-            "Unable to import mair. Install the unified mech-lab repo dependencies "
-            "or ensure internal/mair/src is on PYTHONPATH"
+            "Unable to import mair. Install the unified blkbx-lab repo dependencies "
+            "or ensure internal/ink/legacy_mair/src is on PYTHONPATH"
         ) from exc

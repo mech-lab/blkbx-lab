@@ -43,6 +43,7 @@ Role:
 
 - research and compatibility namespace retained in-repo
 - topology and offline analysis helpers
+- experimental geometry and `holonom` risk helpers
 - Rust bridge shims and version coordination
 
 ## `legacy/`

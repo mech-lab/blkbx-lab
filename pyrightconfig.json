@@ -1,0 +1,67 @@
+{
+  "include": [
+    "blkbx_lab",
+    "adapters",
+    "mech_lab",
+    "hybrid_mechlab",
+    "internal/gates",
+    "internal/ink",
+    "internal/trace/legacy_blt/src",
+    "legacy/hybrid-mechlab-python/hybrid_mechlab",
+    "scripts"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    ".pytest_cache",
+    ".venv",
+    "assets",
+    "blkbx-trace-*",
+    "blkbx-compare-*",
+    "blkbx_lab.egg-info",
+    "build",
+    "dist",
+    "docs",
+    "examples",
+    "internal/ink/legacy_mair/tests",
+    "internal/trace/legacy_blt/tests",
+    "legacy/hybrid-mechlab-python/tests",
+    "legacy/python-rust",
+    "mechlab_sdk.egg-info",
+    "notebooks",
+    "qwen35-claims-*",
+    "rust",
+    "specs",
+    "tests"
+  ],
+  "pythonVersion": "3.10",
+  "typeCheckingMode": "basic",
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "extraPaths": [
+        ".",
+        "internal/ink/legacy_mair/src",
+        "internal/trace/legacy_blt/src"
+      ]
+    },
+    {
+      "root": "internal/ink/legacy_mair/src",
+      "extraPaths": [
+        "internal/ink/legacy_mair/src"
+      ]
+    },
+    {
+      "root": "internal/trace/legacy_blt/src",
+      "extraPaths": [
+        "internal/trace/legacy_blt/src",
+        "internal/ink/legacy_mair/src"
+      ]
+    },
+    {
+      "root": "legacy/hybrid-mechlab-python",
+      "extraPaths": [
+        "legacy/hybrid-mechlab-python"
+      ]
+    }
+  ]
+}

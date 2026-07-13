@@ -90,6 +90,16 @@ class TopologyView:
     def tract_retention(self) -> float:
         return self._trace.transport_digest.retention_score
 
+    def geodesic(self):
+        from hybrid_mechlab.topology.geometry import trace_geodesic
+
+        return trace_geodesic(self._trace)
+
+    def holonom(self):
+        from hybrid_mechlab.topology.geometry import holonom_risk
+
+        return holonom_risk(self._trace)
+
     def summary(self) -> str:
         return (
             f"bridge_dependence={self.bridge_dependence():.3f}, "
@@ -154,6 +164,12 @@ class TraceHandle:
 
     def tract_retention(self) -> float:
         return self.topology().tract_retention()
+
+    def geodesic(self):
+        return self.topology().geodesic()
+
+    def holonom(self):
+        return self.topology().holonom()
 
     def compare(self, other_trace: "TraceHandle") -> ComparisonReport:
         return ComparisonReport(

@@ -4,26 +4,24 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from hybrid_mechlab.api import TraceHandle
-from hybrid_mechlab.io import jsonl
-from hybrid_mechlab.kernel.persistence import (
-    BirthDeathPair,
+from ..api import TraceHandle, backend_name
+from ..io import jsonl
+from ..kernel.graph import Graph
+from ..kernel.persistence import (
     PersistenceComparison,
-    PersistenceDiagram,
     PersistenceInput,
     PersistenceReport,
-    PersistenceSummary,
     build_summary,
     compare_reports,
     compute_exact_persistence,
 )
-from hybrid_mechlab.kernel.topology import (
+from ..kernel.topology import (
     build_trace_complex,
     build_trace_graph,
     edge_filtration,
     vertex_filtration,
 )
-from hybrid_mechlab.topology.sheaf import build_partial_sheaf
+from .sheaf import build_partial_sheaf
 
 ExactPersistenceInput = PersistenceInput
 
@@ -41,7 +39,7 @@ def compute_persistence(trace: TraceHandle) -> PersistenceReport:
         trace_id=trace.trace_id,
         profile_name=trace.profile.name,
         family=trace.profile.family.kind.value,
-        backend=trace.backend.value,
+        backend=backend_name(trace.backend),
         persistence_input=persistence_input,
         diagrams=diagrams,
         summary=summary,
@@ -80,10 +78,7 @@ def export_trace_and_persistence_artifacts(
 
 
 def _build_persistence_input(trace: TraceHandle) -> ExactPersistenceInput:
-    graph, path_edges, bridge_edges = build_trace_graph(
-        trace.schedule,
-        cancellation_pairs=trace.signed_sketch.cancellation_pairs,
-    )
+    graph, path_edges, bridge_edges = trace_graph_inputs(trace)
     complex_ = build_trace_complex(graph)
     vertex_values = vertex_filtration(len(graph.nodes), trace.transport_digest.retention_score)
     edge_values = edge_filtration(
@@ -99,7 +94,7 @@ def _build_persistence_input(trace: TraceHandle) -> ExactPersistenceInput:
     return ExactPersistenceInput(
         trace_id=trace.trace_id,
         family=trace.profile.family.kind.value,
-        backend=trace.backend.value,
+        backend=backend_name(trace.backend),
         graph=graph,
         complex=complex_,
         vertex_filtration=vertex_values,
@@ -108,4 +103,11 @@ def _build_persistence_input(trace: TraceHandle) -> ExactPersistenceInput:
         bridge_crossings=trace.transport_digest.bridge_crossings,
         retention_score=trace.transport_digest.retention_score,
         signed_sketch=trace._signed_sketch(),  # type: ignore[attr-defined]
+    )
+
+
+def trace_graph_inputs(trace: TraceHandle) -> tuple[Graph, list[tuple[int, int]], set[tuple[int, int]]]:
+    return build_trace_graph(
+        trace.schedule,
+        cancellation_pairs=trace.signed_sketch.cancellation_pairs,
     )

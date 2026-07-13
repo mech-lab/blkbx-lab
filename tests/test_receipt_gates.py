@@ -1,4 +1,3 @@
-import pytest
 from internal.gates.policies import evaluate_gate
 
 def test_action_gate_pass():

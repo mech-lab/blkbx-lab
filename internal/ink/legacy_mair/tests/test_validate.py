@@ -5,7 +5,7 @@ from pathlib import Path
 from mair.manifest import write_manifest
 from mair.validate import validate_artifact, validate_manifest
 
-from tests.support import write_full_artifact_set
+from .support import write_full_artifact_set
 
 
 def test_validate_artifact_roundtrip(tmp_path: Path) -> None:

@@ -1,5 +1,6 @@
-"""Visualization placeholder: block_maps."""
+"""Experimental visualization placeholder, not part of the public BLKBX surface."""
+
 
 def render(data):
     _ = data
-    return f"rendered block_maps"
+    return "rendered block_maps"

@@ -3,22 +3,19 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from typing import Any, TYPE_CHECKING
+from typing import Any
 
 import numpy as np
 
-from hybrid_mechlab.kernel.array import as_float_array
-from hybrid_mechlab.kernel.graph import Graph
-from hybrid_mechlab.kernel.metrics import (
+from .array import as_float_array
+from .graph import Graph
+from .metrics import (
     bridge_dependence,
     topological_susceptibility,
     tract_retention,
 )
-from hybrid_mechlab.kernel.simplicial import SimplicialComplex
-from hybrid_mechlab.kernel.topology import SignedSketch
-
-if TYPE_CHECKING:
-    from hybrid_mechlab.kernel.backend import MathKernelBackend
+from .simplicial import SimplicialComplex
+from .topology import SignedSketch
 
 
 @dataclass(frozen=True)

@@ -22,7 +22,7 @@ This is the tracked source-of-truth plan for the BLT + MAIR v1 implementation.
 Supported command from the unified repo root:
 
 ```bash
-python -m pip install -e './internal/mair[dev]' -e './internal/blt[dev]'
+python -m pip install -e './internal/ink/legacy_mair[dev]' -e './internal/trace/legacy_blt[dev]'
 ```
 
 Real Qwen replay additionally requires BLT model dependencies.
@@ -52,7 +52,7 @@ The mock backend remains available, but it is no longer the live `posthoc` path 
 - [x] A manual smoke run against `Qwen/Qwen3.5-2B` completes end to end and emits an assurance receipt.
 
 ## Qwen3.5 milestone status
-- Native `qwen3_5` runtime proof is complete through the public `mechlab` façade.
-- The validated runtime evidence, manifest path, and receipt path are recorded in `../../docs/qwen35-validation-report.md`.
+- Native `qwen3_5` runtime proof is complete through the public `blkbx-lab` facade.
+- The validated runtime evidence, manifest path, and receipt path are recorded in `../../docs/research/qwen35-validation-report.md`.
 - On the validated `16 GiB` arm64/MPS host, `device:auto` required a documented CPU override fallback for the successful public rerun.
 - Remaining follow-up is a CLI semantics issue in `mechlab gate --profile`, not a runtime blocker.

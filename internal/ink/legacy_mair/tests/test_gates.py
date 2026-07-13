@@ -7,7 +7,7 @@ from mair.gates import run_gates, write_receipt
 from mair.manifest import write_manifest
 from mair.validate import validate_artifact
 
-from tests.support import write_full_artifact_set
+from .support import write_full_artifact_set
 
 
 def test_run_gates_passes_when_thresholds_are_satisfied(tmp_path: Path) -> None:

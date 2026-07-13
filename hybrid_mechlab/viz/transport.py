@@ -1,5 +1,6 @@
-"""Visualization placeholder: transport."""
+"""Experimental visualization placeholder, not part of the public BLKBX surface."""
+
 
 def render(data):
     _ = data
-    return f"rendered transport"
+    return "rendered transport"

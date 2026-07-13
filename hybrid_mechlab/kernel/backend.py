@@ -13,6 +13,11 @@ if TYPE_CHECKING:
     from hybrid_mechlab.kernel.topology import SignedSketch
 
 
+_MISSING_RUST_MESSAGE = (
+    "math_backend='rust' requires the optional hybrid-mechlab-rust companion package"
+)
+
+
 class MathKernelBackend(Protocol):
     name: str
 
@@ -96,7 +101,7 @@ class _RustMathKernelBackend:
 
     def __init__(self) -> None:
         if not rust_shim.available():
-            raise RuntimeError(rust_shim.MISSING_RUST_MESSAGE)
+            raise RuntimeError(_MISSING_RUST_MESSAGE)
 
     def transport_summary(
         self,
@@ -154,7 +159,7 @@ class _RustMathKernelBackend:
             persistence_input.family,
             persistence_input.backend,
             [int(node) for node in persistence_input.graph.nodes.tolist()],
-            persistence_input.graph.edge_tuples(),
+            list(persistence_input.graph.edge_tuples()),
             [float(value) for value in persistence_input.vertex_filtration.tolist()],
             [float(value) for value in persistence_input.edge_filtration.tolist()],
             persistence_input.signed_sketch.positive_components,

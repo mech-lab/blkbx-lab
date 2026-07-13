@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-from hybrid_mechlab.api import TraceHandle
-from hybrid_mechlab.kernel.sheaf import (
-    GluingReport,
-    PartialSection,
+from ..api import TraceHandle
+from ..kernel.sheaf import (
     PartialSheaf,
     build_partial_sheaf as build_kernel_partial_sheaf,
 )

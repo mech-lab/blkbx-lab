@@ -4,7 +4,7 @@ from functools import lru_cache
 from hashlib import sha256
 from pathlib import Path
 import re
-from typing import Any
+from typing import Any, cast
 
 from .profiles import load_profile
 from .runtime import NativeQwenPreflightError, inspect_native_qwen_runtime
@@ -93,10 +93,10 @@ def _extract_tensor(payload: Any) -> Any:
 def _resolve_torch_dtype(name: str):
     import torch
 
-    lookup = {
-        "float16": torch.float16,
-        "bfloat16": torch.bfloat16,
-        "float32": torch.float32,
+    lookup: dict[str, Any] = {
+        "float16": getattr(torch, "float16"),
+        "bfloat16": getattr(torch, "bfloat16"),
+        "float32": getattr(torch, "float32"),
         "auto": None,
     }
     try:
@@ -128,7 +128,8 @@ def _load_qwen_backend(model_id: str, device: str, dtype_name: str):
     except Exception as exc:  # pragma: no cover - exercised in integration usage
         raise CaptureError(
             "qwen_hybrid_hf backend requires torch and transformers. "
-            "Install them from the repo root with python -m pip install -e './internal/blt[model]'"
+            "Install them from the repo root with "
+            "python -m pip install -e './internal/trace/legacy_blt[model]'"
         ) from exc
 
     try:
@@ -151,10 +152,11 @@ def _load_qwen_backend(model_id: str, device: str, dtype_name: str):
     else:
         model = AutoModelForCausalLM.from_pretrained(model_id, **kwargs)
     resolved_device = _resolve_device(device)
+    model = cast(Any, model)
     model.to(resolved_device)
     model.eval()
     torch.manual_seed(0)
-    torch.set_num_threads(1)
+    getattr(torch, "set_num_threads")(1)
     return tokenizer, model, resolved_device
 
 

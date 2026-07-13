@@ -6,9 +6,9 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from hybrid_mechlab.kernel.array import as_float_array
-from hybrid_mechlab.kernel.graph import Graph
-from hybrid_mechlab.kernel.simplicial import SimplicialComplex, Simplex
+from .array import as_float_array
+from .graph import Graph
+from .simplicial import SimplicialComplex, Simplex
 from hybrid_mechlab.schedules import HybridSchedule, TransportRegimeKind
 
 

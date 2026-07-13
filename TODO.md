@@ -11,8 +11,8 @@ Repository: `https://github.com/mech-lab/blkbx-lab.git`
 ## Product Hardening
 
 - [ ] Replace the built-in demo signing key with configurable production signing support.
-- [ ] Expand `report()` beyond the current minimal string output.
-- [ ] Decide whether adapter selection should stay registry-name based or grow a stable family/model mapping layer.
+- [ ] Add richer canonical report views without expanding the public artifact schema.
+- [ ] Keep the public adapter surface limited to registered names plus shipped Qwen aliases unless the product scope expands.
 
 ## Demo And Verification
 
@@ -29,4 +29,5 @@ Repository: `https://github.com/mech-lab/blkbx-lab.git`
 ## Research And History
 
 - [ ] Preserve the `hybrid_mechlab`, `legacy_blt`, and `legacy_mair` trees as historical or research context without promoting them to the public release surface.
+- [ ] Keep placeholder research modules explicitly marked experimental and out of the canonical BLKBX docs and smoke paths.
 - [ ] Decide whether any research-only content should move to a separate package or archive.

@@ -1,20 +1,53 @@
 from __future__ import annotations
 
+import importlib
 from copy import deepcopy
-from types import SimpleNamespace
 from pathlib import Path
+from types import SimpleNamespace
+import sys
 
 import pytest
 
 torch = pytest.importorskip("torch")
 
-pytest.importorskip("blt")
-pytest.importorskip("mair.validate")
+ROOT = Path(__file__).resolve().parents[4]
+BLT_SRC = ROOT / "internal" / "trace" / "legacy_blt" / "src"
+MAIR_SRC = ROOT / "internal" / "ink" / "legacy_mair" / "src"
 
-from blt.capture import CaptureError, _load_qwen_backend, build_trace, load_profile, resolve_stage_plan
-from blt.export import run_trace
-from blt.runtime import NativeQwenPreflightError, inspect_native_qwen_runtime
-from mair.validate import validate_manifest
+
+def _ensure_legacy_import_paths() -> None:
+    for path in (str(BLT_SRC), str(MAIR_SRC)):
+        if path not in sys.path:
+            sys.path.insert(0, path)
+
+
+def _load_blt_modules() -> SimpleNamespace:
+    _ensure_legacy_import_paths()
+    for module_name in (
+        "blt",
+        "blt.capture",
+        "blt.export",
+        "blt.runtime",
+        "mair",
+        "mair.validate",
+    ):
+        sys.modules.pop(module_name, None)
+    pytest.importorskip("blt")
+    pytest.importorskip("mair.validate")
+    return SimpleNamespace(
+        CaptureError=importlib.import_module("blt.capture").CaptureError,
+        _load_qwen_backend=importlib.import_module("blt.capture")._load_qwen_backend,
+        build_trace=importlib.import_module("blt.capture").build_trace,
+        load_profile=importlib.import_module("blt.capture").load_profile,
+        resolve_stage_plan=importlib.import_module("blt.capture").resolve_stage_plan,
+        run_trace=importlib.import_module("blt.export").run_trace,
+        NativeQwenPreflightError=importlib.import_module("blt.runtime").NativeQwenPreflightError,
+        inspect_native_qwen_runtime=importlib.import_module("blt.runtime").inspect_native_qwen_runtime,
+        validate_manifest=importlib.import_module("mair.validate").validate_manifest,
+    )
+
+
+BLT = _load_blt_modules()
 
 
 class FakeLayer(torch.nn.Module):
@@ -86,8 +119,8 @@ def _fake_preflight_components(config_class, model_class, *, model_type: str = "
 
 
 def test_run_trace_writes_expected_artifacts(tmp_path: Path) -> None:
-    manifest_path = run_trace("Paris answers itself.", "trace-blt-1", tmp_path, backend="mock")
-    payload = validate_manifest(manifest_path)
+    manifest_path = BLT.run_trace("Paris answers itself.", "trace-blt-1", tmp_path, backend="mock")
+    payload = BLT.validate_manifest(manifest_path)
     names = {artifact["artifact_type"] for artifact in payload["artifacts"]}
     assert {
         "mair_semantic_trace",
@@ -114,7 +147,7 @@ def test_native_qwen_preflight_succeeds_with_native_resolution(monkeypatch: pyte
         lambda: _fake_preflight_components(Qwen3_5Config, Qwen3_5ForConditionalGeneration),
     )
 
-    result = inspect_native_qwen_runtime()
+    result = BLT.inspect_native_qwen_runtime()
 
     assert result["model_type"] == "qwen3_5"
     assert result["config_class"].endswith("Qwen3_5Config")
@@ -135,8 +168,8 @@ def test_native_qwen_preflight_fails_when_config_load_fails(monkeypatch: pytest.
         lambda: (FakeAutoConfig, FakeAutoModelForImageTextToText, lambda *_args, **_kwargs: None),
     )
 
-    with pytest.raises(NativeQwenPreflightError, match="AutoConfig.from_pretrained"):
-        inspect_native_qwen_runtime()
+    with pytest.raises(BLT.NativeQwenPreflightError, match="AutoConfig.from_pretrained"):
+        BLT.inspect_native_qwen_runtime()
 
 
 def test_native_qwen_preflight_fails_when_resolution_lands_on_qwen3_next(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -154,8 +187,8 @@ def test_native_qwen_preflight_fails_when_resolution_lands_on_qwen3_next(monkeyp
         lambda: _fake_preflight_components(FakeQwen35Config, FakeQwen3NextForConditionalGeneration),
     )
 
-    with pytest.raises(NativeQwenPreflightError, match="qwen3_next"):
-        inspect_native_qwen_runtime()
+    with pytest.raises(BLT.NativeQwenPreflightError, match="qwen3_next"):
+        BLT.inspect_native_qwen_runtime()
 
 
 def test_native_qwen_preflight_fails_for_non_qwen35_model_class(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -173,14 +206,14 @@ def test_native_qwen_preflight_fails_for_non_qwen35_model_class(monkeypatch: pyt
         lambda: _fake_preflight_components(FakeQwen35Config, FakeQwen3ForConditionalGeneration),
     )
 
-    with pytest.raises(NativeQwenPreflightError, match="expected auto-model class"):
-        inspect_native_qwen_runtime()
+    with pytest.raises(BLT.NativeQwenPreflightError, match="expected auto-model class"):
+        BLT.inspect_native_qwen_runtime()
 
 
 def test_qwen_stage_plan_resolves_against_stub_model() -> None:
     model = FakeConditionalGenerationHybridModel()
-    profile = load_profile("qwen3.5-2b", backend="qwen_hybrid_hf")
-    plan = resolve_stage_plan(model, profile)
+    profile = BLT.load_profile("qwen3.5-2b", backend="qwen_hybrid_hf")
+    plan = BLT.resolve_stage_plan(model, profile)
     assert len(plan) == 2
     assert plan[0]["stage_indices"]["pre_d1"] == 0
     assert plan[0]["stage_indices"]["post_attention"] == 3
@@ -191,7 +224,7 @@ def test_qwen_backend_builds_trace_with_stub_model(monkeypatch: pytest.MonkeyPat
     model = FakeConditionalGenerationHybridModel()
     tokenizer = FakeTokenizer()
     monkeypatch.setattr("blt.capture._load_qwen_backend", lambda *args, **kwargs: (tokenizer, model, "cpu"))
-    trace = build_trace(
+    trace = BLT.build_trace(
         "Bridge tract topology test",
         "trace-real-1",
         backend="qwen_hybrid_hf",
@@ -204,30 +237,30 @@ def test_qwen_backend_builds_trace_with_stub_model(monkeypatch: pytest.MonkeyPat
 
 def test_qwen_backend_blocks_surrogate_runtime_before_model_load(monkeypatch: pytest.MonkeyPatch) -> None:
     pytest.importorskip("transformers")
-    _load_qwen_backend.cache_clear()
+    BLT._load_qwen_backend.cache_clear()
 
     def fail_preflight(*args, **kwargs):  # noqa: ARG001
-        raise NativeQwenPreflightError(
+        raise BLT.NativeQwenPreflightError(
             "auto-model resolution fell back to surrogate class "
             "transformers.models.qwen3_next.modeling_qwen3_next.Qwen3NextForConditionalGeneration"
         )
 
     monkeypatch.setattr("blt.capture.inspect_native_qwen_runtime", fail_preflight)
 
-    with pytest.raises(CaptureError, match="native qwen3_5 preflight failed"):
-        build_trace(
+    with pytest.raises(BLT.CaptureError, match="native qwen3_5 preflight failed"):
+        BLT.build_trace(
             "Bridge tract topology test",
             "trace-real-preflight",
             backend="qwen_hybrid_hf",
             profile="qwen3.5-2b",
         )
 
-    _load_qwen_backend.cache_clear()
+    BLT._load_qwen_backend.cache_clear()
 
 
 def test_qwen_backend_fails_closed_for_invalid_stage_selector() -> None:
     model = FakeHybridModel()
-    profile = deepcopy(load_profile("qwen3.5-2b", backend="qwen_hybrid_hf"))
+    profile = deepcopy(BLT.load_profile("qwen3.5-2b", backend="qwen_hybrid_hf"))
     profile["capture"]["stage_selectors"]["post_attention"]["offset"] = 4
-    with pytest.raises(CaptureError):
-        resolve_stage_plan(model, profile)
+    with pytest.raises(BLT.CaptureError):
+        BLT.resolve_stage_plan(model, profile)

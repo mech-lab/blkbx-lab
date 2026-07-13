@@ -1,4 +1,5 @@
-"""Capture and intervention policy placeholders."""
+"""Experimental hook-policy scaffolding outside the BLKBX release surface."""
 
-def minimal():
+
+def minimal() -> dict[str, str]:
     return {"policy": "minimal"}

@@ -9,7 +9,10 @@ Current alpha verdict:
 Automated gates:
 
 - `python scripts/check_release_readiness.py`
+- `python -m ruff check .`
+- `python -m pyright`
 - focused public-contract test suite
+- `python -m pytest -q`
 - `python3 -m build`
 - `python3 -m twine check dist/*`
 - fresh-venv wheel and sdist smoke installs
@@ -39,3 +42,8 @@ Current source-of-truth docs:
 - PyPI long description: [`docs/pypi.md`](pypi.md)
 - Qwen validation evidence: [`docs/research/qwen35-validation-report.md`](research/qwen35-validation-report.md)
 - brand system and launch kit: [`docs/brand/README.md`](brand/README.md)
+
+Maintained-versus-experimental split:
+
+- `blkbx_lab` plus the `blkbx-lab` CLI is the release surface that must stay documented and smoke-tested.
+- `hybrid_mechlab`, `internal/trace/legacy_blt`, `internal/ink/legacy_mair`, and placeholder research modules are preserved and checked intentionally, but they are not the public BLKBX product contract.

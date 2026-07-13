@@ -10,14 +10,18 @@ import numpy as np
 from hybrid_mechlab.kernel.array import as_float_array, as_int_array
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, init=False)
 class SparseVector:
     ids: np.ndarray
     values: np.ndarray
 
-    def __post_init__(self) -> None:
-        ids = as_int_array(self.ids).reshape(-1)
-        values = as_float_array(self.values).reshape(-1)
+    def __init__(
+        self,
+        ids: Iterable[int] | np.ndarray,
+        values: Iterable[float] | np.ndarray,
+    ) -> None:
+        ids = as_int_array(ids).reshape(-1)
+        values = as_float_array(values).reshape(-1)
         if ids.shape != values.shape:
             raise ValueError("ids and values must have the same shape")
         object.__setattr__(self, "ids", ids)

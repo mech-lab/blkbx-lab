@@ -1,12 +1,13 @@
 import json
+import hashlib
+from pathlib import Path
 from typing import Any
+
 
 def canonicalize(data: dict[str, Any]) -> bytes:
     """Deterministic JSON canonicalization (JCS-RFC8785 style)."""
-    return json.dumps(data, separators=(',', ':'), sort_keys=True, ensure_ascii=False).encode('utf-8')
+    return json.dumps(data, separators=(",", ":"), sort_keys=True, ensure_ascii=False).encode("utf-8")
 
-import hashlib
-from pathlib import Path
 
 def hash_bytes(data: bytes) -> str:
     return f"sha256:{hashlib.sha256(data).hexdigest()}"

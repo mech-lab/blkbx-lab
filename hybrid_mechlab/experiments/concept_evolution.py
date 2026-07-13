@@ -1,4 +1,5 @@
-"""Experiment placeholder: concept_evolution."""
+"""Experimental concept-evolution scaffolding outside the BLKBX release surface."""
+
 
 def run(config):
     _ = config

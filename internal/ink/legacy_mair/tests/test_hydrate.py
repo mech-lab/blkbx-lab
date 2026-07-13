@@ -5,7 +5,7 @@ from pathlib import Path
 from mair.hydrate import iter_artifacts, load_artifact_bundle, load_artifact_by_type
 from mair.manifest import write_manifest
 
-from tests.support import write_full_artifact_set
+from .support import write_full_artifact_set
 
 
 def test_load_artifact_bundle_returns_manifest_and_payloads(tmp_path: Path) -> None:

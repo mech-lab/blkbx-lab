@@ -40,7 +40,7 @@ def test_rust_math_backend_is_not_available():
             backend="adapter",
             math_backend="rust",
         )
-    assert "python-only" in str(excinfo.value)
+    assert "hybrid-mechlab-rust companion package" in str(excinfo.value)
 
 def test_compute_persistence_uses_python_backend():
     trace = HybridLab.attach(

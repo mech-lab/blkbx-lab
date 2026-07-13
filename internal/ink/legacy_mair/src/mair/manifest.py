@@ -1,16 +1,15 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
 
 from .artifacts import ARTIFACT_FILENAMES, ArtifactRef, Manifest, artifact_path_for_type
 from .ids import derive_artifact_id, file_sha256
 
 
 def _utc_now() -> str:
-    return datetime.now(UTC).isoformat()
+    return datetime.now(timezone.utc).isoformat()
 
 
 def build_manifest(run_dir: str | Path, trace_id: str, producer: str, *, created_at: str | None = None) -> Manifest:

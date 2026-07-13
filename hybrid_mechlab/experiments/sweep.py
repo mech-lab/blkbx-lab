@@ -1,4 +1,5 @@
-"""Experiment placeholder: sweep."""
+"""Experimental sweep scaffolding outside the public BLKBX release surface."""
+
 
 def run(config):
     _ = config

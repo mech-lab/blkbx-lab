@@ -7,15 +7,15 @@ from typing import Iterable
 
 import numpy as np
 
-from hybrid_mechlab.kernel.array import as_int_array
+from .array import as_int_array
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, init=False)
 class Simplex:
     vertices: np.ndarray
 
-    def __post_init__(self) -> None:
-        object.__setattr__(self, "vertices", as_int_array(self.vertices).reshape(-1))
+    def __init__(self, vertices: Iterable[int] | np.ndarray) -> None:
+        object.__setattr__(self, "vertices", as_int_array(vertices).reshape(-1))
 
     def to_record(self) -> list[int]:
         return [int(vertex) for vertex in self.vertices.tolist()]

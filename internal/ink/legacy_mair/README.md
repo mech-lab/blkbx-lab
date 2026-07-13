@@ -1,6 +1,6 @@
 # MAIR
 
-MAIR is the bundled internal artifact contract for `mech-lab`.
+MAIR is the bundled historical artifact-contract subsystem preserved inside `blkbx-lab`.
 
 It owns:
 
@@ -14,7 +14,7 @@ It owns:
 From the repo root:
 
 ```bash
-python -m pip install -e './internal/mair[dev]' -e './internal/blt[dev]'
+python -m pip install -e './internal/ink/legacy_mair[dev]' -e './internal/trace/legacy_blt[dev]'
 ```
 
 That makes these CLIs available for local development:
@@ -28,7 +28,7 @@ That makes these CLIs available for local development:
 For the real Qwen replay backend, also install the BLT model extra:
 
 ```bash
-python -m pip install -e './internal/blt[model]'
+python -m pip install -e './internal/trace/legacy_blt[model]'
 ```
 
 ## Tools

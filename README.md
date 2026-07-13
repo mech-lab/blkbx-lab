@@ -77,6 +77,7 @@ blkbx-lab CLI / blkbx_lab SDK
 ## Current Limits
 
 - The public surface ships the installed `qwen35` adapter and Qwen3.5 claims demo, not a full multi-runtime adapter matrix.
-- `report()` currently returns a minimal string summary.
+- `report()` renders canonical `release-summary` and `comparison-summary` views from the existing Ink artifacts only.
+- `compare()` accepts manifest targets only when a sibling `ink_receipt.v1.json` already exists; it does not run `gate()` implicitly.
 - Receipts are signed with the built-in demo key. Production signing is not part of this release surface.
 - Deprecated compatibility shims remain for migration only.

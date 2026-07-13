@@ -46,5 +46,5 @@ This layer exposes the thin adapter registry used by the public trace and demo f
 
 ## Compatibility Surfaces
 
-- `hybrid_mechlab/` stays in-repo for research and legacy workflows.
+- `hybrid_mechlab/` stays in-repo for research and legacy workflows, including experimental placeholder modules that are not part of the public BLKBX release surface.
 - Deprecated compatibility shims delegate to the canonical `blkbx_lab` surface and emit deprecation warnings.

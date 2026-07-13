@@ -1,18 +1,7 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Any
-
-
-_REQUIRED_QWEN_HOOKS = (
-    "pre-D1",
-    "post-D1",
-    "post-D2",
-    "post-D3",
-    "post-attention",
-    "block-output",
-)
 
 
 def _fmt_path(path: str | Path | None) -> str:
@@ -20,169 +9,184 @@ def _fmt_path(path: str | Path | None) -> str:
 
 
 def render_doctor(result: dict[str, Any]) -> str:
-    lines = ["blkbx-lab doctor", f"Status: {result['status']}", ""]
+    lines = ["BLKBX Lab Doctor", f"Status: {result['status']}"]
     for check in result["checks"]:
-        line = f"- {check['name']}: {check['status']}"
-        if check.get("version"):
-            line += f" ({check['version']})"
-        lines.append(line)
-        if check.get("message"):
-            lines.append(f"  {check['message']}")
-        if check.get("fix"):
-            lines.append(f"  Fix: {check['fix']}")
-    if result.get("notes"):
-        lines.append("")
-        lines.append("Notes:")
-        for note in result["notes"]:
-            lines.append(f"- {note}")
+        lines.append(f"- {check['name']}: {check['status']}")
+    for note in result.get("notes", []):
+        lines.append(f"- {note}")
     return "\n".join(lines)
 
 
-def render_receipt(receipt: dict[str, Any], *, receipt_path: str | Path | None = None) -> str:
-    lines = [
-        "BLKBX Lab Receipt",
-        f"Trace: {receipt['trace_id']}",
-        f"Decision: {receipt['decision']}",
-        f"Receipt: {_fmt_path(receipt_path)}",
-        "",
-    ]
-    passed = receipt.get("summary", {}).get("passed", [])
-    failed = receipt.get("summary", {}).get("failed", [])
-    notes = receipt.get("summary", {}).get("notes", [])
-    if passed:
-        lines.append("Passed gates:")
-        for gate_name in passed:
-            lines.append(f"- {gate_name}")
-    if failed:
-        lines.append("Failed gates:")
-        for gate_name in failed:
-            lines.append(f"- {gate_name}")
-    if notes:
-        lines.append("Notes:")
-        for note in notes:
-            lines.append(f"- {note}")
-    return "\n".join(lines)
-
-
-def render_bundle_summary(
-    summary: dict[str, Any],
+def render_trace_report(
     *,
-    manifest_path: str | Path | None = None,
-    receipt_path: str | Path | None = None,
-    title: str = "BLKBX Lab Evidence Bundle",
+    action_id: str,
+    action: dict[str, Any],
+    adapter_name: str,
+    manifest_path: str | Path,
+    evidence_hash_count: int,
 ) -> str:
-    hook_validation = summary.get("hook_validation", {})
-    report_kinds = summary.get("report_kinds", [])
-    lines = [
-        title,
-        f"Trace: {summary['trace_id']}",
-        f"Manifest: {_fmt_path(manifest_path)}",
-        f"Output dir: {_fmt_path(summary.get('output_dir'))}",
-        f"Bundle digest: {summary.get('bundle_digest', 'n/a')}",
-        f"Artifacts: {summary.get('artifact_count', 0)}",
-        "",
-        "Topology:",
-        f"- backend: {summary.get('topology_backend', 'unknown')}",
-        f"- bridge dependence: {summary.get('bridge_dependence', 'n/a')}",
-        f"- tract retention: {summary.get('tract_retention', 'n/a')}",
-        f"- gluing defect: {summary.get('gluing_defect', 'n/a')}",
-    ]
-    if summary.get("group_count") is not None:
-        lines.extend(
-            [
-                "Grouped CLT:",
-                f"- groups: {summary.get('group_count')}",
-                f"- mean reconstruction divergence: {summary.get('mean_reconstruction_divergence', 'n/a')}",
-                f"- mean bridge dependence: {summary.get('mean_group_bridge_dependence', 'n/a')}",
-            ]
-        )
-    if hook_validation:
-        lines.extend(
-            [
-                "Hook coverage:",
-                f"- required: {', '.join(_REQUIRED_QWEN_HOOKS)}",
-                f"- available: {', '.join(hook_validation.get('available', [])) or 'n/a'}",
-                f"- missing: {', '.join(hook_validation.get('missing', [])) or 'none'}",
-                f"- status: {'pass' if hook_validation.get('passed') else 'incomplete'}",
-            ]
-        )
-    if summary.get("receipt_decision"):
-        lines.extend(["Receipt:", f"- decision: {summary['receipt_decision']}", f"- path: {_fmt_path(receipt_path)}"])
-    if report_kinds:
-        lines.extend(["Report kinds:", *[f"- {kind}" for kind in report_kinds]])
-    lines.extend(
+    return "\n".join(
         [
-            "",
-            "Next steps:",
-            f"- blkbx-lab report {manifest_path}" if manifest_path else "- blkbx-lab report <manifest>",
-            f"- blkbx-lab explain {receipt_path}" if receipt_path else "- blkbx-lab explain <receipt>",
-            "- blkbx-lab doctor",
+            f"Trace captured for {action_id}",
+            f"Action: {action.get('type', 'unknown')}",
+            f"Adapter: {adapter_name}",
+            f"Evidence hashes: {evidence_hash_count}",
+            f"Manifest: {_fmt_path(manifest_path)}",
         ]
     )
-    return "\n".join(lines)
 
 
-def render_comparison(summary: dict[str, Any], *, comparison_path: str | Path | None = None) -> str:
+def render_analysis_report(
+    *,
+    action_id: str,
+    risk_tier: str,
+    required_controls: list[str],
+    missing_controls: list[str],
+    recommended_decision: str,
+    manifest_path: str | Path,
+) -> str:
+    required = ", ".join(required_controls) if required_controls else "none"
+    missing = ", ".join(missing_controls) if missing_controls else "none"
+    return "\n".join(
+        [
+            f"Analysis for {action_id}",
+            f"Risk tier: {risk_tier}",
+            f"Recommended decision: {recommended_decision}",
+            f"Required controls: {required}",
+            f"Missing controls: {missing}",
+            f"Manifest: {_fmt_path(manifest_path)}",
+        ]
+    )
+
+
+def render_gate_report(
+    *,
+    action_id: str,
+    receipt_id: str,
+    decision: str,
+    reason: str,
+    manifest_path: str | Path,
+    receipt_path: str | Path,
+) -> str:
+    return "\n".join(
+        [
+            f"Gate decision for {action_id}: {decision}",
+            f"Reason: {reason}",
+            f"Receipt ID: {receipt_id}",
+            f"Manifest: {_fmt_path(manifest_path)}",
+            f"Receipt: {_fmt_path(receipt_path)}",
+        ]
+    )
+
+
+def render_verify_report(
+    *,
+    receipt: dict[str, Any],
+    verification: dict[str, Any],
+    receipt_path: str | Path,
+) -> str:
+    valid = verification.get("valid", False)
     lines = [
-        "BLKBX Lab Comparison Packet",
-        f"Left trace: {summary['left_trace_id']}",
-        f"Right trace: {summary['right_trace_id']}",
-        f"Packet: {_fmt_path(comparison_path)}",
-        f"Backend pair: {summary.get('backend_pair')}",
-        f"Schema match: {summary.get('schema_match')}",
-        f"Bridge delta: {summary.get('bridge_dependence_delta')}",
-        f"Retention delta: {summary.get('tract_retention_delta')}",
-        f"Topology distance: {summary.get('topology_distance')}",
+        f"Verification for {_fmt_path(receipt_path)}",
+        f"Receipt ID: {receipt.get('receipt_id', 'unknown')}",
+        f"Decision: {receipt.get('gate', {}).get('decision', 'unknown')}",
+        f"Integrity: {'valid' if valid else 'invalid'}",
     ]
-    notes = summary.get("notes") or []
-    if notes:
-        lines.append("Notes:")
-        for note in notes:
-            lines.append(f"- {note}")
+    if not valid and verification.get("reason"):
+        lines.append(f"Reason: {verification['reason']}")
     return "\n".join(lines)
 
 
-def render_report_kind(kind: str, summary: dict[str, Any], *, path: str | Path | None = None) -> str:
-    kind = kind or "release-summary"
-    if kind == "release-summary":
-        return render_bundle_summary(summary, manifest_path=path, receipt_path=summary.get("receipt_path"), title="BLKBX Lab Release Summary")
+def render_demo_report(
+    *,
+    action_id: str,
+    decision: str,
+    receipt_path: str | Path,
+    manifest_path: str | Path,
+) -> str:
+    return "\n".join(
+        [
+            "BLKBX Lab / Qwen3.5 Claims Demo",
+            f"Action ID: {action_id}",
+            f"Decision: {decision}",
+            f"Manifest: {_fmt_path(manifest_path)}",
+            f"Receipt: {_fmt_path(receipt_path)}",
+        ]
+    )
+
+
+def render_release_summary(payload: dict[str, Any], *, path: str | Path | None = None) -> str:
+    schema = payload.get("schema")
+    lines = ["BLKBX Lab Release Summary"]
+    if schema == "ink.manifest.v1":
+        artifacts = payload.get("artifacts", [])
+        lines.extend(
+            [
+                f"Action ID: {payload.get('action_id', 'unknown')}",
+                f"Artifacts: {len(artifacts)}",
+                f"Manifest: {_fmt_path(path)}",
+            ]
+        )
+    elif schema == "ink.receipt.v1":
+        lines.extend(
+            [
+                f"Receipt ID: {payload.get('receipt_id', 'unknown')}",
+                f"Decision: {payload.get('gate', {}).get('decision', 'unknown')}",
+                f"Policy: {payload.get('gate', {}).get('policy', 'unknown')}",
+                f"Reason: {payload.get('gate', {}).get('reason', 'unknown')}",
+                f"Action: {payload.get('action', {}).get('type', 'unknown')}",
+                f"Receipt: {_fmt_path(path)}",
+            ]
+        )
+    else:
+        raise ValueError(f"Unsupported release-summary payload schema: {schema}")
+    return "\n".join(lines)
+
+
+def render_comparison_report(payload: dict[str, Any], *, path: str | Path | None = None) -> str:
+    return "\n".join(
+        [
+            "BLKBX Lab Comparison Summary",
+            f"Left receipt: {payload.get('left_receipt_id', 'unknown')}",
+            f"Right receipt: {payload.get('right_receipt_id', 'unknown')}",
+            f"Decision match: {payload.get('decision_match')}",
+            f"Action match: {payload.get('action_match')}",
+            f"Comparison packet: {_fmt_path(path)}",
+        ]
+    )
+
+
+def render_experimental_report(kind: str, summary: dict[str, Any], *, path: str | Path | None = None) -> str:
     if kind == "tract-vs-bridge":
-        lines = [
-            "BLKBX Lab Report: tract-vs-bridge",
-            f"Trace: {summary['trace_id']}",
-            f"Manifest: {_fmt_path(path)}",
-            f"Tract retention: {summary.get('tract_retention', 'n/a')}",
-            f"Topology bridge dependence: {summary.get('bridge_dependence', 'n/a')}",
-            f"Grouped bridge dependence: {summary.get('mean_group_bridge_dependence', 'n/a')}",
-            f"Mean reconstruction divergence: {summary.get('mean_reconstruction_divergence', 'n/a')}",
-        ]
-        return "\n".join(lines)
+        return "\n".join(
+            [
+                "BLKBX Lab Report: tract-vs-bridge",
+                f"Trace: {summary['trace_id']}",
+                f"Manifest: {_fmt_path(path)}",
+                f"Tract retention: {summary['tract_retention']}",
+                f"Bridge dependence: {summary['bridge_dependence']}",
+            ]
+        )
     if kind == "bridge-necessity":
-        strongest = summary.get("strongest_bridge_necessity") or {}
-        lines = [
-            "BLKBX Lab Report: bridge-necessity",
-            f"Trace: {summary['trace_id']}",
-            f"Manifest: {_fmt_path(path)}",
-            f"Intervention rows: {summary.get('intervention_count', 0)}",
-            f"Strongest group: {strongest.get('group_id', 'n/a')}",
-            f"Strongest delta: {strongest.get('delta', 'n/a')}",
-            f"Scaled strength: {strongest.get('strength', 'n/a')}",
-        ]
-        return "\n".join(lines)
+        strongest = summary["strongest_bridge_necessity"]
+        return "\n".join(
+            [
+                "BLKBX Lab Report: bridge-necessity",
+                f"Trace: {summary['trace_id']}",
+                f"Manifest: {_fmt_path(path)}",
+                f"Intervention rows: {summary['intervention_count']}",
+                f"Strongest group: {strongest['group_id']}",
+                f"Strongest delta: {strongest['delta']}",
+            ]
+        )
     if kind == "compression-forgetting":
-        lines = [
-            "BLKBX Lab Report: compression-forgetting",
-            f"Trace: {summary['trace_id']}",
-            f"Manifest: {_fmt_path(path)}",
-            f"Mean reconstruction divergence: {summary.get('mean_reconstruction_divergence', 'n/a')}",
-            f"Retention after compression: {summary.get('tract_retention', 'n/a')}",
-            f"Top group divergence: {summary.get('top_group_reconstruction_divergence', 'n/a')}",
-        ]
-        return "\n".join(lines)
-    if kind == "comparison-summary":
-        return render_comparison(summary, comparison_path=path)
+        return "\n".join(
+            [
+                "BLKBX Lab Report: compression-forgetting",
+                f"Trace: {summary['trace_id']}",
+                f"Manifest: {_fmt_path(path)}",
+                f"Mean reconstruction divergence: {summary['mean_reconstruction_divergence']}",
+                f"Retention after compression: {summary['tract_retention']}",
+            ]
+        )
     raise ValueError(f"Unsupported report kind: {kind}")
-
-
-def render_json(payload: dict[str, Any]) -> str:
-    return json.dumps(payload, indent=2, sort_keys=True)

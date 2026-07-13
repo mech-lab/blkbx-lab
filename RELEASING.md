@@ -45,7 +45,7 @@ Release readiness gate:
 - Python tooling installed:
 
 ```bash
-python3 -m pip install build twine pytest
+python -m pip install -e ".[dev]"
 ```
 
 ## First-Time PyPI Setup
@@ -68,7 +68,9 @@ Repo-side requirements:
 
 ```bash
 python scripts/check_release_readiness.py
-python3 -m pytest \
+python -m ruff check .
+python -m pyright
+python -m pytest -q \
   tests/test_brand_release_assets.py \
   tests/test_packaging_contracts.py \
   tests/test_readme_example.py \
@@ -76,13 +78,15 @@ python3 -m pytest \
   tests/test_mech_lab_product.py \
   tests/test_mech_lab_doctor.py \
   tests/test_version_sync.py
-python3 -m build
-python3 -m twine check dist/*
+python -m build
+python -m twine check dist/*
 ```
 
 Verify that:
 
 - `python scripts/check_release_readiness.py` passes on a clean tree
+- `python -m ruff check .` passes without local PATH assumptions
+- `python -m pyright` runs without requiring a separately installed Node runtime
 - the root build emits only `blkbx-lab` distribution artifacts
 - the README quickstart examples still run from a fresh environment
 - the deprecated shims still delegate and warn

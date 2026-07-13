@@ -1,4 +1,5 @@
-"""Experiment placeholder: bridge_penalty."""
+"""Experimental bridge-penalty scaffolding outside the BLKBX release surface."""
+
 
 def run(config):
     _ = config

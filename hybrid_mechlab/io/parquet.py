@@ -1,4 +1,5 @@
-"""IO placeholder: parquet."""
+"""Experimental Parquet helpers outside the public BLKBX release surface."""
+
 
 def load(path):
     _ = path

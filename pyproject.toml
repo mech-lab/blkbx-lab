@@ -32,7 +32,7 @@ classifiers = [
 [project.optional-dependencies]
 viz = []
 offline-topology = []
-dev = ["build", "pyright", "pytest", "ruff", "twine"]
+dev = ["build", "pyright[nodejs]", "pytest", "ruff", "twine"]
 
 [project.scripts]
 blkbx-lab = "blkbx_lab.cli:main"
@@ -46,7 +46,22 @@ Changelog = "https://github.com/mech-lab/blkbx-lab/releases"
 "Validation Report" = "https://github.com/mech-lab/blkbx-lab/blob/main/docs/research/qwen35-validation-report.md"
 
 [tool.pytest.ini_options]
-addopts = "-q"
+testpaths = ["tests", "legacy/hybrid-mechlab-python/tests", "internal/trace/legacy_blt/tests", "internal/ink/legacy_mair/tests"]
+addopts = "-q --import-mode=importlib"
+
+[tool.ruff]
+target-version = "py310"
+extend-exclude = [
+  ".pytest_cache",
+  ".venv",
+  "blkbx-trace-*",
+  "blkbx-compare-*",
+  "blkbx_lab.egg-info",
+  "build",
+  "dist",
+  "mechlab_sdk.egg-info",
+  "qwen35-claims-*",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]

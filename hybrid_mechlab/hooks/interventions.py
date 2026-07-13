@@ -1,5 +1,7 @@
-"""Intervention primitives placeholder."""
+"""Experimental intervention primitives outside the BLKBX release surface."""
+
 from __future__ import annotations
+
 from dataclasses import dataclass
 
 

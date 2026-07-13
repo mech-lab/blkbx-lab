@@ -18,6 +18,10 @@ from hybrid_mechlab.schedules import HybridSchedule, TransportFamilyKind
 from hybrid_mechlab._version import RUST_CORE_VERSION, __version__
 
 
+def backend_name(backend: BackendKind | str) -> str:
+    return backend.value if isinstance(backend, BackendKind) else str(backend)
+
+
 @dataclass(frozen=True)
 class TransportDigest:
     local_steps: int
@@ -86,6 +90,16 @@ class TopologyView:
     def tract_retention(self) -> float:
         return self._trace.transport_digest.retention_score
 
+    def geodesic(self):
+        from .topology.geometry import trace_geodesic
+
+        return trace_geodesic(self._trace)
+
+    def holonom(self):
+        from .topology.geometry import holonom_risk
+
+        return holonom_risk(self._trace)
+
     def summary(self) -> str:
         return (
             f"bridge_dependence={self.bridge_dependence():.3f}, "
@@ -98,7 +112,7 @@ class TraceHandle:
     trace_id: str
     prompts: tuple[str, ...]
     profile: ResearchProfile
-    backend: BackendKind
+    backend: BackendKind | str
     math_backend: str
     schedule: HybridSchedule
     sparse_codes: tuple[dict[str, Any], ...]
@@ -110,7 +124,7 @@ class TraceHandle:
 
     def summary(self) -> str:
         return (
-            f"trace {self.trace_id}: {self.profile.family.name} via {self.backend.value}, "
+            f"trace {self.trace_id}: {self.profile.family.name} via {backend_name(self.backend)}, "
             f"{len(self.prompts)} prompts, {self.schedule.bridge_count()} bridges"
         )
 
@@ -123,7 +137,7 @@ class TraceHandle:
             "prompt_count": len(self.prompts),
             "profile_name": self.profile.name,
             "family": self.profile.family.kind.value,
-            "backend": self.backend.value,
+            "backend": backend_name(self.backend),
             "schedule": self.schedule.summary(),
             "capture": list(self.capture),
             "transport_digest": asdict(self.transport_digest),
@@ -151,11 +165,17 @@ class TraceHandle:
     def tract_retention(self) -> float:
         return self.topology().tract_retention()
 
+    def geodesic(self):
+        return self.topology().geodesic()
+
+    def holonom(self):
+        return self.topology().holonom()
+
     def compare(self, other_trace: "TraceHandle") -> ComparisonReport:
         return ComparisonReport(
             left_trace_id=self.trace_id,
             right_trace_id=other_trace.trace_id,
-            backend_pair=(self.backend.value, other_trace.backend.value),
+            backend_pair=(backend_name(self.backend), backend_name(other_trace.backend)),
             schema_match=self.schema_keys() == other_trace.schema_keys(),
             bridge_dependence_delta_value=self.bridge_dependence() - other_trace.bridge_dependence(),
             tract_retention_delta_value=self.tract_retention() - other_trace.tract_retention(),

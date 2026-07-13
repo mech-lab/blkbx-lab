@@ -15,7 +15,7 @@
 ### Changed
 - Renamed `mech_lab` package to `blkbx_lab`.
 - Renamed `mechlab` CLI to `blkbx-lab`.
-- Moved mechanistic interpretability material (`internal/blt` and `internal/mair`) behind a legacy boundary.
+- Moved mechanistic interpretability material into the legacy paths `internal/trace/legacy_blt` and `internal/ink/legacy_mair`.
 - Updated `pyproject.toml` metadata to reflect the new accountable AI focus.
 
 ### Deprecated

@@ -26,6 +26,15 @@ def test_root_package_uses_blkbx_release_metadata():
     assert "transformers" not in dependency_blob
     assert "scipy" not in dependency_blob
     assert data["project"]["scripts"] == {"blkbx-lab": "blkbx_lab.cli:main"}
+    assert data["tool"]["pytest"]["ini_options"] == {
+        "testpaths": [
+            "tests",
+            "legacy/hybrid-mechlab-python/tests",
+            "internal/trace/legacy_blt/tests",
+            "internal/ink/legacy_mair/tests",
+        ],
+        "addopts": "-q --import-mode=importlib",
+    }
     assert sorted(data["tool"]["setuptools"]["packages"]["find"]["include"]) == ["adapters*", "blkbx_lab*", "internal*"]
     assert sorted(data["tool"]["setuptools"]["packages"]["find"]["where"]) == ["."]
     assert sorted(data["tool"]["setuptools"]["packages"]["find"]["exclude"]) == ["legacy*"]

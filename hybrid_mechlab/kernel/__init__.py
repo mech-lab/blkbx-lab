@@ -1,6 +1,7 @@
 """NumPy-first math kernel for hybrid-mechlab."""
 
 from hybrid_mechlab.kernel.backend import MathKernelBackend, get_math_backend
+from hybrid_mechlab.kernel.geometry import GeodesicPath, GeodesicSegment, Holonom, HolonomRisk
 from hybrid_mechlab.kernel.graph import Graph
 from hybrid_mechlab.kernel.persistence import (
     BirthDeathPair,
@@ -18,8 +19,12 @@ from hybrid_mechlab.kernel.transport import TransportState, TransportSummary
 
 __all__ = [
     "BirthDeathPair",
+    "GeodesicPath",
+    "GeodesicSegment",
     "GluingReport",
     "Graph",
+    "Holonom",
+    "HolonomRisk",
     "MathKernelBackend",
     "PartialSection",
     "PartialSheaf",

@@ -44,12 +44,14 @@ print(bl.verify(result.receipt_path).report)
 ## Current Scope
 
 - The bundled adapter registry ships with `qwen35`.
+- Registered adapter names are canonical, and shipped Qwen selectors such as `qwen3.5` and `Qwen/Qwen3.5-2B` resolve to `qwen35`.
 - The Qwen3.5 claims demo is the installed teaching path.
-- `report()` is available but currently minimal.
+- `report()` renders `release-summary` and `comparison-summary` views from the current Ink artifacts.
 - Deprecated compatibility shims remain for migration only.
 
 ## Current Limits
 
+- `compare()` accepts manifest targets only when a sibling `ink_receipt.v1.json` already exists.
 - Production signing keys are not part of this release surface.
 - The public docs do not promise a real-model replay workflow through the `blkbx_lab` facade.
 - Legacy MAIR and BLT histories remain in-repo for research and migration context, not as first-class public release surfaces.
