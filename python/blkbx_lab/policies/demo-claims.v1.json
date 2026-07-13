@@ -1,0 +1,66 @@
+{
+  "schema": "ink.policy.v1",
+  "id": "blkbx.demo-claims",
+  "version": "1.0.0",
+  "default_decision": "pass",
+  "rules": [
+    {
+      "id": "provider-fallbacks-forbidden",
+      "priority": 300,
+      "decision": "fail",
+      "reason_code": "PROVIDER_FALLBACKS_ALLOWED",
+      "when": {
+        "kind": "provider_fallbacks_allowed",
+        "value": true
+      }
+    },
+    {
+      "id": "high-risk-review-missing",
+      "priority": 200,
+      "decision": "fail",
+      "reason_code": "HUMAN_REVIEW_REQUIRED_ABSENT",
+      "when": {
+        "kind": "all",
+        "conditions": [
+          {
+            "kind": "risk_class_at_least",
+            "value": "high"
+          },
+          {
+            "kind": "control_absent",
+            "value": "human_review"
+          }
+        ]
+      }
+    },
+    {
+      "id": "high-risk-review-present",
+      "priority": 150,
+      "decision": "pass",
+      "reason_code": "HUMAN_REVIEW_PRESENT",
+      "when": {
+        "kind": "all",
+        "conditions": [
+          {
+            "kind": "risk_class_at_least",
+            "value": "high"
+          },
+          {
+            "kind": "control_present",
+            "value": "human_review"
+          }
+        ]
+      }
+    },
+    {
+      "id": "low-risk-pass",
+      "priority": 100,
+      "decision": "pass",
+      "reason_code": "RUNTIME_DETERMINISTIC_DEMO",
+      "when": {
+        "kind": "runtime_kind_equals",
+        "value": "deterministic_demo"
+      }
+    }
+  ]
+}

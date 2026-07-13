@@ -2,9 +2,9 @@
 
 > Open-source Ink Receipt gates for accountable AI agents.
 >
-> Qwen3.5 is the installed demo. Receipt gates are the standard.
+> `qwen35` is the installed deterministic demo. Receipt gates are the standard.
 
-BLKBX Lab lets developers wrap agent actions with signed, verifiable policy gates. The current public surface ships a Qwen3.5 claims demo, writes Ink artifacts locally, and keeps verification simple enough to inspect from the CLI or Python.
+BLKBX Lab lets developers wrap agent actions with signed, verifiable policy gates. The v0.6 public surface ships a deterministic `qwen35` demo, writes v2 Ink artifacts locally, and routes trust-critical receipt logic through a `no_std`, `no_alloc` Rust microkernel plus a thin host/PyO3 bridge.
 
 ## Install
 
@@ -17,10 +17,10 @@ pip install --pre blkbx-lab
 CLI:
 
 ```bash
-blkbx-lab demo qwen35-claims --output-dir artifacts/qwen35-claims
-blkbx-lab verify artifacts/qwen35-claims/ink_receipt.v1.json
-blkbx-lab tamper artifacts/qwen35-claims/ink_receipt.v1.json
-blkbx-lab verify artifacts/qwen35-claims/ink_receipt.tampered.json
+blkbx-lab demo qwen35 --output-dir artifacts/qwen35
+blkbx-lab verify artifacts/qwen35/ink_receipt.v2.json
+blkbx-lab tamper artifacts/qwen35/ink_receipt.v2.json
+blkbx-lab verify artifacts/qwen35/ink_receipt.tampered.v2.json
 ```
 
 Python:
@@ -28,7 +28,7 @@ Python:
 ```python
 import blkbx_lab as bl
 
-result = bl.demo(output_dir="artifacts/qwen35-claims")
+result = bl.demo(output_dir="artifacts/qwen35")
 print(result.manifest_path)
 print(result.receipt_path)
 print(bl.verify(result.receipt_path).report)
@@ -36,9 +36,9 @@ print(bl.verify(result.receipt_path).report)
 
 ## What You Get
 
-- Action Evidence Bundle: `ink_manifest.v1.json` plus the run artifacts for the action proposal.
-- Receipt: `ink_receipt.v1.json` for the gate decision.
-- Comparison Packet: `receipt_comparison.v1.json` for left/right receipt comparisons.
+- Action Evidence Bundle: `ink_manifest.v2.json` plus the run artifacts for the action proposal.
+- Receipt: `ink_receipt.v2.json` for the gate decision.
+- Comparison Packet: `receipt_comparison.v2.json` for left/right receipt comparisons.
 
 ## Public Contract
 
@@ -48,6 +48,7 @@ print(bl.verify(result.receipt_path).report)
 - `demo()` returns `InkReceiptResult`
 - `trace()` returns `ActionEvidenceBundle`
 - `analyze()` returns `GateAnalysisResult`
+- `gate()` requires explicit demo signer approval for v0.6 demo issuance
 - `compare()` returns `ReceiptComparisonPacket`
 
 ## How It Works
@@ -76,8 +77,8 @@ blkbx-lab CLI / blkbx_lab SDK
 
 ## Current Limits
 
-- The public surface ships the installed `qwen35` adapter and Qwen3.5 claims demo, not a full multi-runtime adapter matrix.
-- `report()` renders canonical `release-summary` and `comparison-summary` views from the existing Ink artifacts only.
-- `compare()` accepts manifest targets only when a sibling `ink_receipt.v1.json` already exists; it does not run `gate()` implicitly.
-- Receipts are signed with the built-in demo key. Production signing is not part of this release surface.
+- The public surface ships the installed `qwen35` deterministic demo, not a full multi-runtime adapter matrix.
+- `report()` renders canonical `release-summary` and `comparison-summary` views from existing v2 Ink artifacts only.
+- `compare()` accepts manifest targets only when a sibling `ink_receipt.v2.json` already exists; it does not run `gate()` implicitly.
+- Receipts are signed with the built-in demo key only through `demo()` or explicit `--demo-signer` flows. Production signing is not part of v0.6.
 - Deprecated compatibility shims remain for migration only.

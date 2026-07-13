@@ -90,9 +90,9 @@ def test_readme_and_release_template_use_brand_lines():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     template = (ROOT / ".github" / "RELEASE_TEMPLATE.md").read_text(encoding="utf-8")
     assert "Open-source Ink Receipt gates for accountable AI agents." in readme
-    assert "Qwen3.5 is the installed demo. Receipt gates are the standard." in readme
+    assert "`qwen35` is the installed deterministic demo. Receipt gates are the standard." in readme
     assert "Open-source Ink Receipt gates for accountable AI agents." in template
-    assert "Qwen3.5 is the installed demo. Receipt gates are the standard." in template
+    assert "`qwen35` is the installed deterministic demo. Receipt gates are the standard." in template
 
 
 def test_release_workflow_uploads_host_ready_preview_asset():

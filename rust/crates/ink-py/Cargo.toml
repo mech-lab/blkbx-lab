@@ -1,0 +1,15 @@
+[package]
+name = "inkreceipts-py"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "_ink_native"
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+inkreceipts-host = { path = "../ink-host" }
+pyo3.workspace = true
+serde_json.workspace = true

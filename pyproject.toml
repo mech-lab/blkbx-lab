@@ -1,20 +1,18 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["maturin>=1.7,<2"]
+build-backend = "maturin"
 
 [project]
 name = "blkbx-lab"
-version = "0.1.0a2"
-description = "Open-source Ink Receipt gates for accountable AI agents"
+version = "0.6.0"
+description = "Model-agnostic Ink Receipts with a no_std, no_alloc Rust trust waist"
 authors = [{name = "BLKBX Lab contributors"}]
-readme = {file = "docs/pypi.md", content-type = "text/markdown"}
+readme = {file = "README.md", content-type = "text/markdown"}
 license = "MIT"
 requires-python = ">=3.10"
-keywords = ["accountable-ai", "ai-agents", "ink-receipts", "receipt-gates", "qwen35", "gated-deltanet", "hybrid-ai", "insurtech"]
 dependencies = [
+  "cryptography>=42",
   "jsonschema>=4.23",
-  "numpy>=2.0",
-  "pyarrow>=17.0",
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -25,52 +23,26 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
-  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Rust",
   "Typing :: Typed",
 ]
 
 [project.optional-dependencies]
-viz = []
-offline-topology = []
-dev = ["build", "pyright[nodejs]", "pytest", "ruff", "twine"]
+dev = ["maturin>=1.7,<2", "pyright[nodejs]", "pytest", "ruff"]
 
 [project.scripts]
 blkbx-lab = "blkbx_lab.cli:main"
 
-[project.urls]
-Homepage = "https://github.com/mech-lab/blkbx-lab"
-Documentation = "https://github.com/mech-lab/blkbx-lab/tree/main/docs"
-Repository = "https://github.com/mech-lab/blkbx-lab"
-Issues = "https://github.com/mech-lab/blkbx-lab/issues"
-Changelog = "https://github.com/mech-lab/blkbx-lab/releases"
-"Validation Report" = "https://github.com/mech-lab/blkbx-lab/blob/main/docs/research/qwen35-validation-report.md"
+[tool.maturin]
+manifest-path = "rust/crates/ink-py/Cargo.toml"
+python-source = "python"
+python-packages = ["blkbx_lab"]
+module-name = "blkbx_lab._ink_native"
 
 [tool.pytest.ini_options]
-testpaths = ["tests", "legacy/hybrid-mechlab-python/tests", "internal/trace/legacy_blt/tests", "internal/ink/legacy_mair/tests"]
+testpaths = ["tests"]
 addopts = "-q --import-mode=importlib"
 
 [tool.ruff]
 target-version = "py310"
-extend-exclude = [
-  ".pytest_cache",
-  ".venv",
-  "blkbx-trace-*",
-  "blkbx-compare-*",
-  "blkbx_lab.egg-info",
-  "build",
-  "dist",
-  "mechlab_sdk.egg-info",
-  "qwen35-claims-*",
-]
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["blkbx_lab*", "internal*", "adapters*"]
-
-exclude = ["legacy*"]
-
-[tool.setuptools.package-data]
-
-hybrid_mechlab = ["py.typed", "_rust.pyi"]
-
-blkbx_lab = ["py.typed"]
+extend-exclude = [".pytest_cache", ".venv", "build", "dist", "qwen35-claims-*"]

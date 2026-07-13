@@ -1,0 +1,13 @@
+pub const MAX_ID_LEN: usize = 128;
+pub const MAX_REASON_CODE_LEN: usize = 96;
+pub const MAX_ARTIFACTS: usize = 64;
+pub const MAX_CONTROLS: usize = 32;
+pub const MAX_REASONS: usize = 32;
+pub const MAX_MODEL_SLUG_LEN: usize = 96;
+pub const MAX_PLUGIN_ID_HINT_LEN: usize = 96;
+pub const MAX_PATH_HINT_LEN: usize = 160;
+pub const MAX_POLICY_ID_LEN: usize = 96;
+pub const MAX_POLICY_VERSION_LEN: usize = 32;
+pub const MAX_ISSUER_NAME_LEN: usize = 64;
+pub const MAX_RULES: usize = 32;
+pub const MAX_CONDITION_NODES: usize = 128;

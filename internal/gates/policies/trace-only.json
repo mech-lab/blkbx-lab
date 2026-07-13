@@ -1,0 +1,10 @@
+{
+  "schema": "ink.policy.v1",
+  "id": "trace-only",
+  "version": "0.6",
+  "default": {
+    "decision": "pass",
+    "reason": "trace_only"
+  },
+  "rules": []
+}

@@ -1,9 +1,8 @@
-import json
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Any
 
-def load_manifest(path: str | Path) -> dict[str, Any]:
-    return json.loads(Path(path).read_text(encoding="utf-8"))
+from .v2 import load_manifest, write_manifest
 
-def write_manifest(path: str | Path, data: dict[str, Any]) -> None:
-    Path(path).write_text(json.dumps(data, indent=2), encoding="utf-8")
+__all__ = ["load_manifest", "write_manifest", "Path", "Any"]

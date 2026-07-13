@@ -18,7 +18,7 @@ def test_readme_quickstart_example_executes(tmp_path, monkeypatch):
     namespace = {"__name__": "__readme__"}
     exec(source, namespace, namespace)
     result = namespace["result"]
-    assert result.manifest_path.endswith("ink_manifest.v1.json")
-    assert result.receipt_path.endswith("ink_receipt.v1.json")
+    assert result.manifest_path.endswith("ink_manifest.v2.json")
+    assert result.receipt_path.endswith("ink_receipt.v2.json")
     assert Path(result.manifest_path).exists()
     assert Path(result.receipt_path).exists()

@@ -1,7 +1,7 @@
 import tomllib
 from pathlib import Path
 
-from hybrid_mechlab._version import RUST_CORE_VERSION, __version__
+from blkbx_lab._version import __version__
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,23 +11,20 @@ def _toml(path: Path) -> dict:
     return tomllib.loads(path.read_text(encoding="utf-8"))
 
 
-def test_python_versions_are_synced():
+def test_python_versions_are_synced_for_v06_release():
     root_project = _toml(ROOT / "pyproject.toml")
-    rust_project = _toml(ROOT / "legacy" / "python-rust" / "pyproject.toml")
 
-    assert root_project["project"]["version"] == "0.1.0a2"
-    assert __version__ == "0.1.0a2"
-    assert rust_project["project"]["version"] == "0.1.0a2"
+    assert root_project["project"]["version"] == "0.6.0"
+    assert __version__ == "0.6.0"
 
 
-def test_cargo_versions_are_synced():
+def test_workspace_crates_share_the_v06_release_version():
+    workspace = _toml(ROOT / "Cargo.toml")
+    assert workspace["workspace"]["package"]["version"] == "0.6.0"
     cargo_paths = (
-        ROOT / "rust" / "hm_core" / "Cargo.toml",
-        ROOT / "rust" / "hm_std" / "Cargo.toml",
-        ROOT / "rust" / "hm_liger" / "Cargo.toml",
-        ROOT / "rust" / "hm_pyo3" / "Cargo.toml",
-        ROOT / "rust" / "hm_examples" / "Cargo.toml",
+        ROOT / "rust" / "crates" / "ink-core" / "Cargo.toml",
+        ROOT / "rust" / "crates" / "ink-host" / "Cargo.toml",
+        ROOT / "rust" / "crates" / "ink-py" / "Cargo.toml",
     )
-    versions = {_toml(path)["package"]["version"] for path in cargo_paths}
-    assert versions == {"0.1.0-alpha.2"}
-    assert RUST_CORE_VERSION == "0.1.0-alpha.2"
+    versions = {_toml(path)["package"]["version"]["workspace"] for path in cargo_paths}
+    assert versions == {True}

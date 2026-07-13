@@ -2,7 +2,7 @@
 
 > Open-source Ink Receipt gates for accountable AI agents.
 >
-> Qwen3.5 is the installed demo. Receipt gates are the standard.
+> `qwen35` is the installed deterministic demo. Receipt gates are the standard.
 
 ## What Shipped
 
