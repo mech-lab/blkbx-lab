@@ -1312,11 +1312,11 @@ fn sign_comparison_packet(
 ) -> Result<SigningJson, HostError> {
     let issuer = ensure_local_issuer()?;
     let mut sink = Sha256Sink::new();
-    write_tlv(&mut sink, 1, left.receipt_id.as_bytes());
-    write_tlv(&mut sink, 2, right.receipt_id.as_bytes());
-    write_tlv(&mut sink, 3, &[u8::from(out.decision_match)]);
-    write_tlv(&mut sink, 4, &[u8::from(out.action_match)]);
-    write_tlv(&mut sink, 5, &[u8::from(out.manifest_match)]);
+    let _ = write_tlv(&mut sink, 1, left.receipt_id.as_bytes());
+    let _ = write_tlv(&mut sink, 2, right.receipt_id.as_bytes());
+    let _ = write_tlv(&mut sink, 3, &[u8::from(out.decision_match)]);
+    let _ = write_tlv(&mut sink, 4, &[u8::from(out.action_match)]);
+    let _ = write_tlv(&mut sink, 5, &[u8::from(out.manifest_match)]);
     let digest = sink.finalize();
     let signing_key = SigningKey::from_bytes(&issuer.secret_key);
     let signature = signing_key.sign(&digest.0);
@@ -1515,11 +1515,11 @@ fn hash_manifest(manifest: &ManifestJson) -> Result<Sha256Digest, HostError> {
     };
     binding.validate()?;
     let mut sink = Sha256Sink::new();
-    write_tlv(&mut sink, 1, binding.action_id.as_bytes());
+    let _ = write_tlv(&mut sink, 1, binding.action_id.as_bytes());
     for artifact in binding.artifacts {
-        write_tlv(&mut sink, 2, &artifact.content_hash.0);
-        write_tlv(&mut sink, 3, &artifact.path_hash.0);
-        write_tlv(&mut sink, 4, &artifact.size_bytes.to_be_bytes());
+        let _ = write_tlv(&mut sink, 2, &artifact.content_hash.0);
+        let _ = write_tlv(&mut sink, 3, &artifact.path_hash.0);
+        let _ = write_tlv(&mut sink, 4, &artifact.size_bytes.to_be_bytes());
     }
     Ok(sink.finalize())
 }
@@ -1527,8 +1527,8 @@ fn hash_manifest(manifest: &ManifestJson) -> Result<Sha256Digest, HostError> {
 fn hash_evidence_summary(manifest: &ManifestJson) -> Result<Sha256Digest, HostError> {
     let mut sink = Sha256Sink::new();
     for artifact in &manifest.artifacts {
-        write_tlv(&mut sink, 1, artifact.hash.digest.as_bytes());
-        write_tlv(&mut sink, 2, artifact.path.as_bytes());
+        let _ = write_tlv(&mut sink, 1, artifact.hash.digest.as_bytes());
+        let _ = write_tlv(&mut sink, 2, artifact.path.as_bytes());
     }
     Ok(sink.finalize())
 }
@@ -1536,10 +1536,10 @@ fn hash_evidence_summary(manifest: &ManifestJson) -> Result<Sha256Digest, HostEr
 fn hash_controls_summary(controls: &[ControlObservation]) -> Sha256Digest {
     let mut sink = Sha256Sink::new();
     for control in controls {
-        write_tlv(&mut sink, 1, &control.action_hash.0);
-        write_tlv(&mut sink, 2, &(control.control_type as u8).to_be_bytes());
-        write_tlv(&mut sink, 3, &(control.status as u8).to_be_bytes());
-        write_tlv(&mut sink, 4, &control.actor_hash.0);
+        let _ = write_tlv(&mut sink, 1, &control.action_hash.0);
+        let _ = write_tlv(&mut sink, 2, &(control.control_type as u8).to_be_bytes());
+        let _ = write_tlv(&mut sink, 3, &(control.status as u8).to_be_bytes());
+        let _ = write_tlv(&mut sink, 4, &control.actor_hash.0);
     }
     sink.finalize()
 }

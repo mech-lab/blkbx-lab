@@ -14,6 +14,8 @@ pub mod receipt;
 pub mod signing;
 pub mod types;
 pub mod verify;
+pub mod pool;
+pub mod benchmarks;
 
 #[cfg(test)]
 mod tests;

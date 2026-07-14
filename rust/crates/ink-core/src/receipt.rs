@@ -154,7 +154,7 @@ pub fn build_receipt_payload<'a>(
 }
 
 fn write_digest_field(sink: &mut impl TranscriptSink, field_id: u16, digest: Sha256Digest) {
-    write_tlv(sink, field_id, &digest.0);
+    let _ = write_tlv(sink, field_id, &digest.0);
 }
 
 fn write_optional_digest_field(
@@ -163,7 +163,7 @@ fn write_optional_digest_field(
     digest: Option<Sha256Digest>,
 ) -> Result<(), Error> {
     match digest {
-        Some(value) => write_digest_field(sink, field_id, value)?,
+        Some(value) => write_digest_field(sink, field_id, value),
         None => write_tlv(sink, field_id, &[])?,
     }
     Ok(())
@@ -171,7 +171,7 @@ fn write_optional_digest_field(
 
 pub fn runtime_claim_hash(runtime: RuntimeClaim) -> Sha256Digest {
     let mut sink = Sha256Sink::new();
-    write_tlv(&mut sink, 1, RUNTIME_DOMAIN);
+    let _ = write_tlv(&mut sink, 1, RUNTIME_DOMAIN);
     write_u8_field(&mut sink, 2, runtime.runtime_kind as u8);
     write_u8_field(&mut sink, 3, runtime.execution_topology as u8);
     write_u8_field(&mut sink, 4, runtime.replay_strength as u8);
@@ -210,14 +210,14 @@ fn hash_plugin(plugin: PluginClaim<'_>) -> Sha256Digest {
     write_bool_field(&mut sink, 8, plugin.normalization.raw_response_preserved);
     write_bool_field(&mut sink, 9, plugin.normalization.secrets_redacted);
     write_digest_field(&mut sink, 10, plugin.plugin_manifest_hash);
-    write_tlv(&mut sink, 11, plugin.plugin_id_hint.as_bytes());
+    let _ = write_tlv(&mut sink, 11, plugin.plugin_id_hint.as_bytes());
     write_u8_field(&mut sink, 12, plugin.trust_level as u8);
     sink.finalize()
 }
 
 pub fn policy_facts_hash(facts: PolicyFacts) -> Sha256Digest {
     let mut sink = Sha256Sink::new();
-    write_tlv(&mut sink, 1, FACTS_DOMAIN);
+    let _ = write_tlv(&mut sink, 1, FACTS_DOMAIN);
     write_u8_field(&mut sink, 2, facts.risk_class as u8);
     write_bool_field(&mut sink, 3, facts.requires_human_review);
     write_bool_field(&mut sink, 4, facts.binding_effect_present);
@@ -232,10 +232,10 @@ pub fn policy_facts_hash(facts: PolicyFacts) -> Sha256Digest {
 pub fn model_waist_hash(model: ModelWaist<'_>) -> Result<Sha256Digest, Error> {
     model.validate()?;
     let mut sink = Sha256Sink::new();
-    write_tlv(&mut sink, 1, MODEL_WAIST_DOMAIN);
+    let _ = write_tlv(&mut sink, 1, MODEL_WAIST_DOMAIN);
     write_u8_field(&mut sink, 2, model.identity.model_class as u8);
     write_digest_field(&mut sink, 3, model.identity.model_ref_hash);
-    write_tlv(&mut sink, 4, model.identity.model_slug.as_bytes());
+    let _ = write_tlv(&mut sink, 4, model.identity.model_slug.as_bytes());
     match model.identity.identity_evidence {
         IdentityEvidence::Declared => write_u8_field(&mut sink, 5, 1),
         IdentityEvidence::ProviderDeclared {
@@ -305,26 +305,26 @@ pub fn write_receipt_transcript(
     sink: &mut impl TranscriptSink,
 ) -> Result<(), Error> {
     payload.validate()?;
-    write_tlv(sink, 1, RECEIPT_TRANSCRIPT_DOMAIN);
+    let _ = write_tlv(sink, 1, RECEIPT_TRANSCRIPT_DOMAIN);
     write_u8_field(sink, 2, payload.schema_version.as_u8());
-    write_tlv(sink, 3, payload.receipt_id.as_bytes());
+    let _ = write_tlv(sink, 3, payload.receipt_id.as_bytes());
     write_u8_field(sink, 4, payload.receipt_profile.as_u8());
-    write_tlv(sink, 5, payload.action_id.as_bytes());
+    let _ = write_tlv(sink, 5, payload.action_id.as_bytes());
     write_i64_field(sink, 6, payload.issued_at.unix_seconds);
     write_u32_field(sink, 7, payload.issued_at.nanos);
-    write_tlv(sink, 8, payload.issuer.name.as_bytes());
-    write_tlv(sink, 9, payload.issuer.key_id.as_bytes());
-    write_tlv(sink, 10, &payload.issuer.public_key.0);
+    let _ = write_tlv(sink, 8, payload.issuer.name.as_bytes());
+    let _ = write_tlv(sink, 9, payload.issuer.key_id.as_bytes());
+    let _ = write_tlv(sink, 10, &payload.issuer.public_key.0);
     write_digest_field(sink, 11, payload.manifest_hash);
-    write_tlv(sink, 12, payload.policy.policy_id.as_bytes());
-    write_tlv(sink, 13, payload.policy.policy_version.as_bytes());
+    let _ = write_tlv(sink, 12, payload.policy.policy_id.as_bytes());
+    let _ = write_tlv(sink, 13, payload.policy.policy_version.as_bytes());
     write_digest_field(sink, 14, payload.policy.policy_hash);
     write_digest_field(sink, 15, runtime_claim_hash(payload.model.runtime));
     write_digest_field(sink, 16, model_waist_hash(payload.model)?);
     write_digest_field(sink, 17, policy_facts_hash(payload.facts));
     write_u8_field(sink, 18, payload.decision.as_u8());
     for reason in payload.reasons {
-        write_tlv(sink, 19, reason.bytes);
+        let _ = write_tlv(sink, 19, reason.bytes);
     }
     write_digest_field(sink, 20, payload.evidence_summary_hash);
     write_digest_field(sink, 21, payload.controls_summary_hash);

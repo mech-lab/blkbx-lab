@@ -157,7 +157,7 @@ This document outlines the continued hardening plan for the Rust core (inkreceip
 - [ ] No performance regressions >5% on benchmarks
 - [ ] All secrets properly zeroized on drop
 - [ ] CI passes with all new checks enabled
-- [ ] Documentation covers all public APIs
+- [x] Documentation covers all public APIs (see `HARDENING_IMPLEMENTATION.md`)
 - [ ] Automated release process validated
 
 ## Risk Mitigation
