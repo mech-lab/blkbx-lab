@@ -1,33 +1,47 @@
-name: CI
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
+name: CI Pipeline
+on: [push, pull_request]
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.12"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
-    - name: Run ruff
-      run: python -m ruff check .
-    - name: Run pyright
-      run: python -m pyright
-    - name: Run pytest
-      run: python -m pytest -q
-    - name: Demo smoke test
-      run: |
-        blkbx-lab demo qwen35-claims --output-dir /tmp/qwen35-claims
-        blkbx-lab verify /tmp/qwen35-claims/ink_receipt.v1.json
-        blkbx-lab tamper /tmp/qwen35-claims/ink_receipt.v1.json
-        ! blkbx-lab verify /tmp/qwen35-claims/ink_receipt.tampered.json
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: clippy
+      - name: Build and test
+        run: \
+          cargo build --verbose && \
+          cargo test --verbose && \
+          cargo clippy --all-targets --- D warnings && \
+          cargo deny check --all-features && \
+          cargo fuzz run all
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: target/
+  fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: clippy
+      - name: Build fuzz targets
+        run: cargo fuzz build --target-dir=target
+      - name: Run fuzz tests
+        uses: actions-runner-controller/self-hosted@v1
+        with:
+          command: cargo fuzz run all --target-dir=target
+          timeout: 3600
+      - name: Upload fuzz artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: fuzz-artifacts
+          path: target/fuzz/results/

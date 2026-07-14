@@ -1,5 +1,6 @@
 use sha2::{Digest, Sha256};
 
+use crate::error::Error;
 use crate::types::Sha256Digest;
 
 pub trait TranscriptSink {
@@ -39,10 +40,14 @@ pub fn sha256(bytes: &[u8]) -> Sha256Digest {
     sink.finalize()
 }
 
-pub fn write_tlv(sink: &mut impl TranscriptSink, field_id: u16, value: &[u8]) {
+pub fn write_tlv(sink: &mut impl TranscriptSink, field_id: u16, value: &[u8]) -> Result<(), Error> {
+    if value.len() > 1024 * 1024 {
+        return Err(Error::TlvValueTooLarge);
+    }
     sink.update(&field_id.to_be_bytes());
     sink.update(&(value.len() as u32).to_be_bytes());
     sink.update(value);
+    Ok(())
 }
 
 pub fn write_u8_field(sink: &mut impl TranscriptSink, field_id: u16, value: u8) {

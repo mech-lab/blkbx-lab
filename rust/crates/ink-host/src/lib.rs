@@ -8,6 +8,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use base64ct::{Base64UrlUnpadded, Encoding};
 use dirs::config_dir;
 use ed25519_dalek::{Signer, SigningKey};
+use rand::RngCore;
 use inkreceipts_core::compare::{compare_receipts, ComparisonOut, VerifiedReceiptSummary};
 use inkreceipts_core::controls::{ControlObservation, ControlSet, ControlStatus, ControlType};
 use inkreceipts_core::digest::{sha256, write_tlv, Sha256Sink};
@@ -1323,7 +1324,7 @@ fn sign_comparison_packet(
         transcript_encoding: "INK-COMPARISON-CORE-V1".to_string(),
         payload_hash: digest_json(&digest),
         algorithm: "Ed25519".to_string(),
-        key_id: issuer.key_id,
+        key_id: issuer.key_id.clone(),
         signature: Base64UrlUnpadded::encode_string(&signature.to_bytes()),
     })
 }
@@ -1396,10 +1397,23 @@ fn ensure_local_issuer() -> Result<LocalIssuer, HostError> {
             key_id,
         });
     }
-    let secret_key: [u8; 32] = rand::random();
+    let mut rng = rand::rng();
+    let mut secret_key = [0u8; 32];
+    rng.fill_bytes(&mut secret_key);
     let signing_key = SigningKey::from_bytes(&secret_key);
     let public_key = signing_key.verifying_key().to_bytes();
-    fs::write(&secret_path, Base64UrlUnpadded::encode_string(&secret_key))?;
+    // Write secret key with restrictive permissions (0o600)
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        let mut file = std::fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .mode(0o600)
+            .open(&secret_path)?;
+        file.write_all(Base64UrlUnpadded::encode_string(&secret_key).as_bytes())?;
+        file.flush()?;
+    }
     fs::write(&public_path, Base64UrlUnpadded::encode_string(&public_key))?;
     let key_id = key_id_for_public(&public_key);
     ensure_trusted_key(&key_id, &public_key)?;
@@ -1978,4 +1992,13 @@ struct LocalIssuer {
     secret_key: [u8; 32],
     public_key: [u8; 32],
     key_id: String,
+}
+
+impl Drop for LocalIssuer {
+    fn drop(&mut self) {
+        // Zero out the secret key to prevent memory leakage
+        for byte in &mut self.secret_key {
+            *byte = 0;
+        }
+    }
 }

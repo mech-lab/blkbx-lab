@@ -3,7 +3,6 @@ pub enum Error {
     EmptyValue,
     ValueTooLong,
     ContainsNul,
-    InvalidByteClass,
     InvalidUtf8,
     InvalidTimestamp,
     InvalidRuntimeShape,
@@ -21,4 +20,6 @@ pub enum Error {
     InvalidTokenUsageTotals,
     InconsistentReceiptPayload,
     SignatureError,
+    InvalidByteClass,
+    TlvValueTooLarge,
 }

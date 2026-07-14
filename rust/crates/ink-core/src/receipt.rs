@@ -161,11 +161,12 @@ fn write_optional_digest_field(
     sink: &mut impl TranscriptSink,
     field_id: u16,
     digest: Option<Sha256Digest>,
-) {
+) -> Result<(), Error> {
     match digest {
-        Some(value) => write_digest_field(sink, field_id, value),
-        None => write_tlv(sink, field_id, &[]),
+        Some(value) => write_digest_field(sink, field_id, value)?,
+        None => write_tlv(sink, field_id, &[])?,
     }
+    Ok(())
 }
 
 pub fn runtime_claim_hash(runtime: RuntimeClaim) -> Sha256Digest {
@@ -250,8 +251,8 @@ pub fn model_waist_hash(model: ModelWaist<'_>) -> Result<Sha256Digest, Error> {
         } => {
             write_u8_field(&mut sink, 5, 3);
             write_digest_field(&mut sink, 6, weights_hash);
-            write_optional_digest_field(&mut sink, 7, tokenizer_hash);
-            write_optional_digest_field(&mut sink, 8, config_hash);
+            write_optional_digest_field(&mut sink, 7, tokenizer_hash)?;
+            write_optional_digest_field(&mut sink, 8, config_hash)?;
         }
         IdentityEvidence::ContainerHashed { image_hash } => {
             write_u8_field(&mut sink, 5, 4);
@@ -260,9 +261,9 @@ pub fn model_waist_hash(model: ModelWaist<'_>) -> Result<Sha256Digest, Error> {
     }
     write_digest_field(&mut sink, 9, model.invocation.action_hash);
     write_digest_field(&mut sink, 10, model.invocation.messages_hash);
-    write_optional_digest_field(&mut sink, 11, model.invocation.system_prompt_hash);
-    write_optional_digest_field(&mut sink, 12, model.invocation.tool_spec_hash);
-    write_optional_digest_field(&mut sink, 13, model.invocation.response_schema_hash);
+    write_optional_digest_field(&mut sink, 11, model.invocation.system_prompt_hash)?;
+    write_optional_digest_field(&mut sink, 12, model.invocation.tool_spec_hash)?;
+    write_optional_digest_field(&mut sink, 13, model.invocation.response_schema_hash)?;
     write_digest_field(&mut sink, 14, model.invocation.parameters_hash);
     match model.invocation.requested_output {
         RequestedOutput::FreeText => write_u8_field(&mut sink, 15, 1),
@@ -275,9 +276,9 @@ pub fn model_waist_hash(model: ModelWaist<'_>) -> Result<Sha256Digest, Error> {
             write_digest_field(&mut sink, 16, tool_spec_hash);
         }
     }
-    write_optional_digest_field(&mut sink, 17, model.observation.output_text_hash);
-    write_optional_digest_field(&mut sink, 18, model.observation.structured_output_hash);
-    write_optional_digest_field(&mut sink, 19, model.observation.provider_metadata_hash);
+    write_optional_digest_field(&mut sink, 17, model.observation.output_text_hash)?;
+    write_optional_digest_field(&mut sink, 18, model.observation.structured_output_hash)?;
+    write_optional_digest_field(&mut sink, 19, model.observation.provider_metadata_hash)?;
     write_u8_field(&mut sink, 20, model.observation.finish_reason as u8);
     write_u32_field(
         &mut sink,
