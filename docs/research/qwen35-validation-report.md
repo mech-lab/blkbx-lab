@@ -2,15 +2,15 @@
 
 ## Scope
 
-This document records the current public `blkbx-lab` Qwen3.5 validation surface as of April 1, 2026.
+This document records the current public `blkbx-lab` Qwen3.5 validation surface as of July 16, 2026.
 
 Canonical public commands:
 
 ```bash
 blkbx-lab demo qwen35-claims --output-dir artifacts/qwen35-claims
-blkbx-lab verify artifacts/qwen35-claims/ink_receipt.v1.json
-blkbx-lab tamper artifacts/qwen35-claims/ink_receipt.v1.json
-blkbx-lab verify artifacts/qwen35-claims/ink_receipt.tampered.json
+blkbx-lab verify artifacts/qwen35-claims/ink_receipt.v2.json
+blkbx-lab tamper artifacts/qwen35-claims/ink_receipt.v2.json
+blkbx-lab verify artifacts/qwen35-claims/ink_receipt.tampered.v2.json
 ```
 
 ## Executive Result
@@ -18,7 +18,7 @@ blkbx-lab verify artifacts/qwen35-claims/ink_receipt.tampered.json
 Status:
 
 - the installed public Qwen3.5 teaching path succeeds through `blkbx-lab`
-- the demo emits `ink_manifest.v1.json` and `ink_receipt.v1.json`
+- the demo emits `ink_manifest.v2.json` and `ink_receipt.v2.json`
 - tamper detection fails verification as expected
 - the current public release surface does not promise a real-model replay workflow
 
@@ -29,15 +29,15 @@ The shipped public path uses the installed `qwen35` adapter and the Qwen3.5 clai
 - package surface: `blkbx-lab`
 - Python namespace: `blkbx_lab`
 - demo name: `qwen35-claims`
-- receipt signer: built-in demo key
-- gate outcome for the bundled claims demo: `block`
+- receipt signer: local demo signer backend by default, with config-backed file signing also supported
+- gate outcome for the bundled low-risk teaching demo: `pass`
 
 Artifacts written by the public demo:
 
 - `action.json`
-- `ink_manifest.v1.json`
-- `ink_receipt.v1.json`
-- `ink_receipt.tampered.json` after `tamper`
+- `ink_manifest.v2.json`
+- `ink_receipt.v2.json`
+- `ink_receipt.tampered.v2.json` after `tamper`
 
 ## Public Verification Result
 
@@ -75,8 +75,8 @@ Exact recorded local runtime and artifact paths from the archived validation wor
 - native runtime root: `/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation`
 - archived transformers source checkout: `/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation/src/transformers-upstream`
 - archived output directory: `/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation/artifacts/qwen35-claims`
-- archived manifest path: `/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation/artifacts/qwen35-claims/ink_manifest.v1.json`
-- archived receipt path: `/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation/artifacts/qwen35-claims/ink_receipt.v1.json`
+- archived manifest path: `/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation/artifacts/qwen35-claims/ink_manifest.v2.json`
+- archived receipt path: `/Volumes/2.5SSDDD128/blkbx-lab-qwen35-validation/artifacts/qwen35-claims/ink_receipt.v2.json`
 
 Recorded environment variables:
 

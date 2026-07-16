@@ -14,9 +14,9 @@ pip install --pre blkbx-lab
 
 ```bash
 blkbx-lab demo qwen35-claims --output-dir artifacts/blkbx-lab-demo
-blkbx-lab verify artifacts/blkbx-lab-demo/ink_receipt.v1.json
-blkbx-lab tamper artifacts/blkbx-lab-demo/ink_receipt.v1.json
-blkbx-lab verify artifacts/blkbx-lab-demo/ink_receipt.tampered.json
+blkbx-lab verify artifacts/blkbx-lab-demo/ink_receipt.v2.json
+blkbx-lab tamper artifacts/blkbx-lab-demo/ink_receipt.v2.json
+blkbx-lab verify artifacts/blkbx-lab-demo/ink_receipt.tampered.v2.json
 ```
 
 ```python
@@ -30,9 +30,9 @@ print(bl.verify(result.receipt_path).report)
 
 ## What You Get
 
-- Action Evidence Bundle: `ink_manifest.v1.json`
-- Receipt: `ink_receipt.v1.json`
-- Comparison Packet: `receipt_comparison.v1.json`
+- Action Evidence Bundle: `ink_manifest.v2.json`
+- Receipt: `ink_receipt.v2.json`
+- Comparison Packet: `receipt_comparison.v2.json`
 
 ## Public Contract
 
@@ -47,11 +47,11 @@ print(bl.verify(result.receipt_path).report)
 - Registered adapter names are canonical, and shipped Qwen selectors such as `qwen3.5` and `Qwen/Qwen3.5-2B` resolve to `qwen35`.
 - The Qwen3.5 claims demo is the installed teaching path.
 - `report()` renders `release-summary` and `comparison-summary` views from the current Ink artifacts.
-- Deprecated compatibility shims remain for migration only.
+- Deprecated selector aliases remain for migration only.
 
 ## Current Limits
 
-- `compare()` accepts manifest targets only when a sibling `ink_receipt.v1.json` already exists.
-- Production signing keys are not part of this release surface.
+- `compare()` accepts manifest targets only when a sibling `ink_receipt.v2.json` already exists.
+- The default demo flow still uses the local demo signer backend, but the host layer now supports config-backed file signing, trust registries, and revocation lists under `INKRECEIPTS_CONFIG_DIR`.
 - The public docs do not promise a real-model replay workflow through the `blkbx_lab` facade.
-- Legacy MAIR and BLT histories remain in-repo for research and migration context, not as first-class public release surfaces.
+- Research histories are intentionally out of this product repo rather than mixed into the shipped source tree.

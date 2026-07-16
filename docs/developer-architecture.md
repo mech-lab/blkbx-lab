@@ -5,46 +5,54 @@ BLKBX Lab is structured into the following layers:
 ```text
 blkbx-lab CLI / blkbx_lab SDK
         |
-        +-- blkbx_lab/              public API, CLI parser, result objects
+        +-- python/blkbx_lab/       public API, CLI parser, packaged adapters, result objects
         |
-        +-- internal/trace/         action capture and preserved legacy trace code
+        +-- rust/crates/ink-py/     PyO3 bindings exposed as blkbx_lab._ink_native
         |
-        +-- internal/ink/           manifest, canonicalization, signing, verification
+        +-- rust/crates/ink-host/   manifest IO, policy evaluation, signer config, trust registry
         |
-        +-- internal/gates/         gate policy evaluation
+        +-- rust/crates/ink-core/   no_std receipt core, transcript encodings, digest/signature logic
         |
-        +-- adapters/               installed adapter registry (ships with qwen35)
+        +-- policies/ schemas/      shipped policy and schema assets
         |
-        +-- hybrid_mechlab/         research and compatibility namespace
+        +-- tests/ docs/            product-facing verification and documentation
 ```
 
-## Public Facade (`blkbx_lab/`)
+## Public Facade (`python/blkbx_lab/`)
 
 This is the canonical SDK and CLI surface. Release-facing docs, examples, and tests should target this layer.
 
-## Trace Layer (`internal/trace/`)
+## Python Package (`python/blkbx_lab/`)
 
-This layer captures action proposals and preserves the historical trace subsystem under `internal/trace/legacy_blt/`. It is kept in-repo for continuity, not as a first-class public package.
+This package owns:
 
-## Ink Layer (`internal/ink/`)
+- the public `blkbx_lab` namespace
+- the installed `qwen35` deterministic demo adapter
+- CLI entrypoints and public result objects
+- compatibility normalization for deprecated adapter-selection flags
 
-This layer owns the current public artifact contract:
+## Host Layer (`rust/crates/ink-host/`)
 
-- `ink_manifest.v1.json`
-- `ink_receipt.v1.json`
-- `receipt_comparison.v1.json`
+This crate owns:
 
-The old MAIR implementation remains under `internal/ink/legacy_mair/` for historical context.
+- manifest creation and evidence hashing
+- policy evaluation and receipt issuance
+- signer backend config loading
+- trust-registry and revocation-list enforcement
+- receipt verification and comparison packet signing
 
-## Gates Layer (`internal/gates/`)
+## Core Layer (`rust/crates/ink-core/`)
 
-This layer evaluates actions against policies and produces gate decisions and receipt content.
+This crate is the product's trust waist. It stays `no_std` and owns the semantic receipt model plus the signed transcript encoders:
 
-## Adapters (`adapters/`)
+- TLV v2 is the current default signed transcript.
+- TLV legacy v1 remains supported for explicit compatibility verification.
+- canonical JSON v1 is supported as a governed host-level encoding choice.
 
-This layer exposes the thin adapter registry used by the public trace and demo flows. The current installed public adapter is `qwen35`.
+## Assets (`policies/`, `schemas/`, `tests/`, `docs/`)
 
-## Compatibility Surfaces
+Only shipped product assets remain in this repository. Research trees, compatibility packages, notebooks, and legacy experimental crates are intentionally out of scope for the product repo.
 
-- `hybrid_mechlab/` stays in-repo for research and legacy workflows, including experimental placeholder modules that are not part of the public BLKBX release surface.
-- Deprecated compatibility shims delegate to the canonical `blkbx_lab` surface and emit deprecation warnings.
+## Repo Boundary
+
+This repository is now the OSS receipt-core/product tree. If historical research material needs to be preserved, it belongs in a separate history-preserving research repo rather than mixed into this install surface.

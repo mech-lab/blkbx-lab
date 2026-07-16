@@ -7,24 +7,30 @@ The release-facing contract is:
 - package: `blkbx-lab`
 - CLI: `blkbx-lab`
 - Python namespace: `blkbx_lab`
-- artifacts: `ink_manifest.v1.json`, `ink_receipt.v1.json`, `receipt_comparison.v1.json`
+- artifacts: `ink_manifest.v2.json`, `ink_receipt.v2.json`, `receipt_comparison.v2.json`
 
-## Deprecated Shims
+## Deprecated Selectors
 
-- `mech_lab` imports the canonical `blkbx_lab` surface and emits a deprecation warning.
-- `mechlab` delegates to the canonical CLI and emits a deprecation warning.
+The public package still tolerates some deprecated adapter-selection inputs for the installed deterministic demo:
 
-These shims exist for migration only and should not appear in new release-facing examples.
+- `qwen35`
+- `qwen35-claims`
+- `qwen3.5`
+- `Qwen/Qwen3.5-2B`
 
-## In-Repo Historical Surfaces
+Deprecated `backend`, `family`, `model`, and `profile` knobs are normalized or rejected fail-loudly; they are not separate product surfaces.
 
-The following paths remain in the repo for research or migration context, not as first-class public releases:
+## Repo Scope
 
-- `hybrid_mechlab/`
-- `internal/trace/legacy_blt/`
-- `internal/ink/legacy_mair/`
-- `legacy/hybrid-mechlab-python/`
-- `legacy/python-rust/`
+The product repo no longer ships research trees, legacy compatibility namespaces, notebooks, or experimental Rust crates. Those belong in a separate research repo if they still need history preserved.
+
+## Signing Compatibility
+
+- current default encoding: `INK-CORE-TLV-V2`
+- explicit compatibility encoding: `INK-CORE-TRANSCRIPT-V1`
+- governed alternate encoding: `INK-CORE-JSON-CANONICAL-V1`
+
+The `signing.transcript_encoding` field is part of the public compatibility contract. Verifiers must treat it as authoritative rather than assuming a single implicit transcript format.
 
 ## Qwen Note
 

@@ -4,7 +4,7 @@
 >
 > `qwen35` is the installed deterministic demo. Receipt gates are the standard.
 
-BLKBX Lab lets developers wrap agent actions with signed, verifiable policy gates. The v0.6 public surface ships a deterministic `qwen35` demo, writes v2 Ink artifacts locally, and routes trust-critical receipt logic through a `no_std`, `no_alloc` Rust microkernel plus a thin host/PyO3 bridge.
+BLKBX Lab lets developers wrap agent actions with signed, verifiable policy gates. The v0.7 public surface ships a deterministic `qwen35` demo, writes v2 Ink artifacts locally, and routes trust-critical receipt logic through a `no_std` Rust core plus a thin host/PyO3 bridge.
 
 ## Install
 
@@ -48,7 +48,7 @@ print(bl.verify(result.receipt_path).report)
 - `demo()` returns `InkReceiptResult`
 - `trace()` returns `ActionEvidenceBundle`
 - `analyze()` returns `GateAnalysisResult`
-- `gate()` requires explicit demo signer approval for v0.6 demo issuance
+- `gate()` requires explicit demo signer approval when the configured signer backend is `demo_file`
 - `compare()` returns `ReceiptComparisonPacket`
 
 ## How It Works
@@ -56,15 +56,13 @@ print(bl.verify(result.receipt_path).report)
 ```text
 blkbx-lab CLI / blkbx_lab SDK
         |
-        +-- blkbx_lab/      public API, CLI entrypoints, public result objects
+        +-- python/blkbx_lab/       public API, CLI entrypoints, adapters, result objects
         |
-        +-- internal/trace  action proposal capture and preserved trace history
+        +-- rust/crates/ink-py/     PyO3 bridge into the host crate
         |
-        +-- internal/ink    manifests, canonicalization, signing, verification
+        +-- rust/crates/ink-host/   filesystem, config loading, signer backends, verification
         |
-        +-- internal/gates  policy evaluation and receipt issuance
-        |
-        +-- adapters/       installed adapter registry (ships with qwen35)
+        +-- rust/crates/ink-core/   no_std receipt core, transcript hashing, signing helpers
 ```
 
 ## Docs
@@ -80,5 +78,5 @@ blkbx-lab CLI / blkbx_lab SDK
 - The public surface ships the installed `qwen35` deterministic demo, not a full multi-runtime adapter matrix.
 - `report()` renders canonical `release-summary` and `comparison-summary` views from existing v2 Ink artifacts only.
 - `compare()` accepts manifest targets only when a sibling `ink_receipt.v2.json` already exists; it does not run `gate()` implicitly.
-- Receipts are signed with the built-in demo key only through `demo()` or explicit `--demo-signer` flows. Production signing is not part of v0.6.
-- Deprecated compatibility shims remain for migration only.
+- The default local bootstrap uses a demo signer backend, but the host layer also supports config-backed file signing plus trust-registry and revocation files under `INKRECEIPTS_CONFIG_DIR`.
+- The repository now carries only the OSS receipt surface; historical research material belongs in a separate history-preserving research repo.

@@ -36,4 +36,4 @@ class ModelAdapter(Protocol):
 - Registered adapter names remain canonical for the public surface.
 - Shipped Qwen selectors `qwen35`, `qwen3.5`, `qwen3.5-2b`, and `Qwen/Qwen3.5-2B` resolve to the installed `qwen35` adapter.
 - Unsupported `family` or `model` values fail with a clear supported-adapters error.
-- Additional runtimes should not be documented as supported until they are registered in `adapters/` and exercised by the public contract tests.
+- Additional runtimes should not be documented as supported until they are registered under `python/blkbx_lab/adapters/` and exercised by the public contract tests.

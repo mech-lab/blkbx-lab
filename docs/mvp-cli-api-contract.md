@@ -11,12 +11,12 @@ Release-facing identity:
 
 | CLI | Python | Input | Output |
 | --- | --- | --- | --- |
-| `blkbx-lab demo` | `bl.demo()` | optional demo name and output dir | `InkReceiptResult` backed by `ink_manifest.v1.json` and `ink_receipt.v1.json` |
+| `blkbx-lab demo` | `bl.demo()` | optional demo name and output dir | `InkReceiptResult` backed by `ink_manifest.v2.json` and `ink_receipt.v2.json` |
 | `blkbx-lab doctor` | `bl.doctor()` | none | `DoctorResult` |
-| `blkbx-lab trace` | `bl.trace()` | prompt plus optional output dir, trace id, backend, family, model, profile | `ActionEvidenceBundle` backed by `ink_manifest.v1.json` |
+| `blkbx-lab trace` | `bl.trace()` | prompt plus optional output dir, trace id, backend, family, model, profile | `ActionEvidenceBundle` backed by `ink_manifest.v2.json` |
 | `blkbx-lab analyze` | `bl.analyze()` | manifest path plus optional output dir/profile | `GateAnalysisResult` |
-| `blkbx-lab compare` | `bl.compare()` | two receipt targets, or manifest targets that already have sibling receipts, plus optional output dir | `ReceiptComparisonPacket` backed by `receipt_comparison.v1.json` |
-| `blkbx-lab gate` | `bl.gate()` | manifest path plus optional policy/profile/output path | `InkReceiptResult` backed by `ink_receipt.v1.json` |
+| `blkbx-lab compare` | `bl.compare()` | two receipt targets, or manifest targets that already have sibling receipts, plus optional output dir | `ReceiptComparisonPacket` backed by `receipt_comparison.v2.json` |
+| `blkbx-lab gate` | `bl.gate()` | manifest path plus optional policy/profile/output path | `InkReceiptResult` backed by `ink_receipt.v2.json` |
 | `blkbx-lab verify` | `bl.verify()` | receipt path | `InkReceiptResult` with verification status |
 | `blkbx-lab tamper` | `bl.tamper()` | receipt path | `InkReceiptResult` for the tampered output |
 | `blkbx-lab explain` | `bl.explain()` | receipt path | plain-language string |
@@ -24,24 +24,24 @@ Release-facing identity:
 
 ## Artifact Mapping
 
-- Action Evidence Bundle -> `ink_manifest.v1.json`
-- Receipt -> `ink_receipt.v1.json`
-- Comparison Packet -> `receipt_comparison.v1.json`
+- Action Evidence Bundle -> `ink_manifest.v2.json`
+- Receipt -> `ink_receipt.v2.json`
+- Comparison Packet -> `receipt_comparison.v2.json`
 
 ## Quickstart Commands
 
 ```bash
 blkbx-lab demo qwen35-claims --output-dir artifacts/qwen35-claims
-blkbx-lab verify artifacts/qwen35-claims/ink_receipt.v1.json
-blkbx-lab tamper artifacts/qwen35-claims/ink_receipt.v1.json
-blkbx-lab verify artifacts/qwen35-claims/ink_receipt.tampered.json
+blkbx-lab verify artifacts/qwen35-claims/ink_receipt.v2.json
+blkbx-lab tamper artifacts/qwen35-claims/ink_receipt.v2.json
+blkbx-lab verify artifacts/qwen35-claims/ink_receipt.tampered.v2.json
 ```
 
 ```bash
 blkbx-lab trace --prompt "Capture a CLI trace." --output-dir artifacts/trace --trace-id trace-cli
-blkbx-lab analyze artifacts/trace/ink_manifest.v1.json
-blkbx-lab gate artifacts/trace/ink_manifest.v1.json --policy action-gate
-blkbx-lab compare --left artifacts/trace/ink_manifest.v1.json --right artifacts/trace/ink_manifest.v1.json --output-dir artifacts/compare
+blkbx-lab analyze artifacts/trace/ink_manifest.v2.json
+blkbx-lab gate artifacts/trace/ink_manifest.v2.json --policy action-gate
+blkbx-lab compare --left artifacts/trace/ink_manifest.v2.json --right artifacts/trace/ink_manifest.v2.json --output-dir artifacts/compare
 ```
 
 ## Current Scope
@@ -57,4 +57,4 @@ blkbx-lab compare --left artifacts/trace/ink_manifest.v1.json --right artifacts/
 
 - `compare()` will not synthesize receipts or call `gate()` implicitly for manifest inputs without a sibling receipt.
 - The public docs do not promise hook-coverage reports, replay packs, or a real-model replay workflow through `blkbx_lab`.
-- Deprecated compatibility shims remain available for migration only.
+- `doctor()` and the host config surface are part of the signing story: signer backend, trust registry, and revocation list must all line up for production-style verification.

@@ -3,8 +3,8 @@
 Current alpha verdict:
 
 - the public BLKBX Lab contract is centered on `blkbx-lab` / `blkbx_lab`
-- remaining release risk is mostly documentation, packaging, and operator discipline
-- deprecated shim paths should remain migration-only and out of release-facing copy
+- remaining release risk is mostly packaging discipline, signer configuration clarity, and test coverage
+- release-facing copy must describe only the shipped product repo, not removed research trees
 
 Automated gates:
 
@@ -33,7 +33,7 @@ Manual checks before tagging:
 - confirm the repository social preview uses [`assets/brand/og-card.png`](../assets/brand/og-card.png)
 - confirm the social preview and branded badges are readable in both GitHub light and dark themes
 - confirm the PyPI long description still matches [`docs/pypi.md`](pypi.md)
-- confirm the PyPI pending publisher is configured for `blkbx-lab / mech-lab / blkbx-lab / release.yml / pypi`
+- confirm the PyPI pending publisher is configured for `blkbx-lab / blkbx-lab / .github/workflows/release.yml / pypi`
 
 Current source-of-truth docs:
 
@@ -46,4 +46,4 @@ Current source-of-truth docs:
 Maintained-versus-experimental split:
 
 - `blkbx_lab` plus the `blkbx-lab` CLI is the release surface that must stay documented and smoke-tested.
-- `hybrid_mechlab`, `internal/trace/legacy_blt`, `internal/ink/legacy_mair`, and placeholder research modules are preserved and checked intentionally, but they are not the public BLKBX product contract.
+- `python/blkbx_lab`, `rust/crates/ink-core`, `rust/crates/ink-host`, `rust/crates/ink-py`, `policies`, and `schemas` are the only source trees that should influence the shipped `pip install blkbx-lab` surface.

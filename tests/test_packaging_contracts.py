@@ -1,4 +1,5 @@
 import tomllib
+import subprocess
 from pathlib import Path
 
 
@@ -22,8 +23,18 @@ def test_root_package_uses_maturin_thin_waist_contract():
     }
 
 
-def test_legacy_rust_package_remains_quarantined_under_legacy_namespace():
-    data = tomllib.loads((ROOT / "legacy" / "python-rust" / "pyproject.toml").read_text(encoding="utf-8"))
-    assert data["project"]["name"] == "hybrid-mechlab-rust"
-    assert data["build-system"]["build-backend"] == "maturin"
-    assert data["tool"]["maturin"]["manifest-path"] == "../../rust/hm_pyo3/Cargo.toml"
+def test_repo_uses_python_src_layout_without_root_package_shim():
+    assert (ROOT / "python" / "blkbx_lab" / "__init__.py").exists()
+    assert not (ROOT / "blkbx_lab").exists()
+    assert not (ROOT / "adapters").exists()
+
+
+def test_native_extension_is_not_tracked_in_git():
+    tracked = subprocess.run(
+        ["git", "ls-files", "python/blkbx_lab"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    assert "_ink_native.abi3.so" not in tracked

@@ -1,8 +1,0 @@
-[package]
-name = "hm_liger"
-version = "0.1.0-alpha.2"
-edition = "2021"
-license = "MIT"
-
-[dependencies]
-hm_core = { path = "../hm_core", default-features = false, features = ["std"] }
