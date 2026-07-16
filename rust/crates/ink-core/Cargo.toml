@@ -1,23 +1,17 @@
 [package]
-name = "inkreceipts-core"
+name = "ink-core"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [lib]
-name = "inkreceipts_core"
+name = "ink_core"
 path = "src/lib.rs"
 
 [dependencies]
-bitflags = "2.13.0"
-crossbeam = "0.8.4"
-dashmap = "6.2.1"
 ed25519-dalek.workspace = true
-rayon = "1.12.0"
 sha2.workspace = true
-smallvec = "1.15.2"
 
 [dev-dependencies]
 arbitrary = "1.0"
 proptest = "1.0"
-rand = { workspace = true, features = ["std"] }

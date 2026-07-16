@@ -131,7 +131,7 @@ pub fn benchmark_policy_evaluation() {
     // Create a simple policy input
     let input = PolicyInput {
         facts,
-        controls: crate::controls::ControlSet::new(),
+        controls: crate::controls::ControlSet::new(&[]).unwrap(),
     };
 
     // Create a simple compiled policy (just a placeholder)
@@ -166,6 +166,7 @@ pub fn benchmark_policy_evaluation() {
     println!("Average per evaluation: {:.2?}", eval_time / 1000);
 }
 
+#[cfg(feature = "std")]
 /// Benchmark receipt processing performance
 pub fn benchmark_receipt_processing() {
     // Create a simple receipt payload
@@ -186,7 +187,7 @@ pub fn benchmark_receipt_processing() {
             policy_version: BoundedBytes::new_identifier(b"v1").unwrap(),
             policy_hash: Sha256Digest([0u8; 32]),
         },
-        model: model,
+        model: model.clone(),
         facts: PolicyFacts {
             risk_class: crate::policy::RiskClass::Low,
             requires_human_review: false,

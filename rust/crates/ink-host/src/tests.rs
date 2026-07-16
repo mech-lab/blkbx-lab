@@ -5,11 +5,19 @@ use std::process;
 use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use base64ct::{Base64UrlUnpadded, Encoding};
+use ed25519_dalek::{Signer, SigningKey};
 use serde_json::json;
 
-use super::{create_manifest, doctor, gate, verify, HostError};
+use super::{
+    create_manifest, doctor, gate, key_id_for_public, load_signer_config,
+    revocation_list_digest, verify, HostError, LegacyTrustPolicyJson, LegacyTrustedKeyJson,
+    RevocationListJson, RevokedKeyJson, SignerConfigJson, TrustRegistryJson, ACTIVE_PUBLIC_FILE,
+    ACTIVE_SECRET_FILE, LEGACY_TRUST_POLICY_FILE, REVOCATION_LIST_FILE, SIGNER_CONFIG_FILE,
+    TRUST_REGISTRY_FILE,
+};
 use crate::digest_json;
-use inkreceipts_core::digest::sha256;
+use ink_core::digest::sha256;
 
 static ENV_LOCK: Mutex<()> = Mutex::new(());
 
@@ -108,6 +116,40 @@ fn write_bundle(root: &Path) {
         serde_json::to_vec_pretty(&model).unwrap(),
     )
     .unwrap();
+}
+
+fn policy_path() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../policies/demo-claims.v1.json")
+}
+
+fn write_manifest_fixture(root: &Path, action_id: &str) -> PathBuf {
+    let artifacts = json!([
+        {
+            "artifact_type": "prompt_text",
+            "path": "prompt.txt",
+            "media_type": "text/plain; charset=utf-8",
+        },
+        {
+            "artifact_type": "action_json",
+            "path": "action.json",
+            "media_type": "application/json",
+            "schema_id": "ink.action.v1",
+        },
+        {
+            "artifact_type": "model_waist_json",
+            "path": "model_waist.json",
+            "media_type": "application/json",
+            "schema_id": "ink.model-waist.v1",
+        }
+    ]);
+    let manifest = create_manifest(
+        root,
+        action_id,
+        &serde_json::to_string(&artifacts).unwrap(),
+        Some("2026-07-13T00:00:00Z"),
+    )
+    .unwrap();
+    PathBuf::from(manifest["manifest_path"].as_str().unwrap())
 }
 
 #[test]
@@ -267,6 +309,145 @@ fn host_verify_rejects_mismatched_runtime_projection() {
     assert!(
         matches!(verified, Err(HostError::InvalidInput(message)) if message.contains("runtime projection"))
     );
+
+    let _ = fs::remove_dir_all(&root);
+}
+
+#[test]
+fn host_gate_supports_file_signer_with_json_canonical_encoding() {
+    let _guard = ENV_LOCK.lock().unwrap();
+    let root = unique_temp_dir("inkreceipts-host-file-signer");
+    let config_root = root.join("config");
+    env::set_var("INKRECEIPTS_CONFIG_DIR", &config_root);
+    fs::create_dir_all(&root).unwrap();
+    doctor(true).unwrap();
+
+    let signer_path = config_root.join(SIGNER_CONFIG_FILE);
+    let mut signer: SignerConfigJson =
+        serde_json::from_str(&fs::read_to_string(&signer_path).unwrap()).unwrap();
+    signer.backend = "file_ed25519".to_string();
+    signer.receipt_encoding = "INK-CORE-JSON-CANONICAL-V1".to_string();
+    fs::write(&signer_path, serde_json::to_vec_pretty(&signer).unwrap()).unwrap();
+
+    let doc = doctor(false).unwrap();
+    assert_eq!(doc["demo_ready"], json!(false));
+    assert_eq!(doc["real_replay_ready"], json!(true));
+
+    write_bundle(&root);
+    let manifest_path = write_manifest_fixture(&root, "urn:ink:action:file-signer");
+    let gated = gate(&manifest_path, &policy_path(), None, None, false).unwrap();
+    let receipt_path = PathBuf::from(gated["receipt_path"].as_str().unwrap());
+    let receipt: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(&receipt_path).unwrap()).unwrap();
+    assert_eq!(
+        receipt["signing"]["transcript_encoding"],
+        json!("INK-CORE-JSON-CANONICAL-V1")
+    );
+
+    let verified = verify(&receipt_path, Some(&manifest_path)).unwrap();
+    assert_eq!(verified["verification"]["overall"], "pass");
+
+    let _ = fs::remove_dir_all(&root);
+}
+
+#[test]
+fn host_verify_rejects_revoked_keys() {
+    let _guard = ENV_LOCK.lock().unwrap();
+    let root = unique_temp_dir("inkreceipts-host-revocation");
+    let config_root = root.join("config");
+    env::set_var("INKRECEIPTS_CONFIG_DIR", &config_root);
+    fs::create_dir_all(&root).unwrap();
+    doctor(true).unwrap();
+    write_bundle(&root);
+
+    let manifest_path = write_manifest_fixture(&root, "urn:ink:action:revoked-key");
+    let gated = gate(&manifest_path, &policy_path(), None, None, true).unwrap();
+    let receipt_path = PathBuf::from(gated["receipt_path"].as_str().unwrap());
+
+    let signer = load_signer_config().unwrap();
+    let secret_key_text = fs::read_to_string(config_root.join(&signer.secret_key_path)).unwrap();
+    let secret_key_bytes = Base64UrlUnpadded::decode_vec(secret_key_text.trim()).unwrap();
+    let signing_key = SigningKey::from_bytes(&secret_key_bytes.try_into().unwrap());
+
+    let revocation_path = config_root.join(REVOCATION_LIST_FILE);
+    let mut list: RevocationListJson =
+        serde_json::from_str(&fs::read_to_string(&revocation_path).unwrap()).unwrap();
+    list.revoked_keys.push(RevokedKeyJson {
+        key_id: signer.key_id.clone(),
+        reason: "compromised_for_test".to_string(),
+        revoked_at: "2026-07-16T00:00:00Z".to_string(),
+    });
+    let digest = revocation_list_digest(&list).unwrap();
+    list.signing.payload_hash = digest_json(&digest);
+    list.signing.signature =
+        Base64UrlUnpadded::encode_string(&signing_key.sign(&digest.0).to_bytes());
+    fs::write(&revocation_path, serde_json::to_vec_pretty(&list).unwrap()).unwrap();
+
+    let verified = verify(&receipt_path, Some(&manifest_path));
+    assert!(matches!(verified, Err(HostError::Trust(message)) if message.contains("revoked")));
+
+    let _ = fs::remove_dir_all(&root);
+}
+
+#[test]
+fn doctor_migrates_legacy_trust_policy_into_current_config() {
+    let _guard = ENV_LOCK.lock().unwrap();
+    let root = unique_temp_dir("inkreceipts-host-legacy-migration");
+    let config_root = root.join("config");
+    let keys_root = config_root.join("keys");
+    env::set_var("INKRECEIPTS_CONFIG_DIR", &config_root);
+    fs::create_dir_all(&keys_root).unwrap();
+
+    let secret_key = [7u8; 32];
+    let signing_key = SigningKey::from_bytes(&secret_key);
+    let public_key = signing_key.verifying_key().to_bytes();
+    let key_id = key_id_for_public(&public_key);
+    fs::write(
+        keys_root.join(ACTIVE_SECRET_FILE),
+        Base64UrlUnpadded::encode_string(&secret_key),
+    )
+    .unwrap();
+    fs::write(
+        keys_root.join(ACTIVE_PUBLIC_FILE),
+        Base64UrlUnpadded::encode_string(&public_key),
+    )
+    .unwrap();
+
+    let legacy = LegacyTrustPolicyJson {
+        schema: "ink.trust-policy.v1".to_string(),
+        trusted_keys: vec![LegacyTrustedKeyJson {
+            key_id: key_id.clone(),
+            algorithm: "Ed25519".to_string(),
+            public_key: Base64UrlUnpadded::encode_string(&public_key),
+            issuer_names: vec!["Legacy Issuer".to_string()],
+            status: "active".to_string(),
+        }],
+    };
+    fs::write(
+        config_root.join(LEGACY_TRUST_POLICY_FILE),
+        serde_json::to_vec_pretty(&legacy).unwrap(),
+    )
+    .unwrap();
+
+    let doc = doctor(true).unwrap();
+    assert_eq!(doc["status"], "ready");
+    assert!(config_root.join(SIGNER_CONFIG_FILE).exists());
+    assert!(config_root.join(TRUST_REGISTRY_FILE).exists());
+    assert!(config_root.join(REVOCATION_LIST_FILE).exists());
+
+    let signer: SignerConfigJson =
+        serde_json::from_str(&fs::read_to_string(config_root.join(SIGNER_CONFIG_FILE)).unwrap())
+            .unwrap();
+    assert_eq!(signer.key_id, key_id);
+    assert_eq!(signer.issuer_name, "Legacy Issuer");
+
+    let registry: TrustRegistryJson =
+        serde_json::from_str(&fs::read_to_string(config_root.join(TRUST_REGISTRY_FILE)).unwrap())
+            .unwrap();
+    assert!(registry
+        .issuers
+        .iter()
+        .any(|entry| entry.key_id == key_id && entry.issuer_name == "Legacy Issuer"));
 
     let _ = fs::remove_dir_all(&root);
 }

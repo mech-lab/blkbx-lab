@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use inkreceipts_host::HostError;
+use ink_host::HostError;
 use pyo3::create_exception;
 use pyo3::exceptions::{PyException, PyOSError};
 use pyo3::prelude::*;
@@ -36,7 +36,7 @@ fn create_manifest(
     artifacts_json: String,
     created_at: Option<String>,
 ) -> PyResult<String> {
-    inkreceipts_host::create_manifest(
+    ink_host::create_manifest(
         &bundle_dir,
         &action_id,
         &artifacts_json,
@@ -53,7 +53,7 @@ fn analyze(
     policy_path: PathBuf,
     controls_json: Option<String>,
 ) -> PyResult<String> {
-    inkreceipts_host::analyze(&manifest_path, &policy_path, controls_json.as_deref())
+    ink_host::analyze(&manifest_path, &policy_path, controls_json.as_deref())
         .map_err(map_host_error)
         .and_then(to_json_string)
 }
@@ -67,7 +67,7 @@ fn gate(
     output_path: Option<PathBuf>,
     demo_signer: bool,
 ) -> PyResult<String> {
-    inkreceipts_host::gate(
+    ink_host::gate(
         &manifest_path,
         &policy_path,
         controls_json.as_deref(),
@@ -81,7 +81,7 @@ fn gate(
 #[pyfunction]
 #[pyo3(signature = (receipt_path, manifest_path=None))]
 fn verify(receipt_path: PathBuf, manifest_path: Option<PathBuf>) -> PyResult<String> {
-    inkreceipts_host::verify(&receipt_path, manifest_path.as_deref())
+    ink_host::verify(&receipt_path, manifest_path.as_deref())
         .map_err(map_host_error)
         .and_then(to_json_string)
 }
@@ -93,7 +93,7 @@ fn compare(
     right_receipt: PathBuf,
     output_path: Option<PathBuf>,
 ) -> PyResult<String> {
-    inkreceipts_host::compare(&left_receipt, &right_receipt, output_path.as_deref())
+    ink_host::compare(&left_receipt, &right_receipt, output_path.as_deref())
         .map_err(map_host_error)
         .and_then(to_json_string)
 }
@@ -101,7 +101,7 @@ fn compare(
 #[pyfunction]
 #[pyo3(signature = (initialize_local_issuer=false))]
 fn doctor(initialize_local_issuer: bool) -> PyResult<String> {
-    inkreceipts_host::doctor(initialize_local_issuer)
+    ink_host::doctor(initialize_local_issuer)
         .map_err(map_host_error)
         .and_then(to_json_string)
 }

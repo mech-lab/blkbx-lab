@@ -2,8 +2,12 @@ use crate::digest::{
     write_bool_field, write_i64_field, write_tlv, write_u32_field, write_u8_field, Sha256Sink,
     TranscriptSink,
 };
-use crate::domain::{FACTS_DOMAIN, MODEL_WAIST_DOMAIN, RECEIPT_TRANSCRIPT_DOMAIN, RUNTIME_DOMAIN};
+use crate::domain::{
+    FACTS_DOMAIN, MODEL_WAIST_DOMAIN, RECEIPT_TRANSCRIPT_LEGACY_V1_DOMAIN,
+    RECEIPT_TRANSCRIPT_TLV_V2_DOMAIN, RUNTIME_DOMAIN,
+};
 use crate::error::Error;
+use crate::field_ids;
 use crate::limits::{
     MAX_ISSUER_NAME_LEN, MAX_POLICY_ID_LEN, MAX_POLICY_VERSION_LEN, MAX_REASONS,
     MAX_REASON_CODE_LEN,
@@ -153,8 +157,9 @@ pub fn build_receipt_payload<'a>(
     Ok(payload)
 }
 
-fn write_digest_field(sink: &mut impl TranscriptSink, field_id: u16, digest: Sha256Digest) {
-    let _ = write_tlv(sink, field_id, &digest.0);
+fn write_digest_field(sink: &mut impl TranscriptSink, field_id: u16, digest: Sha256Digest) -> Result<(), Error> {
+    write_tlv(sink, field_id, &digest.0)?;
+    Ok(())
 }
 
 fn write_optional_digest_field(
@@ -163,7 +168,7 @@ fn write_optional_digest_field(
     digest: Option<Sha256Digest>,
 ) -> Result<(), Error> {
     match digest {
-        Some(value) => write_digest_field(sink, field_id, value),
+        Some(value) => write_digest_field(sink, field_id, value)?,
         None => write_tlv(sink, field_id, &[])?,
     }
     Ok(())
@@ -171,18 +176,50 @@ fn write_optional_digest_field(
 
 pub fn runtime_claim_hash(runtime: RuntimeClaim) -> Sha256Digest {
     let mut sink = Sha256Sink::new();
-    let _ = write_tlv(&mut sink, 1, RUNTIME_DOMAIN);
-    write_u8_field(&mut sink, 2, runtime.runtime_kind as u8);
-    write_u8_field(&mut sink, 3, runtime.execution_topology as u8);
-    write_u8_field(&mut sink, 4, runtime.replay_strength as u8);
-    write_bool_field(&mut sink, 5, runtime.determinism.deterministic);
-    write_bool_field(&mut sink, 6, runtime.determinism.seed_bound);
-    write_bool_field(&mut sink, 7, runtime.isolation.process_isolated);
-    write_bool_field(&mut sink, 8, runtime.provider_routing.fallbacks_allowed);
-    write_bool_field(&mut sink, 9, runtime.provider_routing.provider_pinned);
+    let _ = write_tlv(&mut sink, field_ids::runtime_claim::DOMAIN, RUNTIME_DOMAIN);
     write_u8_field(
         &mut sink,
-        10,
+        field_ids::runtime_claim::RUNTIME_KIND,
+        runtime.runtime_kind as u8,
+    );
+    write_u8_field(
+        &mut sink,
+        field_ids::runtime_claim::EXECUTION_TOPOLOGY,
+        runtime.execution_topology as u8,
+    );
+    write_u8_field(
+        &mut sink,
+        field_ids::runtime_claim::REPLAY_STRENGTH,
+        runtime.replay_strength as u8,
+    );
+    write_bool_field(
+        &mut sink,
+        field_ids::runtime_claim::DETERMINISTIC,
+        runtime.determinism.deterministic,
+    );
+    write_bool_field(
+        &mut sink,
+        field_ids::runtime_claim::SEED_BOUND,
+        runtime.determinism.seed_bound,
+    );
+    write_bool_field(
+        &mut sink,
+        field_ids::runtime_claim::PROCESS_ISOLATED,
+        runtime.isolation.process_isolated,
+    );
+    write_bool_field(
+        &mut sink,
+        field_ids::runtime_claim::FALLBACKS_ALLOWED,
+        runtime.provider_routing.fallbacks_allowed,
+    );
+    write_bool_field(
+        &mut sink,
+        field_ids::runtime_claim::PROVIDER_PINNED,
+        runtime.provider_routing.provider_pinned,
+    );
+    write_u8_field(
+        &mut sink,
+        field_ids::runtime_claim::DATA_COLLECTION_POLICY,
         match runtime.provider_routing.data_collection_policy {
             DataCollectionPolicy::DeclaredAllow => 1,
             DataCollectionPolicy::DeclaredDeny => 2,
@@ -194,110 +231,393 @@ pub fn runtime_claim_hash(runtime: RuntimeClaim) -> Sha256Digest {
 
 fn hash_plugin(plugin: PluginClaim<'_>) -> Sha256Digest {
     let mut sink = Sha256Sink::new();
-    write_digest_field(&mut sink, 1, plugin.plugin_id_hash);
-    write_digest_field(&mut sink, 2, plugin.plugin_version_hash);
+    let _ = write_digest_field(
+        &mut sink,
+        field_ids::plugin_claim::PLUGIN_ID_HASH,
+        plugin.plugin_id_hash,
+    );
+    let _ = write_digest_field(
+        &mut sink,
+        field_ids::plugin_claim::PLUGIN_VERSION_HASH,
+        plugin.plugin_version_hash,
+    );
     write_u8_field(
         &mut sink,
-        3,
+        field_ids::plugin_claim::PLUGIN_API_VERSION,
         match plugin.plugin_api_version {
             PluginApiVersion::V1 => 1,
         },
     );
-    write_u8_field(&mut sink, 4, plugin.maintainer_class as u8);
-    write_bool_field(&mut sink, 5, plugin.normalization.input_normalized);
-    write_bool_field(&mut sink, 6, plugin.normalization.output_normalized);
-    write_bool_field(&mut sink, 7, plugin.normalization.raw_request_preserved);
-    write_bool_field(&mut sink, 8, plugin.normalization.raw_response_preserved);
-    write_bool_field(&mut sink, 9, plugin.normalization.secrets_redacted);
-    write_digest_field(&mut sink, 10, plugin.plugin_manifest_hash);
-    let _ = write_tlv(&mut sink, 11, plugin.plugin_id_hint.as_bytes());
-    write_u8_field(&mut sink, 12, plugin.trust_level as u8);
+    write_u8_field(
+        &mut sink,
+        field_ids::plugin_claim::MAINTAINER_CLASS,
+        plugin.maintainer_class as u8,
+    );
+    write_bool_field(
+        &mut sink,
+        field_ids::plugin_claim::INPUT_NORMALIZED,
+        plugin.normalization.input_normalized,
+    );
+    write_bool_field(
+        &mut sink,
+        field_ids::plugin_claim::OUTPUT_NORMALIZED,
+        plugin.normalization.output_normalized,
+    );
+    write_bool_field(
+        &mut sink,
+        field_ids::plugin_claim::RAW_REQUEST_PRESERVED,
+        plugin.normalization.raw_request_preserved,
+    );
+    write_bool_field(
+        &mut sink,
+        field_ids::plugin_claim::RAW_RESPONSE_PRESERVED,
+        plugin.normalization.raw_response_preserved,
+    );
+    write_bool_field(
+        &mut sink,
+        field_ids::plugin_claim::SECRETS_REDACTED,
+        plugin.normalization.secrets_redacted,
+    );
+    let _ = write_digest_field(
+        &mut sink,
+        field_ids::plugin_claim::PLUGIN_MANIFEST_HASH,
+        plugin.plugin_manifest_hash,
+    );
+    let _ = write_tlv(
+        &mut sink,
+        field_ids::plugin_claim::PLUGIN_ID_HINT,
+        plugin.plugin_id_hint.as_bytes(),
+    );
+    write_u8_field(
+        &mut sink,
+        field_ids::plugin_claim::TRUST_LEVEL,
+        plugin.trust_level as u8,
+    );
     sink.finalize()
 }
 
 pub fn policy_facts_hash(facts: PolicyFacts) -> Sha256Digest {
     let mut sink = Sha256Sink::new();
-    let _ = write_tlv(&mut sink, 1, FACTS_DOMAIN);
-    write_u8_field(&mut sink, 2, facts.risk_class as u8);
-    write_bool_field(&mut sink, 3, facts.requires_human_review);
-    write_bool_field(&mut sink, 4, facts.binding_effect_present);
-    write_bool_field(&mut sink, 5, facts.provider_fallbacks_allowed);
-    write_u8_field(&mut sink, 6, facts.plugin_trust_level as u8);
-    write_u8_field(&mut sink, 7, facts.runtime_kind as u8);
-    write_u8_field(&mut sink, 8, facts.replay_strength as u8);
-    write_u8_field(&mut sink, 9, facts.model_class as u8);
+    let _ = write_tlv(&mut sink, field_ids::policy_facts::DOMAIN, FACTS_DOMAIN);
+    write_u8_field(
+        &mut sink,
+        field_ids::policy_facts::RISK_CLASS,
+        facts.risk_class as u8,
+    );
+    write_bool_field(
+        &mut sink,
+        field_ids::policy_facts::REQUIRES_HUMAN_REVIEW,
+        facts.requires_human_review,
+    );
+    write_bool_field(
+        &mut sink,
+        field_ids::policy_facts::BINDING_EFFECT_PRESENT,
+        facts.binding_effect_present,
+    );
+    write_bool_field(
+        &mut sink,
+        field_ids::policy_facts::PROVIDER_FALLBACKS_ALLOWED,
+        facts.provider_fallbacks_allowed,
+    );
+    write_u8_field(
+        &mut sink,
+        field_ids::policy_facts::PLUGIN_TRUST_LEVEL,
+        facts.plugin_trust_level as u8,
+    );
+    write_u8_field(
+        &mut sink,
+        field_ids::policy_facts::RUNTIME_KIND,
+        facts.runtime_kind as u8,
+    );
+    write_u8_field(
+        &mut sink,
+        field_ids::policy_facts::REPLAY_STRENGTH,
+        facts.replay_strength as u8,
+    );
+    write_u8_field(
+        &mut sink,
+        field_ids::policy_facts::MODEL_CLASS,
+        facts.model_class as u8,
+    );
     sink.finalize()
 }
 
 pub fn model_waist_hash(model: ModelWaist<'_>) -> Result<Sha256Digest, Error> {
     model.validate()?;
     let mut sink = Sha256Sink::new();
-    let _ = write_tlv(&mut sink, 1, MODEL_WAIST_DOMAIN);
-    write_u8_field(&mut sink, 2, model.identity.model_class as u8);
-    write_digest_field(&mut sink, 3, model.identity.model_ref_hash);
-    let _ = write_tlv(&mut sink, 4, model.identity.model_slug.as_bytes());
+    let _ = write_tlv(&mut sink, field_ids::model_waist::DOMAIN, MODEL_WAIST_DOMAIN);
+    write_u8_field(
+        &mut sink,
+        field_ids::model_waist::MODEL_CLASS,
+        model.identity.model_class as u8,
+    );
+    let _ = write_digest_field(
+        &mut sink,
+        field_ids::model_waist::MODEL_REF_HASH,
+        model.identity.model_ref_hash,
+    );
+    let _ = write_tlv(
+        &mut sink,
+        field_ids::model_waist::MODEL_SLUG,
+        model.identity.model_slug.as_bytes(),
+    );
     match model.identity.identity_evidence {
-        IdentityEvidence::Declared => write_u8_field(&mut sink, 5, 1),
+        IdentityEvidence::Declared => {
+            write_u8_field(&mut sink, field_ids::model_waist::IDENTITY_EVIDENCE_KIND, 1)
+        }
         IdentityEvidence::ProviderDeclared {
             provider_model_id_hash,
         } => {
-            write_u8_field(&mut sink, 5, 2);
-            write_digest_field(&mut sink, 6, provider_model_id_hash);
+            write_u8_field(&mut sink, field_ids::model_waist::IDENTITY_EVIDENCE_KIND, 2);
+            let _ = write_digest_field(
+                &mut sink,
+                field_ids::model_waist::IDENTITY_EVIDENCE_DIGEST_A,
+                provider_model_id_hash,
+            );
         }
         IdentityEvidence::LocalFilesHashed {
             weights_hash,
             tokenizer_hash,
             config_hash,
         } => {
-            write_u8_field(&mut sink, 5, 3);
-            write_digest_field(&mut sink, 6, weights_hash);
-            write_optional_digest_field(&mut sink, 7, tokenizer_hash)?;
-            write_optional_digest_field(&mut sink, 8, config_hash)?;
+            write_u8_field(&mut sink, field_ids::model_waist::IDENTITY_EVIDENCE_KIND, 3);
+            write_digest_field(
+                &mut sink,
+                field_ids::model_waist::IDENTITY_EVIDENCE_DIGEST_A,
+                weights_hash,
+            )?;
+            write_optional_digest_field(
+                &mut sink,
+                field_ids::model_waist::IDENTITY_EVIDENCE_DIGEST_B,
+                tokenizer_hash,
+            )?;
+            write_optional_digest_field(
+                &mut sink,
+                field_ids::model_waist::IDENTITY_EVIDENCE_DIGEST_C,
+                config_hash,
+            )?;
         }
         IdentityEvidence::ContainerHashed { image_hash } => {
-            write_u8_field(&mut sink, 5, 4);
-            write_digest_field(&mut sink, 6, image_hash);
+            write_u8_field(&mut sink, field_ids::model_waist::IDENTITY_EVIDENCE_KIND, 4);
+            let _ = write_digest_field(
+                &mut sink,
+                field_ids::model_waist::IDENTITY_EVIDENCE_DIGEST_A,
+                image_hash,
+            );
         }
     }
-    write_digest_field(&mut sink, 9, model.invocation.action_hash);
-    write_digest_field(&mut sink, 10, model.invocation.messages_hash);
-    write_optional_digest_field(&mut sink, 11, model.invocation.system_prompt_hash)?;
-    write_optional_digest_field(&mut sink, 12, model.invocation.tool_spec_hash)?;
-    write_optional_digest_field(&mut sink, 13, model.invocation.response_schema_hash)?;
-    write_digest_field(&mut sink, 14, model.invocation.parameters_hash);
+    let _ = write_digest_field(
+        &mut sink,
+        field_ids::model_waist::ACTION_HASH,
+        model.invocation.action_hash,
+    );
+    let _ = write_digest_field(
+        &mut sink,
+        field_ids::model_waist::MESSAGES_HASH,
+        model.invocation.messages_hash,
+    );
+    write_optional_digest_field(
+        &mut sink,
+        field_ids::model_waist::SYSTEM_PROMPT_HASH,
+        model.invocation.system_prompt_hash,
+    )?;
+    write_optional_digest_field(
+        &mut sink,
+        field_ids::model_waist::TOOL_SPEC_HASH,
+        model.invocation.tool_spec_hash,
+    )?;
+    write_optional_digest_field(
+        &mut sink,
+        field_ids::model_waist::RESPONSE_SCHEMA_HASH,
+        model.invocation.response_schema_hash,
+    )?;
+    let _ = write_digest_field(
+        &mut sink,
+        field_ids::model_waist::PARAMETERS_HASH,
+        model.invocation.parameters_hash,
+    );
     match model.invocation.requested_output {
-        RequestedOutput::FreeText => write_u8_field(&mut sink, 15, 1),
+        RequestedOutput::FreeText => {
+            write_u8_field(&mut sink, field_ids::model_waist::REQUESTED_OUTPUT_KIND, 1)
+        }
         RequestedOutput::JsonSchema { schema_hash } => {
-            write_u8_field(&mut sink, 15, 2);
-            write_digest_field(&mut sink, 16, schema_hash);
+            write_u8_field(&mut sink, field_ids::model_waist::REQUESTED_OUTPUT_KIND, 2);
+            let _ = write_digest_field(
+                &mut sink,
+                field_ids::model_waist::REQUESTED_OUTPUT_DIGEST,
+                schema_hash,
+            );
         }
         RequestedOutput::ToolCall { tool_spec_hash } => {
-            write_u8_field(&mut sink, 15, 3);
-            write_digest_field(&mut sink, 16, tool_spec_hash);
+            write_u8_field(&mut sink, field_ids::model_waist::REQUESTED_OUTPUT_KIND, 3);
+            let _ = write_digest_field(
+                &mut sink,
+                field_ids::model_waist::REQUESTED_OUTPUT_DIGEST,
+                tool_spec_hash,
+            );
         }
     }
-    write_optional_digest_field(&mut sink, 17, model.observation.output_text_hash)?;
-    write_optional_digest_field(&mut sink, 18, model.observation.structured_output_hash)?;
-    write_optional_digest_field(&mut sink, 19, model.observation.provider_metadata_hash)?;
-    write_u8_field(&mut sink, 20, model.observation.finish_reason as u8);
+    write_optional_digest_field(
+        &mut sink,
+        field_ids::model_waist::OUTPUT_TEXT_HASH,
+        model.observation.output_text_hash,
+    )?;
+    write_optional_digest_field(
+        &mut sink,
+        field_ids::model_waist::STRUCTURED_OUTPUT_HASH,
+        model.observation.structured_output_hash,
+    )?;
+    write_optional_digest_field(
+        &mut sink,
+        field_ids::model_waist::PROVIDER_METADATA_HASH,
+        model.observation.provider_metadata_hash,
+    )?;
+    write_u8_field(
+        &mut sink,
+        field_ids::model_waist::FINISH_REASON,
+        model.observation.finish_reason as u8,
+    );
     write_u32_field(
         &mut sink,
-        21,
+        field_ids::model_waist::INPUT_TOKENS,
         model.observation.usage.input_tokens.unwrap_or(0),
     );
     write_u32_field(
         &mut sink,
-        22,
+        field_ids::model_waist::OUTPUT_TOKENS,
         model.observation.usage.output_tokens.unwrap_or(0),
     );
     write_u32_field(
         &mut sink,
-        23,
+        field_ids::model_waist::TOTAL_TOKENS,
         model.observation.usage.total_tokens.unwrap_or(0),
     );
-    write_digest_field(&mut sink, 24, runtime_claim_hash(model.runtime));
-    write_digest_field(&mut sink, 25, hash_plugin(model.plugin));
+    let _ = write_digest_field(
+        &mut sink,
+        field_ids::model_waist::RUNTIME_HASH,
+        runtime_claim_hash(model.runtime),
+    );
+    let _ = write_digest_field(
+        &mut sink,
+        field_ids::model_waist::PLUGIN_HASH,
+        hash_plugin(model.plugin),
+    );
     Ok(sink.finalize())
+}
+
+pub fn write_receipt_transcript_legacy_v1(
+    payload: &ReceiptPayload<'_>,
+    sink: &mut impl TranscriptSink,
+) -> Result<(), Error> {
+    payload.validate()?;
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::DOMAIN,
+        RECEIPT_TRANSCRIPT_LEGACY_V1_DOMAIN,
+    );
+    write_u8_field(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::SCHEMA_VERSION,
+        payload.schema_version.as_u8(),
+    );
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::RECEIPT_ID,
+        payload.receipt_id.as_bytes(),
+    );
+    write_u8_field(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::RECEIPT_PROFILE,
+        payload.receipt_profile.as_u8(),
+    );
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::ACTION_ID,
+        payload.action_id.as_bytes(),
+    );
+    write_i64_field(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::ISSUED_AT_SECONDS,
+        payload.issued_at.unix_seconds,
+    );
+    write_u32_field(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::ISSUED_AT_NANOS,
+        payload.issued_at.nanos,
+    );
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::ISSUER_NAME,
+        payload.issuer.name.as_bytes(),
+    );
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::KEY_ID,
+        payload.issuer.key_id.as_bytes(),
+    );
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::PUBLIC_KEY,
+        &payload.issuer.public_key.0,
+    );
+    write_digest_field(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::MANIFEST_HASH,
+        payload.manifest_hash,
+    )?;
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::POLICY_ID,
+        payload.policy.policy_id.as_bytes(),
+    );
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::POLICY_VERSION,
+        payload.policy.policy_version.as_bytes(),
+    );
+    write_digest_field(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::POLICY_HASH,
+        payload.policy.policy_hash,
+    )?;
+    write_digest_field(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::RUNTIME_HASH,
+        runtime_claim_hash(payload.model.runtime),
+    )?;
+    write_digest_field(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::MODEL_HASH,
+        model_waist_hash(payload.model)?,
+    )?;
+    write_digest_field(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::FACTS_HASH,
+        policy_facts_hash(payload.facts),
+    )?;
+    write_u8_field(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::DECISION,
+        payload.decision.as_u8(),
+    );
+    for reason in payload.reasons {
+        let _ = write_tlv(
+            sink,
+            field_ids::receipt_tlv_legacy_v1::REASON,
+            reason.bytes,
+        );
+    }
+    write_digest_field(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::EVIDENCE_SUMMARY_HASH,
+        payload.evidence_summary_hash,
+    )?;
+    write_digest_field(
+        sink,
+        field_ids::receipt_tlv_legacy_v1::CONTROLS_SUMMARY_HASH,
+        payload.controls_summary_hash,
+    )?;
+    Ok(())
 }
 
 pub fn write_receipt_transcript(
@@ -305,30 +625,122 @@ pub fn write_receipt_transcript(
     sink: &mut impl TranscriptSink,
 ) -> Result<(), Error> {
     payload.validate()?;
-    let _ = write_tlv(sink, 1, RECEIPT_TRANSCRIPT_DOMAIN);
-    write_u8_field(sink, 2, payload.schema_version.as_u8());
-    let _ = write_tlv(sink, 3, payload.receipt_id.as_bytes());
-    write_u8_field(sink, 4, payload.receipt_profile.as_u8());
-    let _ = write_tlv(sink, 5, payload.action_id.as_bytes());
-    write_i64_field(sink, 6, payload.issued_at.unix_seconds);
-    write_u32_field(sink, 7, payload.issued_at.nanos);
-    let _ = write_tlv(sink, 8, payload.issuer.name.as_bytes());
-    let _ = write_tlv(sink, 9, payload.issuer.key_id.as_bytes());
-    let _ = write_tlv(sink, 10, &payload.issuer.public_key.0);
-    write_digest_field(sink, 11, payload.manifest_hash);
-    let _ = write_tlv(sink, 12, payload.policy.policy_id.as_bytes());
-    let _ = write_tlv(sink, 13, payload.policy.policy_version.as_bytes());
-    write_digest_field(sink, 14, payload.policy.policy_hash);
-    write_digest_field(sink, 15, runtime_claim_hash(payload.model.runtime));
-    write_digest_field(sink, 16, model_waist_hash(payload.model)?);
-    write_digest_field(sink, 17, policy_facts_hash(payload.facts));
-    write_u8_field(sink, 18, payload.decision.as_u8());
-    for reason in payload.reasons {
-        let _ = write_tlv(sink, 19, reason.bytes);
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_v2::DOMAIN,
+        RECEIPT_TRANSCRIPT_TLV_V2_DOMAIN,
+    );
+    write_u8_field(
+        sink,
+        field_ids::receipt_tlv_v2::SCHEMA_VERSION,
+        payload.schema_version.as_u8(),
+    );
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_v2::RECEIPT_ID,
+        payload.receipt_id.as_bytes(),
+    );
+    write_u8_field(
+        sink,
+        field_ids::receipt_tlv_v2::RECEIPT_PROFILE,
+        payload.receipt_profile.as_u8(),
+    );
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_v2::ACTION_ID,
+        payload.action_id.as_bytes(),
+    );
+    write_i64_field(
+        sink,
+        field_ids::receipt_tlv_v2::ISSUED_AT_SECONDS,
+        payload.issued_at.unix_seconds,
+    );
+    write_u32_field(
+        sink,
+        field_ids::receipt_tlv_v2::ISSUED_AT_NANOS,
+        payload.issued_at.nanos,
+    );
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_v2::ISSUER_NAME,
+        payload.issuer.name.as_bytes(),
+    );
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_v2::KEY_ID,
+        payload.issuer.key_id.as_bytes(),
+    );
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_v2::PUBLIC_KEY,
+        &payload.issuer.public_key.0,
+    );
+    write_digest_field(
+        sink,
+        field_ids::receipt_tlv_v2::MANIFEST_HASH,
+        payload.manifest_hash,
+    )?;
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_v2::POLICY_ID,
+        payload.policy.policy_id.as_bytes(),
+    );
+    let _ = write_tlv(
+        sink,
+        field_ids::receipt_tlv_v2::POLICY_VERSION,
+        payload.policy.policy_version.as_bytes(),
+    );
+    write_digest_field(
+        sink,
+        field_ids::receipt_tlv_v2::POLICY_HASH,
+        payload.policy.policy_hash,
+    )?;
+    write_digest_field(
+        sink,
+        field_ids::receipt_tlv_v2::RUNTIME_HASH,
+        runtime_claim_hash(payload.model.runtime),
+    )?;
+    write_digest_field(
+        sink,
+        field_ids::receipt_tlv_v2::MODEL_HASH,
+        model_waist_hash(payload.model)?,
+    )?;
+    write_digest_field(
+        sink,
+        field_ids::receipt_tlv_v2::FACTS_HASH,
+        policy_facts_hash(payload.facts),
+    )?;
+    write_u8_field(
+        sink,
+        field_ids::receipt_tlv_v2::DECISION,
+        payload.decision.as_u8(),
+    );
+    write_u8_field(
+        sink,
+        field_ids::receipt_tlv_v2::REASON_COUNT,
+        payload.reasons.len() as u8,
+    );
+    for (index, reason) in payload.reasons.iter().enumerate() {
+        let field_id = field_ids::receipt_tlv_v2::REASON_BASE + (index as u16);
+        let _ = write_tlv(sink, field_id, reason.bytes);
     }
-    write_digest_field(sink, 20, payload.evidence_summary_hash);
-    write_digest_field(sink, 21, payload.controls_summary_hash);
+    write_digest_field(
+        sink,
+        field_ids::receipt_tlv_v2::EVIDENCE_SUMMARY_HASH,
+        payload.evidence_summary_hash,
+    )?;
+    write_digest_field(
+        sink,
+        field_ids::receipt_tlv_v2::CONTROLS_SUMMARY_HASH,
+        payload.controls_summary_hash,
+    )?;
     Ok(())
+}
+
+pub fn receipt_transcript_hash_legacy_v1(payload: &ReceiptPayload<'_>) -> Result<Sha256Digest, Error> {
+    let mut sink = Sha256Sink::new();
+    write_receipt_transcript_legacy_v1(payload, &mut sink)?;
+    Ok(sink.finalize())
 }
 
 pub fn receipt_transcript_hash(payload: &ReceiptPayload<'_>) -> Result<Sha256Digest, Error> {

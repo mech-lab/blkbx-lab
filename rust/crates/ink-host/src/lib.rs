@@ -9,32 +9,33 @@ use base64ct::{Base64UrlUnpadded, Encoding};
 use dirs::config_dir;
 use ed25519_dalek::{Signer, SigningKey};
 use rand::RngCore;
-use inkreceipts_core::compare::{compare_receipts, ComparisonOut, VerifiedReceiptSummary};
-use inkreceipts_core::controls::{ControlObservation, ControlSet, ControlStatus, ControlType};
-use inkreceipts_core::digest::{sha256, write_tlv, Sha256Sink};
-use inkreceipts_core::manifest::{ArtifactRef, ArtifactType, ManifestBinding, MediaType};
-use inkreceipts_core::model_waist::{
+use ink_core::compare::{compare_receipts, ComparisonOut, VerifiedReceiptSummary};
+use ink_core::controls::{ControlObservation, ControlSet, ControlStatus, ControlType};
+use ink_core::digest::{sha256, write_tlv, Sha256Sink};
+use ink_core::limits;
+use ink_core::manifest::{ArtifactRef, ArtifactType, ManifestBinding, MediaType};
+use ink_core::model_waist::{
     DataCollectionPolicy, DeterminismClaim, ExecutionTopology, FinishReason, IdentityEvidence,
     IsolationClaim, MaintainerClass, ModelClass, ModelIdentityClaim, ModelInvocationClaim,
     ModelObservationClaim, ModelWaist, NormalizationClaim, PluginApiVersion, PluginClaim,
     PluginTrustLevel, ProviderRoutingClaim, ReplayStrength, RequestedOutput, RuntimeClaim,
     RuntimeKind, TokenUsage,
 };
-use inkreceipts_core::policy::{
+use ink_core::policy::{
     evaluate_policy, CompiledPolicy, CompiledRule, ConditionNode, ConditionOp, ConditionValue,
     Decision, EvaluationOut, PluginTrustFact, PolicyFacts, PolicyInput, ReasonCodeSlot,
     ReasonWriter, RiskClass, RuleEffect,
 };
-use inkreceipts_core::receipt::{
-    build_receipt_payload, receipt_transcript_hash, IssuerClaim, PolicyBinding, ReceiptInput,
-    ReceiptPayload, ReceiptProfile, ReceiptSchemaVersion,
+use ink_core::receipt::{
+    build_receipt_payload, receipt_transcript_hash, receipt_transcript_hash_legacy_v1,
+    IssuerClaim, PolicyBinding, ReceiptInput, ReceiptPayload, ReceiptProfile,
+    ReceiptSchemaVersion,
 };
-use inkreceipts_core::signing::sign_receipt_payload;
-use inkreceipts_core::types::{
+use ink_core::signing::verify_receipt_signature_for_digest;
+use ink_core::types::{
     ActionId, BoundedBytes, Ed25519PublicKey, Ed25519Signature, KeyId, ReceiptId, Sha256Digest,
     TimestampUtc,
 };
-use inkreceipts_core::verify::{verify_receipt, VerificationOut, VerificationReason};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256, Sha512};
@@ -44,9 +45,16 @@ const LOCAL_ISSUER_NAME: &str = "BLKBX Local Dev";
 const RECEIPT_PROFILE: &str = "thin_waist_v2";
 const LEGACY_DEV_SECRET: &[u8] = b"dev-secret-key-do-not-use-in-prod";
 const CONFIG_DIR_NAME: &str = "inkreceipts";
-const TRUST_POLICY_FILE: &str = "trust-policy.json";
+const LEGACY_TRUST_POLICY_FILE: &str = "trust-policy.json";
+const SIGNER_CONFIG_FILE: &str = "signer-config.json";
+const TRUST_REGISTRY_FILE: &str = "trust-registry.json";
+const REVOCATION_LIST_FILE: &str = "revocations.json";
 const ACTIVE_SECRET_FILE: &str = "active.ed25519.key";
 const ACTIVE_PUBLIC_FILE: &str = "active.ed25519.pub";
+const RECEIPT_ENCODING_TLV_V2: &str = "INK-CORE-TLV-V2";
+const RECEIPT_ENCODING_TLV_V1_LEGACY: &str = "INK-CORE-TRANSCRIPT-V1";
+const RECEIPT_ENCODING_JSON_CANONICAL_V1: &str = "INK-CORE-JSON-CANONICAL-V1";
+const REVOCATION_ENCODING_JSON_V1: &str = "INK-REVOCATION-JSON-V1";
 
 #[derive(Debug, Error)]
 pub enum HostError {
@@ -55,7 +63,7 @@ pub enum HostError {
     #[error("json error: {0}")]
     Json(#[from] serde_json::Error),
     #[error("core error: {0:?}")]
-    Core(inkreceipts_core::error::Error),
+    Core(ink_core::error::Error),
     #[error("invalid input: {0}")]
     InvalidInput(String),
     #[error("unsafe path: {0}")]
@@ -64,8 +72,8 @@ pub enum HostError {
     Trust(String),
 }
 
-impl From<inkreceipts_core::error::Error> for HostError {
-    fn from(value: inkreceipts_core::error::Error) -> Self {
+impl From<ink_core::error::Error> for HostError {
+    fn from(value: ink_core::error::Error) -> Self {
         Self::Core(value)
     }
 }
@@ -358,13 +366,56 @@ struct ComparisonJson {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct TrustPolicyJson {
+struct TrustRegistryJson {
     schema: String,
-    trusted_keys: Vec<TrustedKeyJson>,
+    issuers: Vec<TrustedIssuerJson>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct TrustedKeyJson {
+struct TrustedIssuerJson {
+    key_id: String,
+    algorithm: String,
+    public_key: String,
+    issuer_name: String,
+    org_name: String,
+    status: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct SignerConfigJson {
+    schema: String,
+    backend: String,
+    issuer_name: String,
+    key_id: String,
+    secret_key_path: String,
+    public_key_path: String,
+    trust_registry_path: String,
+    revocation_list_path: String,
+    receipt_encoding: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct RevocationListJson {
+    schema: String,
+    revoked_keys: Vec<RevokedKeyJson>,
+    signing: SigningJson,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct RevokedKeyJson {
+    key_id: String,
+    reason: String,
+    revoked_at: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct LegacyTrustPolicyJson {
+    schema: String,
+    trusted_keys: Vec<LegacyTrustedKeyJson>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct LegacyTrustedKeyJson {
     key_id: String,
     algorithm: String,
     public_key: String,
@@ -441,7 +492,7 @@ pub fn analyze(
 ) -> Result<Value, HostError> {
     let bundle = load_bundle(manifest_path, controls_json)?;
     let policy = load_policy(policy_path)?;
-    let mut reason_slots = [ReasonCodeSlot { bytes: b"" }; inkreceipts_core::limits::MAX_REASONS];
+    let mut reason_slots = [ReasonCodeSlot { bytes: b"" }; limits::MAX_REASONS];
     let mut evaluation = EvaluationOut {
         decision: Decision::Warn,
         reasons: ReasonWriter {
@@ -490,12 +541,6 @@ pub fn gate(
     output_path: Option<&Path>,
     demo_signer: bool,
 ) -> Result<Value, HostError> {
-    if !demo_signer {
-        return Err(HostError::Trust(
-            "v0.6 gate requires explicit demo signer approval; use demo() or pass --demo-signer"
-                .to_string(),
-        ));
-    }
     let bundle = load_bundle(manifest_path, controls_json)?;
     let policy = load_policy(policy_path)?;
     if let Some(raw_controls) = controls_json {
@@ -505,7 +550,7 @@ pub fn gate(
             .join("controls.supplied.json");
         fs::write(controls_path, raw_controls)?;
     }
-    let mut reason_slots = [ReasonCodeSlot { bytes: b"" }; inkreceipts_core::limits::MAX_REASONS];
+    let mut reason_slots = [ReasonCodeSlot { bytes: b"" }; limits::MAX_REASONS];
     let mut evaluation = EvaluationOut {
         decision: Decision::Warn,
         reasons: ReasonWriter {
@@ -522,6 +567,12 @@ pub fn gate(
         &mut evaluation,
     )?;
     let issuer = ensure_local_issuer()?;
+    if issuer.requires_demo_consent() && !demo_signer {
+        return Err(HostError::Trust(
+            "gate requires explicit demo signer approval when the configured backend is demo_file"
+                .to_string(),
+        ));
+    }
     let now = now_timestamp();
     let issued_at = TimestampUtc {
         unix_seconds: now.unix_seconds,
@@ -536,18 +587,16 @@ pub fn gate(
             action_id: leak_action_id(bundle.manifest.action_id.clone())?,
             issued_at,
             issuer: IssuerClaim {
-                name: leak_bounded::<{ inkreceipts_core::limits::MAX_ISSUER_NAME_LEN }>(
-                    LOCAL_ISSUER_NAME.to_string(),
-                )?,
+                name: leak_bounded::<{ limits::MAX_ISSUER_NAME_LEN }>(issuer.issuer_name.clone())?,
                 key_id: leak_key_id(issuer.key_id.clone())?,
                 public_key: Ed25519PublicKey(issuer.public_key),
             },
             manifest_hash: bundle.manifest_hash,
             policy: PolicyBinding {
-                policy_id: leak_bounded::<{ inkreceipts_core::limits::MAX_POLICY_ID_LEN }>(
+                policy_id: leak_bounded::<{ limits::MAX_POLICY_ID_LEN }>(
                     policy.file.id.clone(),
                 )?,
-                policy_version: leak_bounded::<{ inkreceipts_core::limits::MAX_POLICY_VERSION_LEN }>(
+                policy_version: leak_bounded::<{ limits::MAX_POLICY_VERSION_LEN }>(
                     policy.file.version.clone(),
                 )?,
                 policy_hash: sha256(&fs::read(policy_path)?),
@@ -559,8 +608,6 @@ pub fn gate(
         },
         &evaluation,
     )?;
-    let signing_key = SigningKey::from_bytes(&issuer.secret_key);
-    let signature = sign_receipt_payload(&payload, &signing_key)?;
     let receipt = ReceiptJson {
         schema: "ink.receipt.v2".to_string(),
         receipt_id: payload.receipt_id.as_str()?.to_string(),
@@ -586,13 +633,26 @@ pub fn gate(
         evidence_summary_hash: digest_json(&payload.evidence_summary_hash),
         controls_summary_hash: digest_json(&payload.controls_summary_hash),
         signing: SigningJson {
-            transcript_encoding: "INK-CORE-TRANSCRIPT-V1".to_string(),
-            payload_hash: digest_json(&receipt_transcript_hash(&payload)?),
+            transcript_encoding: issuer.receipt_encoding.clone(),
+            payload_hash: DigestJson {
+                algorithm: "sha-256".to_string(),
+                digest: String::new(),
+            },
             algorithm: "Ed25519".to_string(),
             key_id: payload.issuer.key_id.as_str()?.to_string(),
-            signature: Base64UrlUnpadded::encode_string(&signature.0),
+            signature: String::new(),
         },
     };
+    let digest = receipt_digest_for_encoding(&receipt, &payload, &issuer.receipt_encoding)?;
+    let signature = if issuer.receipt_encoding == RECEIPT_ENCODING_TLV_V2 {
+        Ed25519Signature(SigningKey::from_bytes(&issuer.secret_key).sign(&digest.0).to_bytes())
+    } else {
+        let signing_key = SigningKey::from_bytes(&issuer.secret_key);
+        Ed25519Signature(signing_key.sign(&digest.0).to_bytes())
+    };
+    let mut receipt = receipt;
+    receipt.signing.payload_hash = digest_json(&digest);
+    receipt.signing.signature = Base64UrlUnpadded::encode_string(&signature.0);
     let out_path = output_path.map(PathBuf::from).unwrap_or_else(|| {
         manifest_path
             .parent()
@@ -633,26 +693,29 @@ pub fn verify(receipt_path: &Path, manifest_path: Option<&Path>) -> Result<Value
     }
     let receipt: ReceiptJson = serde_json::from_str(&raw)?;
     let trusted = load_trusted_key(&receipt.issuer.key_id, &receipt.issuer.name)?;
+    ensure_key_not_revoked(&trusted.key_id)?;
     let payload = receipt_payload_from_json(&receipt)?;
     let signature = Ed25519Signature(decode_fixed::<64>(&receipt.signing.signature)?);
-    let mut core_out = VerificationOut {
-        valid: false,
-        payload_hash: Sha256Digest::ZERO,
-        reason: VerificationReason::InvalidSignature,
-    };
-    verify_receipt(
-        &payload,
-        &signature,
-        &Ed25519PublicKey(decode_fixed::<32>(&trusted.public_key)?),
-        &mut core_out,
-    )?;
+    let digest = receipt_digest_for_encoding(&receipt, &payload, &receipt.signing.transcript_encoding)?;
+    let expected_payload_hash = digest_json(&digest);
+    let payload_hash_valid = receipt.signing.payload_hash.digest == expected_payload_hash.digest
+        && receipt.signing.payload_hash.algorithm == expected_payload_hash.algorithm;
+    let signature_valid = payload_hash_valid
+        && verify_receipt_signature_for_digest(
+            &digest,
+            &signature,
+            &Ed25519PublicKey(decode_fixed::<32>(&trusted.public_key)?),
+        )
+        .is_ok();
     let sibling = sibling_manifest(receipt_path);
     let manifest_candidate = manifest_path.map(PathBuf::from).or(sibling);
     let mut scope = "receipt-only";
-    let mut overall = if core_out.valid { "pass" } else { "fail" };
+    let mut overall = if signature_valid { "pass" } else { "fail" };
     let mut checks = vec![
-        json!({"id": "receipt.signature", "status": if core_out.valid { "pass" } else { "fail" }, "reason_code": if core_out.reason == VerificationReason::Valid { "RECEIPT_SIGNATURE_VALID" } else { "RECEIPT_SIGNATURE_INVALID" }}),
+        json!({"id": "payload.hash", "status": if payload_hash_valid { "pass" } else { "fail" }, "reason_code": if payload_hash_valid { "RECEIPT_PAYLOAD_HASH_MATCH" } else { "RECEIPT_PAYLOAD_HASH_MISMATCH" }}),
+        json!({"id": "receipt.signature", "status": if signature_valid { "pass" } else { "fail" }, "reason_code": if signature_valid { "RECEIPT_SIGNATURE_VALID" } else { "RECEIPT_SIGNATURE_INVALID" }}),
         json!({"id": "issuer.trust", "status": "pass", "reason_code": "ISSUER_KEY_TRUSTED"}),
+        json!({"id": "issuer.revocation", "status": "pass", "reason_code": "ISSUER_KEY_NOT_REVOKED"}),
     ];
     if let Some(ref manifest_path) = manifest_candidate {
         let bundle = load_bundle(manifest_path, None)?;
@@ -781,12 +844,28 @@ pub fn doctor(initialize_local_issuer: bool) -> Result<Value, HostError> {
         json!({"name": "native_core", "status": "ok"}),
         json!({"name": "receipt_v2", "status": "ok"}),
     ];
+    let mut demo_ready = false;
+    let mut real_replay_ready = false;
     if initialize_local_issuer {
         let issuer = ensure_local_issuer()?;
-        notes.push(format!("initialized local issuer {}", issuer.key_id));
+        notes.push(format!("initialized signer {}", issuer.key_id));
         checks.push(json!({"name": "local_issuer", "status": "ok"}));
-    } else if load_any_trusted_key().is_ok() {
+        checks.push(json!({"name": "signer_backend", "status": issuer.backend}));
+        checks.push(json!({"name": "receipt_encoding", "status": issuer.receipt_encoding}));
+        checks.push(json!({"name": "trust_registry", "status": "ok"}));
+        checks.push(json!({"name": "revocation_list", "status": "ok"}));
+        demo_ready = issuer.requires_demo_consent();
+        real_replay_ready = issuer.backend == "file_ed25519";
+    } else if let Ok(config) = load_signer_config() {
         checks.push(json!({"name": "local_issuer", "status": "ok"}));
+        checks.push(json!({"name": "signer_backend", "status": config.backend}));
+        checks.push(json!({"name": "receipt_encoding", "status": config.receipt_encoding}));
+        checks.push(json!({"name": "trust_registry", "status": if config_root()?.join(&config.trust_registry_path).exists() { "ok" } else { "missing" }}));
+        checks.push(json!({"name": "revocation_list", "status": if config_root()?.join(&config.revocation_list_path).exists() { "ok" } else { "missing" }}));
+        demo_ready = config.backend == "demo_file";
+        real_replay_ready = config.backend == "file_ed25519"
+            && config_root()?.join(&config.trust_registry_path).exists()
+            && config_root()?.join(&config.revocation_list_path).exists();
     } else {
         checks.push(json!({"name": "local_issuer", "status": "missing"}));
         notes.push(
@@ -794,16 +873,13 @@ pub fn doctor(initialize_local_issuer: bool) -> Result<Value, HostError> {
                 .to_string(),
         );
     }
-    notes.push(
-        "the built-in local issuer is demo-only; use demo() or pass --demo-signer explicitly"
-            .to_string(),
-    );
+    notes.push("demo_file requires explicit --demo-signer; file_ed25519 can issue receipts without demo consent once configured".to_string());
     Ok(json!({
         "status": "ready",
         "checks": checks,
         "notes": notes,
-        "demo_ready": true,
-        "real_replay_ready": false,
+        "demo_ready": demo_ready,
+        "real_replay_ready": real_replay_ready,
     }))
 }
 
@@ -915,10 +991,10 @@ fn load_policy(policy_path: &Path) -> Result<PolicyBundle, HostError> {
         });
     }
     let compiled = CompiledPolicy {
-        policy_id: leak_bounded::<{ inkreceipts_core::limits::MAX_POLICY_ID_LEN }>(
+        policy_id: leak_bounded::<{ limits::MAX_POLICY_ID_LEN }>(
             file.id.clone(),
         )?,
-        policy_version: leak_bounded::<{ inkreceipts_core::limits::MAX_POLICY_VERSION_LEN }>(
+        policy_version: leak_bounded::<{ limits::MAX_POLICY_VERSION_LEN }>(
             file.version.clone(),
         )?,
         policy_hash: sha256(&raw),
@@ -1068,7 +1144,7 @@ fn chain_conditions(
 
 fn push_node(nodes: &mut Vec<ConditionNode>, node: ConditionNode) -> Result<u16, HostError> {
     let index = nodes.len();
-    if index >= inkreceipts_core::limits::MAX_CONDITION_NODES {
+    if index >= limits::MAX_CONDITION_NODES {
         return Err(HostError::InvalidInput(
             "too many condition nodes".to_string(),
         ));
@@ -1087,7 +1163,7 @@ fn normalize_model(json_model: &ModelWaistJson) -> Result<ModelWaist<'static>, H
         identity: ModelIdentityClaim {
             model_class: model_class_from_str(&json_model.identity.model_class)?,
             model_ref_hash: parse_digest(&json_model.identity.model_ref_hash)?,
-            model_slug: leak_bounded::<{ inkreceipts_core::limits::MAX_MODEL_SLUG_LEN }>(
+            model_slug: leak_bounded::<{ limits::MAX_MODEL_SLUG_LEN }>(
                 json_model.identity.model_slug.clone(),
             )?,
             identity_evidence: match &json_model.identity.identity_evidence {
@@ -1205,7 +1281,7 @@ fn normalize_model(json_model: &ModelWaistJson) -> Result<ModelWaist<'static>, H
                 secrets_redacted: json_model.plugin.normalization.secrets_redacted,
             },
             plugin_manifest_hash: parse_digest(&json_model.plugin.plugin_manifest_hash)?,
-            plugin_id_hint: leak_bounded::<{ inkreceipts_core::limits::MAX_PLUGIN_ID_HINT_LEN }>(
+            plugin_id_hint: leak_bounded::<{ limits::MAX_PLUGIN_ID_HINT_LEN }>(
                 json_model.plugin.plugin_id_hint.clone(),
             )?,
             trust_level: plugin_trust_from_str(&json_model.plugin.trust_level),
@@ -1278,7 +1354,7 @@ fn receipt_payload_from_json(receipt: &ReceiptJson) -> Result<ReceiptPayload<'st
         action_id: leak_action_id(receipt.action_id.clone())?,
         issued_at: TimestampUtc::new(receipt.issued_at, 0)?,
         issuer: IssuerClaim {
-            name: leak_bounded::<{ inkreceipts_core::limits::MAX_ISSUER_NAME_LEN }>(
+            name: leak_bounded::<{ limits::MAX_ISSUER_NAME_LEN }>(
                 receipt.issuer.name.clone(),
             )?,
             key_id: leak_key_id(receipt.issuer.key_id.clone())?,
@@ -1286,10 +1362,10 @@ fn receipt_payload_from_json(receipt: &ReceiptJson) -> Result<ReceiptPayload<'st
         },
         manifest_hash: parse_digest(&receipt.manifest_hash)?,
         policy: PolicyBinding {
-            policy_id: leak_bounded::<{ inkreceipts_core::limits::MAX_POLICY_ID_LEN }>(
+            policy_id: leak_bounded::<{ limits::MAX_POLICY_ID_LEN }>(
                 receipt.policy.id.clone(),
             )?,
-            policy_version: leak_bounded::<{ inkreceipts_core::limits::MAX_POLICY_VERSION_LEN }>(
+            policy_version: leak_bounded::<{ limits::MAX_POLICY_VERSION_LEN }>(
                 receipt.policy.version.clone(),
             )?,
             policy_hash: parse_digest(&receipt.policy.hash)?,
@@ -1382,27 +1458,76 @@ fn verify_legacy_v1(receipt_path: &Path, value: &Value) -> Result<Value, HostErr
 
 fn ensure_local_issuer() -> Result<LocalIssuer, HostError> {
     let root = config_root()?;
+    fs::create_dir_all(&root)?;
+    let _ = migrate_legacy_trust_policy(&root)?;
+    if let Ok(config) = load_signer_config() {
+        return load_issuer_from_config(&root, &config);
+    }
+
     let keys_dir = root.join("keys");
     fs::create_dir_all(&keys_dir)?;
     let secret_path = keys_dir.join(ACTIVE_SECRET_FILE);
     let public_path = keys_dir.join(ACTIVE_PUBLIC_FILE);
-    if secret_path.exists() && public_path.exists() {
-        let secret_key = decode_fixed::<32>(&fs::read_to_string(secret_path)?)?;
-        let public_key = decode_fixed::<32>(&fs::read_to_string(public_path)?)?;
-        let key_id = key_id_for_public(&public_key);
-        ensure_trusted_key(&key_id, &public_key)?;
-        return Ok(LocalIssuer {
-            secret_key,
-            public_key,
-            key_id,
-        });
+    let (secret_key, public_key) = if secret_path.exists() && public_path.exists() {
+        (
+            decode_fixed::<32>(&fs::read_to_string(&secret_path)?)?,
+            decode_fixed::<32>(&fs::read_to_string(&public_path)?)?,
+        )
+    } else {
+        let mut rng = rand::rng();
+        let mut secret_key = [0u8; 32];
+        rng.fill_bytes(&mut secret_key);
+        let signing_key = SigningKey::from_bytes(&secret_key);
+        let public_key = signing_key.verifying_key().to_bytes();
+        write_private_key(&secret_path, &secret_key)?;
+        fs::write(&public_path, Base64UrlUnpadded::encode_string(&public_key))?;
+        (secret_key, public_key)
+    };
+
+    let key_id = key_id_for_public(&public_key);
+    let config = default_signer_config(&key_id);
+    write_json(&root.join(SIGNER_CONFIG_FILE), &config)?;
+    ensure_registry_entry(&root, &config, &public_key)?;
+    ensure_signed_revocation_list(&root, &config, &secret_key, &public_key, &key_id)?;
+    load_issuer_from_config(&root, &config)
+}
+
+fn load_signer_config() -> Result<SignerConfigJson, HostError> {
+    let root = config_root()?;
+    let path = root.join(SIGNER_CONFIG_FILE);
+    let config: SignerConfigJson = serde_json::from_str(&fs::read_to_string(path)?)?;
+    Ok(config)
+}
+
+fn load_trusted_key(key_id: &str, issuer_name: &str) -> Result<TrustedIssuerJson, HostError> {
+    let registry = load_trust_registry()?;
+    registry
+        .issuers
+        .into_iter()
+        .find(|entry| entry.key_id == key_id && entry.status == "active" && entry.issuer_name == issuer_name)
+        .ok_or_else(|| HostError::Trust(format!("unknown trusted key {key_id}")))
+}
+
+fn default_signer_config(key_id: &str) -> SignerConfigJson {
+    SignerConfigJson {
+        schema: "ink.signer-config.v1".to_string(),
+        backend: "demo_file".to_string(),
+        issuer_name: LOCAL_ISSUER_NAME.to_string(),
+        key_id: key_id.to_string(),
+        secret_key_path: format!("keys/{ACTIVE_SECRET_FILE}"),
+        public_key_path: format!("keys/{ACTIVE_PUBLIC_FILE}"),
+        trust_registry_path: TRUST_REGISTRY_FILE.to_string(),
+        revocation_list_path: REVOCATION_LIST_FILE.to_string(),
+        receipt_encoding: RECEIPT_ENCODING_TLV_V2.to_string(),
     }
-    let mut rng = rand::rng();
-    let mut secret_key = [0u8; 32];
-    rng.fill_bytes(&mut secret_key);
-    let signing_key = SigningKey::from_bytes(&secret_key);
-    let public_key = signing_key.verifying_key().to_bytes();
-    // Write secret key with restrictive permissions (0o600)
+}
+
+fn resolve_config_path(root: &Path, relative: &str) -> PathBuf {
+    root.join(relative)
+}
+
+fn write_private_key(path: &Path, secret_key: &[u8; 32]) -> Result<(), HostError> {
+    #[cfg(unix)]
     {
         use std::os::unix::fs::OpenOptionsExt;
         let mut file = std::fs::OpenOptions::new()
@@ -1410,71 +1535,239 @@ fn ensure_local_issuer() -> Result<LocalIssuer, HostError> {
             .create(true)
             .truncate(true)
             .mode(0o600)
-            .open(&secret_path)?;
-        file.write_all(Base64UrlUnpadded::encode_string(&secret_key).as_bytes())?;
+            .open(path)?;
+        file.write_all(Base64UrlUnpadded::encode_string(secret_key).as_bytes())?;
         file.flush()?;
+        return Ok(());
     }
-    fs::write(&public_path, Base64UrlUnpadded::encode_string(&public_key))?;
-    let key_id = key_id_for_public(&public_key);
-    ensure_trusted_key(&key_id, &public_key)?;
+    #[cfg(not(unix))]
+    {
+        fs::write(path, Base64UrlUnpadded::encode_string(secret_key))?;
+        return Ok(());
+    }
+}
+
+fn load_issuer_from_config(root: &Path, config: &SignerConfigJson) -> Result<LocalIssuer, HostError> {
+    let secret_path = resolve_config_path(root, &config.secret_key_path);
+    let public_path = resolve_config_path(root, &config.public_key_path);
+    let secret_key = decode_fixed::<32>(&fs::read_to_string(&secret_path)?)?;
+    let public_key = decode_fixed::<32>(&fs::read_to_string(&public_path)?)?;
+    let derived_key_id = key_id_for_public(&public_key);
+    if config.key_id != derived_key_id {
+        return Err(HostError::Trust(format!(
+            "signer config key_id {} does not match the configured public key",
+            config.key_id
+        )));
+    }
+    ensure_registry_entry(root, config, &public_key)?;
+    ensure_signed_revocation_list(root, config, &secret_key, &public_key, &config.key_id)?;
     Ok(LocalIssuer {
         secret_key,
         public_key,
-        key_id,
+        key_id: config.key_id.clone(),
+        issuer_name: config.issuer_name.clone(),
+        backend: config.backend.clone(),
+        receipt_encoding: config.receipt_encoding.clone(),
     })
 }
 
-fn ensure_trusted_key(key_id: &str, public_key: &[u8; 32]) -> Result<(), HostError> {
+fn migrate_legacy_trust_policy(root: &Path) -> Result<bool, HostError> {
+    let legacy_path = root.join(LEGACY_TRUST_POLICY_FILE);
+    if !legacy_path.exists() {
+        return Ok(false);
+    }
+
+    let mut migrated = false;
+    let registry_path = root.join(TRUST_REGISTRY_FILE);
+    if !registry_path.exists() {
+        let legacy: LegacyTrustPolicyJson = serde_json::from_str(&fs::read_to_string(&legacy_path)?)?;
+        let mut issuers = Vec::new();
+        for key in legacy.trusted_keys {
+            issuers.push(TrustedIssuerJson {
+                key_id: key.key_id,
+                algorithm: key.algorithm,
+                public_key: key.public_key,
+                issuer_name: key
+                    .issuer_names
+                    .first()
+                    .cloned()
+                    .unwrap_or_else(|| LOCAL_ISSUER_NAME.to_string()),
+                org_name: "BLKBX Lab".to_string(),
+                status: key.status,
+            });
+        }
+        write_json(
+            &registry_path,
+            &TrustRegistryJson {
+                schema: "ink.trust-registry.v1".to_string(),
+                issuers,
+            },
+        )?;
+        migrated = true;
+    }
+
+    let signer_config_path = root.join(SIGNER_CONFIG_FILE);
+    if !signer_config_path.exists() {
+        let public_path = root.join("keys").join(ACTIVE_PUBLIC_FILE);
+        if public_path.exists() {
+            let public_key = decode_fixed::<32>(&fs::read_to_string(public_path)?)?;
+            let key_id = key_id_for_public(&public_key);
+            let mut config = default_signer_config(&key_id);
+            if registry_path.exists() {
+                let registry: TrustRegistryJson =
+                    serde_json::from_str(&fs::read_to_string(&registry_path)?)?;
+                if let Some(entry) = registry
+                    .issuers
+                    .iter()
+                    .find(|entry| entry.key_id == key_id && entry.status == "active")
+                {
+                    config.issuer_name = entry.issuer_name.clone();
+                }
+            }
+            write_json(&signer_config_path, &config)?;
+            migrated = true;
+        }
+    }
+
+    Ok(migrated)
+}
+
+fn load_trust_registry() -> Result<TrustRegistryJson, HostError> {
     let root = config_root()?;
-    fs::create_dir_all(&root)?;
-    let path = root.join(TRUST_POLICY_FILE);
-    let mut policy = if path.exists() {
-        serde_json::from_str::<TrustPolicyJson>(&fs::read_to_string(&path)?)?
+    let path = root.join(TRUST_REGISTRY_FILE);
+    let registry: TrustRegistryJson = serde_json::from_str(&fs::read_to_string(path)?)?;
+    Ok(registry)
+}
+
+fn ensure_registry_entry(
+    root: &Path,
+    config: &SignerConfigJson,
+    public_key: &[u8; 32],
+) -> Result<(), HostError> {
+    let path = resolve_config_path(root, &config.trust_registry_path);
+    let mut registry = if path.exists() {
+        serde_json::from_str::<TrustRegistryJson>(&fs::read_to_string(&path)?)?
     } else {
-        TrustPolicyJson {
-            schema: "ink.trust-policy.v1".to_string(),
-            trusted_keys: Vec::new(),
+        TrustRegistryJson {
+            schema: "ink.trust-registry.v1".to_string(),
+            issuers: Vec::new(),
         }
     };
-    if !policy
-        .trusted_keys
+    if !registry
+        .issuers
         .iter()
-        .any(|entry| entry.key_id == key_id)
+        .any(|entry| entry.key_id == config.key_id && entry.issuer_name == config.issuer_name)
     {
-        policy.trusted_keys.push(TrustedKeyJson {
-            key_id: key_id.to_string(),
+        registry.issuers.push(TrustedIssuerJson {
+            key_id: config.key_id.clone(),
             algorithm: "Ed25519".to_string(),
             public_key: Base64UrlUnpadded::encode_string(public_key),
-            issuer_names: vec![LOCAL_ISSUER_NAME.to_string()],
+            issuer_name: config.issuer_name.clone(),
+            org_name: "BLKBX Lab".to_string(),
             status: "active".to_string(),
         });
-        write_json(&path, &policy)?;
+        write_json(&path, &registry)?;
     }
     Ok(())
 }
 
-fn load_trusted_key(key_id: &str, issuer_name: &str) -> Result<TrustedKeyJson, HostError> {
-    let path = config_root()?.join(TRUST_POLICY_FILE);
-    let policy: TrustPolicyJson = serde_json::from_str(&fs::read_to_string(path)?)?;
-    policy
-        .trusted_keys
-        .into_iter()
-        .find(|entry| {
-            entry.key_id == key_id
-                && entry.status == "active"
-                && entry.issuer_names.iter().any(|name| name == issuer_name)
-        })
-        .ok_or_else(|| HostError::Trust(format!("unknown trusted key {key_id}")))
+fn ensure_signed_revocation_list(
+    root: &Path,
+    config: &SignerConfigJson,
+    secret_key: &[u8; 32],
+    public_key: &[u8; 32],
+    key_id: &str,
+) -> Result<(), HostError> {
+    let path = resolve_config_path(root, &config.revocation_list_path);
+    if path.exists() {
+        return Ok(());
+    }
+    let mut list = RevocationListJson {
+        schema: "ink.revocations.v1".to_string(),
+        revoked_keys: Vec::new(),
+        signing: SigningJson {
+            transcript_encoding: REVOCATION_ENCODING_JSON_V1.to_string(),
+            payload_hash: DigestJson {
+                algorithm: "sha-256".to_string(),
+                digest: String::new(),
+            },
+            algorithm: "Ed25519".to_string(),
+            key_id: key_id.to_string(),
+            signature: String::new(),
+        },
+    };
+    let digest = revocation_list_digest(&list)?;
+    let signing_key = SigningKey::from_bytes(secret_key);
+    let signature = signing_key.sign(&digest.0);
+    list.signing.payload_hash = digest_json(&digest);
+    list.signing.signature = Base64UrlUnpadded::encode_string(&signature.to_bytes());
+    write_json(&path, &list)?;
+    ensure_registry_entry(root, config, public_key)?;
+    Ok(())
 }
 
-fn load_any_trusted_key() -> Result<TrustedKeyJson, HostError> {
-    let path = config_root()?.join(TRUST_POLICY_FILE);
-    let policy: TrustPolicyJson = serde_json::from_str(&fs::read_to_string(path)?)?;
-    policy
-        .trusted_keys
+fn ensure_key_not_revoked(key_id: &str) -> Result<(), HostError> {
+    let list = load_revocation_list()?;
+    if list.revoked_keys.iter().any(|entry| entry.key_id == key_id) {
+        return Err(HostError::Trust(format!("trusted key {key_id} is revoked")));
+    }
+    Ok(())
+}
+
+fn load_revocation_list() -> Result<RevocationListJson, HostError> {
+    let root = config_root()?;
+    let path = root.join(REVOCATION_LIST_FILE);
+    let list: RevocationListJson = serde_json::from_str(&fs::read_to_string(path)?)?;
+    let trusted = load_trust_registry()?
+        .issuers
         .into_iter()
-        .find(|entry| entry.status == "active")
-        .ok_or_else(|| HostError::Trust("no active trusted keys".to_string()))
+        .find(|entry| entry.key_id == list.signing.key_id && entry.status == "active")
+        .ok_or_else(|| HostError::Trust(format!("unknown revocation signer {}", list.signing.key_id)))?;
+    let digest = revocation_list_digest(&list)?;
+    let payload_hash = digest_json(&digest);
+    if payload_hash.digest != list.signing.payload_hash.digest
+        || payload_hash.algorithm != list.signing.payload_hash.algorithm
+    {
+        return Err(HostError::Trust("revocation list payload hash mismatch".to_string()));
+    }
+    verify_receipt_signature_for_digest(
+        &digest,
+        &Ed25519Signature(decode_fixed::<64>(&list.signing.signature)?),
+        &Ed25519PublicKey(decode_fixed::<32>(&trusted.public_key)?),
+    )
+    .map_err(HostError::from)?;
+    Ok(list)
+}
+
+fn revocation_list_digest(list: &RevocationListJson) -> Result<Sha256Digest, HostError> {
+    let mut value = serde_json::to_value(list)?;
+    if let Some(map) = value.as_object_mut() {
+        map.remove("signing");
+    }
+    Ok(sha256(&canonicalize_legacy(&value)))
+}
+
+fn receipt_digest_for_encoding(
+    receipt: &ReceiptJson,
+    payload: &ReceiptPayload<'_>,
+    encoding: &str,
+) -> Result<Sha256Digest, HostError> {
+    match encoding {
+        RECEIPT_ENCODING_TLV_V2 => receipt_transcript_hash(payload).map_err(HostError::from),
+        RECEIPT_ENCODING_TLV_V1_LEGACY => {
+            receipt_transcript_hash_legacy_v1(payload).map_err(HostError::from)
+        }
+        RECEIPT_ENCODING_JSON_CANONICAL_V1 => {
+            let mut value = serde_json::to_value(receipt)?;
+            if let Some(map) = value.as_object_mut() {
+                map.remove("signing");
+            }
+            Ok(sha256(&canonicalize_legacy(&value)))
+        }
+        other => Err(HostError::InvalidInput(format!(
+            "unsupported receipt transcript encoding {other}"
+        ))),
+    }
 }
 
 fn config_root() -> Result<PathBuf, HostError> {
@@ -1502,7 +1795,7 @@ fn hash_manifest(manifest: &ManifestJson) -> Result<Sha256Digest, HostError> {
                     .schema
                     .as_ref()
                     .map(|schema| sha256(schema.id.as_bytes())),
-                path_hint: leak_bounded::<{ inkreceipts_core::limits::MAX_PATH_HINT_LEN }>(
+                path_hint: leak_bounded::<{ limits::MAX_PATH_HINT_LEN }>(
                     artifact.path.clone(),
                 )?,
             })
@@ -1676,7 +1969,7 @@ fn leak_key_id(value: String) -> Result<KeyId<'static>, HostError> {
 
 fn leak_reason(
     value: String,
-) -> Result<BoundedBytes<'static, { inkreceipts_core::limits::MAX_REASON_CODE_LEN }>, HostError> {
+) -> Result<BoundedBytes<'static, { limits::MAX_REASON_CODE_LEN }>, HostError> {
     let leaked = Box::leak(value.into_boxed_str());
     BoundedBytes::new_reason_code(leaked.as_bytes()).map_err(HostError::from)
 }
@@ -1992,6 +2285,9 @@ struct LocalIssuer {
     secret_key: [u8; 32],
     public_key: [u8; 32],
     key_id: String,
+    issuer_name: String,
+    backend: String,
+    receipt_encoding: String,
 }
 
 impl Drop for LocalIssuer {
@@ -2000,5 +2296,11 @@ impl Drop for LocalIssuer {
         for byte in &mut self.secret_key {
             *byte = 0;
         }
+    }
+}
+
+impl LocalIssuer {
+    fn requires_demo_consent(&self) -> bool {
+        self.backend == "demo_file"
     }
 }
