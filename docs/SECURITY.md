@@ -6,8 +6,8 @@ We provide security updates for the following versions of the project:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.6.0   | :white_check_mark: |
-| < 0.6.0 | :x:                |
+| 0.7.0   | :white_check_mark: |
+| < 0.7.0 | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -31,7 +31,7 @@ detailed response within 7 days.
 ### Cryptographic Security
 - We use the `ed25519-dalek` library for cryptographic signatures.
 - All cryptographic operations are reviewed for side-channel resistance.
-- Keys are managed securely with environment variables and secure storage.
+- Keys are managed through signer config, trust registry, and revocation files under the configured host directory.
 
 ### Error Handling and Logging
 - Errors are defined as an enum with exhaustive variants.

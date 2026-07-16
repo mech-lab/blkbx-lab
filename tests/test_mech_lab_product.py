@@ -87,7 +87,7 @@ def test_legacy_public_aliases_warn_but_still_normalize(tmp_path: Path) -> None:
     assert analysis.recommended_decision == "pass"
     messages = [str(w.message) for w in caught]
     assert any("normalized to the `qwen35` deterministic demo adapter" in message for message in messages)
-    assert any("ignored in the canonical v0.6 thin-waist flow" in message for message in messages)
+    assert any("ignored in the canonical v0.7 thin-waist flow" in message for message in messages)
 
     with pytest.raises(ValueError, match="Supported public adapters: qwen35"):
         bl.trace(

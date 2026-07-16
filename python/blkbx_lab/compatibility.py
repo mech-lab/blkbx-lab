@@ -16,14 +16,14 @@ def reject_decorative_options(**kwargs: object) -> None:
         if value in (None, "", "default"):
             if value is not None:
                 warnings.warn(
-                    f"`{name}` is deprecated and ignored in the canonical v0.6 thin-waist flow.",
+                    f"`{name}` is deprecated and ignored in the canonical v0.7 thin-waist flow.",
                     DeprecationWarning,
                     stacklevel=2,
                 )
             continue
         if name == "backend" and isinstance(value, str) and value.casefold() in _SUPPORTED_BACKENDS:
             warnings.warn(
-                f"`{name}` is deprecated and ignored in the canonical v0.6 thin-waist flow.",
+                f"`{name}` is deprecated and ignored in the canonical v0.7 thin-waist flow.",
                 DeprecationWarning,
                 stacklevel=2,
             )
@@ -37,7 +37,7 @@ def reject_decorative_options(**kwargs: object) -> None:
             continue
         if name == "profile" and isinstance(value, str) and value.casefold() in _SUPPORTED_PROFILES:
             warnings.warn(
-                f"`{name}` is deprecated and ignored in the canonical v0.6 thin-waist flow.",
+                f"`{name}` is deprecated and ignored in the canonical v0.7 thin-waist flow.",
                 DeprecationWarning,
                 stacklevel=2,
             )

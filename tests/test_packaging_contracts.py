@@ -10,7 +10,7 @@ def test_root_package_uses_maturin_thin_waist_contract():
     data = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert data["build-system"]["build-backend"] == "maturin"
     assert data["project"]["name"] == "blkbx-lab"
-    assert data["project"]["version"] == "0.6.0"
+    assert data["project"]["version"] == "0.7.0"
     assert data["project"]["description"] == "Model-agnostic Ink Receipts with a no_std, no_alloc Rust trust waist"
     assert data["project"]["readme"] == {"file": "README.md", "content-type": "text/markdown"}
     assert sorted(data["project"]["dependencies"]) == ["cryptography>=42", "jsonschema>=4.23"]

@@ -26,7 +26,7 @@ Short description:
 
 Proof line:
 
-`The public surface ships a Qwen3.5 claims demo that emits ink_manifest.v1.json and ink_receipt.v1.json locally.`
+`The public surface ships a Qwen3.5 claims demo that emits ink_manifest.v2.json and ink_receipt.v2.json locally.`
 
 ## GitHub Release Lead
 
@@ -34,8 +34,8 @@ Proof line:
 
 ## Social Launch Caption
 
-`BLKBX Lab v0.1.0a2 is live. Install blkbx-lab, run the Qwen3.5 claims demo, and inspect the Ink receipt artifacts locally.`
+`BLKBX Lab v0.7.0 is live. Install blkbx-lab, run the Qwen3.5 claims demo, and inspect the Ink receipt artifacts locally.`
 
 ## Known-Limit Language
 
-`This release surface ships the bundled demo adapter and built-in demo signing key. Production signing and broader adapter coverage remain future work.`
+`This release surface ships the bundled demo adapter plus config-backed signer, trust-registry, and revocation primitives. Broader adapter coverage remains future work.`
