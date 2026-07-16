@@ -1,0 +1,58 @@
+{
+  "schema": "due.legal_action_receipt.v1",
+  "receipt_id": "rcpt_due_priv_001",
+  "action_id": "act_due_priv_001",
+  "issued_at": "2026-07-16T13:10:00Z",
+  "domain_context": {
+    "product_surface": "litigation-prep-assistant",
+    "matter_id": "matter-2026-115",
+    "jurisdiction": "England and Wales",
+    "parties": {
+      "client": "Harbor Counsel",
+      "counterparty": "Red Wharf Logistics Ltd"
+    },
+    "case_type": "commercial_dispute",
+    "privilege": {
+      "privilege_id": "priv-2026-115",
+      "privilege_type": "legal_advice",
+      "holder": "Harbor Counsel",
+      "basis": "Drafts prepared for solicitor review.",
+      "scope": "Internal legal workstream",
+      "materiality": "high"
+    }
+  },
+  "event_trail": [
+    {
+      "event_type": "privilege_recorded",
+      "payload": {
+        "privilege_id": "priv-2026-115",
+        "privilege_type": "legal_advice",
+        "holder": "Harbor Counsel",
+        "basis": "Drafts prepared for solicitor review.",
+        "scope": "Internal legal workstream",
+        "materiality": "high"
+      }
+    },
+    {
+      "event_type": "human_review_recorded",
+      "payload": {
+        "reviewer": "associate@due.example",
+        "notes": "Privilege boundary confirmed before document release.",
+        "status": "reviewed",
+        "reviewed_at": "2026-07-16T13:11:00Z"
+      }
+    }
+  ],
+  "human_review": {
+    "reviewer": "associate@due.example",
+    "notes": "Privilege boundary confirmed before document release.",
+    "status": "reviewed",
+    "reviewed_at": "2026-07-16T13:11:00Z"
+  },
+  "integrity": {
+    "digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+    "signature_algorithm": "stub-v1",
+    "signature": null,
+    "core_binding": null
+  }
+}

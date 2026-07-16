@@ -3,8 +3,8 @@ requires = ["maturin>=1.7,<2"]
 build-backend = "maturin"
 
 [project]
-name = "blkbx-lab"
-version = "0.7.0"
+name = "mechlab-sdk"
+version = "0.9.1"
 description = "Model-agnostic Ink Receipts with a no_std, no_alloc Rust trust waist"
 authors = [{name = "BLKBX Lab contributors"}]
 readme = {file = "README.md", content-type = "text/markdown"}
@@ -28,15 +28,19 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+research = ["markdown-it-py>=3"]
+experimental = ["rich>=13"]
+all = ["markdown-it-py>=3", "rich>=13"]
 dev = ["maturin>=1.7,<2", "pyright[nodejs]", "pytest", "ruff"]
 
 [project.scripts]
 blkbx-lab = "blkbx_lab.cli:main"
+mechlab = "blkbx_lab.cli:main"
 
 [tool.maturin]
 manifest-path = "rust/crates/ink-py/Cargo.toml"
 python-source = "python"
-python-packages = ["blkbx_lab"]
+python-packages = ["blkbx_lab", "mech_lab", "blkbxs", "mand8", "due"]
 module-name = "blkbx_lab._ink_native"
 
 [tool.pytest.ini_options]
@@ -45,4 +49,4 @@ addopts = "-q --import-mode=importlib"
 
 [tool.ruff]
 target-version = "py310"
-extend-exclude = [".pytest_cache", ".venv", "build", "dist", "qwen35-claims-*"]
+extend-exclude = [".pytest_cache", ".venv", "build", "dist", "qwen35-claims-"]

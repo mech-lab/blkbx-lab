@@ -1,15 +1,13 @@
 # Migration from `mech-lab`
 
-BLKBX Lab is the canonical public surface. The old `mechlab` CLI and `mech_lab` Python import remain as deprecated shims that delegate to `blkbx_lab`.
+Black Box Labs is the product brand. `mechlab-sdk` is the current carrier package on PyPI, and the compatibility names remain active instead of retired.
 
 ## Name Mapping
 
-- Old package: `mechlab-sdk`
-- New package: `blkbx-lab`
-- Old CLI: `mechlab`
-- New CLI: `blkbx-lab`
-- Old Python import: `import mech_lab`
-- New Python import: `import blkbx_lab`
+- Published package: `mechlab-sdk`
+- CLIs: `mechlab`, `blkbx-lab`
+- Runtime namespaces: `import mech_lab`, `import blkbx_lab`
+- Stable product imports from the same install: `import blkbxs`, `import mand8`, `import due`
 
 ## Artifact Mapping
 
@@ -19,5 +17,6 @@ BLKBX Lab is the canonical public surface. The old `mechlab` CLI and `mech_lab` 
 
 ## Migration Rule
 
-- Use `blkbx-lab` and `blkbx_lab` in all new docs, examples, scripts, and release notes.
-- Treat `mechlab` and `mech_lab` as temporary compatibility shims only.
+- Use `mechlab-sdk` for installation instructions.
+- Use `blkbx-lab` or `mechlab` for CLI examples when you want to show both installed entry points.
+- Use `blkbx_lab` for shared runtime examples and `blkbxs`, `mand8`, or `due` for market-specific Python examples.

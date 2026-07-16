@@ -1,0 +1,60 @@
+{
+  "schema": "due.legal_action_receipt.v1",
+  "receipt_id": "rcpt_due_disc_001",
+  "action_id": "act_due_disc_001",
+  "issued_at": "2026-07-16T13:20:00Z",
+  "domain_context": {
+    "product_surface": "employment-workflow-assistant",
+    "matter_id": "matter-2026-204",
+    "jurisdiction": "England and Wales",
+    "parties": {
+      "employer": "Stone Pier Holdings",
+      "employee": "A. Patel"
+    },
+    "case_type": "employment_review",
+    "disclosure": {
+      "disclosure_id": "disc-2026-204",
+      "disclosure_type": "pre_action_exchange",
+      "recipient": "A. Patel",
+      "content_summary": "Final approved notice only.",
+      "status": "ready_if_required",
+      "disclosed_on": null,
+      "method": "secure_portal"
+    }
+  },
+  "event_trail": [
+    {
+      "event_type": "disclosure_recorded",
+      "payload": {
+        "disclosure_id": "disc-2026-204",
+        "disclosure_type": "pre_action_exchange",
+        "recipient": "A. Patel",
+        "content_summary": "Final approved notice only.",
+        "status": "ready_if_required",
+        "disclosed_on": null,
+        "method": "secure_portal"
+      }
+    },
+    {
+      "event_type": "human_review_recorded",
+      "payload": {
+        "reviewer": "employment.counsel@due.example",
+        "notes": "Outgoing disclosure scope limited to approved final document.",
+        "status": "reviewed",
+        "reviewed_at": "2026-07-16T13:22:00Z"
+      }
+    }
+  ],
+  "human_review": {
+    "reviewer": "employment.counsel@due.example",
+    "notes": "Outgoing disclosure scope limited to approved final document.",
+    "status": "reviewed",
+    "reviewed_at": "2026-07-16T13:22:00Z"
+  },
+  "integrity": {
+    "digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+    "signature_algorithm": "stub-v1",
+    "signature": null,
+    "core_binding": null
+  }
+}

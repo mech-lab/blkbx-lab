@@ -1,0 +1,80 @@
+{
+  "schema": "due.legal_action_receipt.v1",
+  "receipt_id": "rcpt_due_001",
+  "action_id": "act_due_001",
+  "issued_at": "2026-07-16T13:00:00Z",
+  "domain_context": {
+    "product_surface": "contract-review-copilot",
+    "action_name": "draft_termination_notice",
+    "action_type": "adverse_action",
+    "materiality": "high",
+    "matter_id": "matter-2026-042",
+    "jurisdiction": "England and Wales",
+    "parties": {
+      "client": "LexHarbor",
+      "counterparty": "North Bay Systems Ltd"
+    },
+    "case_type": "pre_dispute_contract",
+    "case_number": null,
+    "filing_date": null,
+    "matter_status": "active",
+    "authority": {
+      "authority_id": "auth-client-general-counsel",
+      "authority_name": "General Counsel approval",
+      "jurisdiction": "England and Wales",
+      "authority_type": "internal_approval",
+      "basis": "Client sign-off before adverse action.",
+      "credentials": {}
+    }
+  },
+  "event_trail": [
+    {
+      "event_type": "legal_receipt_initialized",
+      "payload": {
+        "startup": "LexHarbor"
+      }
+    },
+    {
+      "event_type": "ai_assisted_legal_action_recorded",
+      "payload": {
+        "action_name": "draft_termination_notice",
+        "action_type": "adverse_action",
+        "description": "AI-assisted draft for a vendor termination notice.",
+        "legal_basis": "Master services agreement section 11.2",
+        "materiality": "high",
+        "adverse_action": true,
+        "chain_of_custody_ref": "custody-2026-042"
+      }
+    },
+    {
+      "event_type": "matter_bound",
+      "payload": {
+        "matter_id": "matter-2026-042",
+        "jurisdiction": "England and Wales"
+      }
+    },
+    {
+      "event_type": "authority_checked",
+      "payload": {
+        "authority_id": "auth-client-general-counsel",
+        "authority_name": "General Counsel approval",
+        "jurisdiction": "England and Wales",
+        "authority_type": "internal_approval",
+        "basis": "Client sign-off before adverse action.",
+        "credentials": {}
+      }
+    }
+  ],
+  "human_review": {
+    "reviewer": null,
+    "notes": null,
+    "status": "not_reviewed",
+    "reviewed_at": null
+  },
+  "integrity": {
+    "digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+    "signature_algorithm": "stub-v1",
+    "signature": null,
+    "core_binding": null
+  }
+}

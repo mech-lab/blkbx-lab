@@ -1,0 +1,9 @@
+:root {
+  --ink-primary: #0A0A0A;
+  --ink-accent: #00E5A0;
+  --paper-base: #FFFFFF;
+  --paper-muted: #F5F5F5;
+  --signal-pass: #00E5A0;
+  --signal-fail: #FF3B30;
+  --signal-warn: #FF9F0A;
+}

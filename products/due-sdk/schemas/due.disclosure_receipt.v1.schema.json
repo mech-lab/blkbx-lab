@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DUE Disclosure Receipt",
+  "type": "object",
+  "required": [
+    "disclosure_id",
+    "disclosure_type",
+    "recipient",
+    "content_summary",
+    "status"
+  ],
+  "properties": {
+    "disclosure_id": {
+      "type": "string"
+    },
+    "disclosure_type": {
+      "type": "string"
+    },
+    "recipient": {
+      "type": "string"
+    },
+    "content_summary": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

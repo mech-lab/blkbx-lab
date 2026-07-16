@@ -13,5 +13,5 @@ def test_pyproject_uses_maturin_and_canonical_python_package() -> None:
     assert data["build-system"]["build-backend"] == "maturin"
     assert data["tool"]["maturin"]["manifest-path"] == "rust/crates/ink-py/Cargo.toml"
     assert data["tool"]["maturin"]["python-source"] == "python"
-    assert data["tool"]["maturin"]["python-packages"] == ["blkbx_lab"]
+    assert data["tool"]["maturin"]["python-packages"] == ["blkbx_lab", "mech_lab", "blkbxs", "mand8", "due"]
     assert data["tool"]["maturin"]["module-name"] == "blkbx_lab._ink_native"

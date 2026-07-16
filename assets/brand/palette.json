@@ -1,0 +1,15 @@
+{
+  "ink": {
+    "primary": "#0A0A0A",
+    "accent": "#00E5A0"
+  },
+  "paper": {
+    "base": "#FFFFFF",
+    "muted": "#F5F5F5"
+  },
+  "signal": {
+    "pass": "#00E5A0",
+    "fail": "#FF3B30",
+    "warn": "#FF9F0A"
+  }
+}

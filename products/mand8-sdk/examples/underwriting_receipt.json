@@ -1,0 +1,102 @@
+{
+  "schema": "mand8.risk_receipt.v1",
+  "receipt_id": "rcpt_mand8_uk_001",
+  "action_id": "act_mand8_uk_001",
+  "issued_at": "2026-07-16T12:00:00Z",
+  "domain_context": {
+    "exposure_unit_id": "uk-cyber-eu-042",
+    "policy_ref": "B1234UK2026",
+    "risk_class": "cyber",
+    "insured_value": 5000000.0,
+    "currency": "GBP",
+    "territory": "UK",
+    "market_segment": "lloyds_delegated_authority",
+    "binder_ref": "B1234UK2026",
+    "managing_agent": "Lime Street Managing Agency Ltd",
+    "coverholder": "North Dock Coverholder Ltd",
+    "policy_conditions": [
+      "Quarterly model drift review",
+      "Human referral on confidence below threshold"
+    ],
+    "exclusions": [
+      "Silent cyber outside declared products"
+    ],
+    "regulators": [
+      "FCA",
+      "PRA"
+    ]
+  },
+  "event_trail": [
+    {
+      "event_type": "underwriting_action_emitted",
+      "payload": {
+        "action": "ai_underwriting_action",
+        "decision": "bind_with_controls",
+        "exposure_unit_id": "uk-cyber-eu-042",
+        "policy_ref": "B1234UK2026"
+      }
+    },
+    {
+      "event_type": "authority_receipt_recorded",
+      "payload": {
+        "authority_id": "auth-lma-binder-042",
+        "construct": "delegated_authority",
+        "lloyds_binding_ref": "B1234UK2026",
+        "managing_agent": "Lime Street Managing Agency Ltd",
+        "coverholder": "North Dock Coverholder Ltd",
+        "regulators": [
+          "FCA",
+          "PRA"
+        ]
+      }
+    },
+    {
+      "event_type": "control_check_recorded",
+      "payload": {
+        "control_id": "ctl-model-drift-quarterly",
+        "control_name": "Quarterly model drift review",
+        "status": "pass",
+        "control_type": "risk_control",
+        "evidence_ref": "ev-drift-review-q2-2026",
+        "details": {
+          "review_window": "2026-Q2"
+        }
+      }
+    },
+    {
+      "event_type": "override_recorded",
+      "payload": {
+        "override_id": "ovr-uk-042",
+        "override_type": "no_manual_referral",
+        "reason": "No manual referral required under binder terms.",
+        "overridden_by": "system:no_override",
+        "effective_date": "2026-07-16",
+        "outcome": "not_required",
+        "details": {
+          "confidence_floor_met": true
+        }
+      }
+    },
+    {
+      "event_type": "human_review_recorded",
+      "payload": {
+        "reviewer": "syndicate.underwriter@mand8.example",
+        "notes": "Delegated authority terms satisfied and London market review complete.",
+        "status": "reviewed",
+        "reviewed_at": "2026-07-16T12:05:00Z"
+      }
+    }
+  ],
+  "human_review": {
+    "reviewer": "syndicate.underwriter@mand8.example",
+    "notes": "Delegated authority terms satisfied and London market review complete.",
+    "status": "reviewed",
+    "reviewed_at": "2026-07-16T12:05:00Z"
+  },
+  "integrity": {
+    "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "signature_algorithm": "stub-v1",
+    "signature": null,
+    "core_binding": null
+  }
+}

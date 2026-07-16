@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DUE Authority Receipt",
+  "type": "object",
+  "required": [
+    "authority_id",
+    "authority_name",
+    "jurisdiction",
+    "authority_type"
+  ],
+  "properties": {
+    "authority_id": {
+      "type": "string"
+    },
+    "authority_name": {
+      "type": "string"
+    },
+    "jurisdiction": {
+      "type": "string"
+    },
+    "authority_type": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

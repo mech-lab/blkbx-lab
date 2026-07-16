@@ -13,8 +13,9 @@
 
 - [List package, CLI, API, or artifact changes.]
 - [Say `No public contract change.` when nothing changed.]
+- [If product APIs changed, call out `blkbxs`, `mand8`, `due`, or extras explicitly.]
 
-## Qwen3.5 Demo Status
+## qwen35 Demo Status
 
 - [State whether this release changes the installed Qwen3.5 demo path.]
 - [Link the validation report when that path changed materially.]
@@ -28,8 +29,9 @@
 ## Install
 
 ```bash
-pip install blkbx-lab==<version>
-blkbx-lab demo qwen35-claims
+pip install mechlab-sdk==<version>
+blkbx-lab demo qwen35 --output-dir artifacts/release-demo
+python -c "import blkbxs, mand8, due"
 ```
 
 ## Known Limits

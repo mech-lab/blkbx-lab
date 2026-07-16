@@ -17,8 +17,8 @@ body:
       label: Reproduction
       description: Include the command, API call, or minimal steps to reproduce.
       placeholder: |
-        1. pip install --pre blkbx-lab
-        2. blkbx-lab ...
+        1. pip install --pre mechlab-sdk
+        2. mechlab doctor
         3. observe ...
     validations:
       required: true
@@ -32,9 +32,12 @@ body:
     attributes:
       label: Affected surface
       options:
-        - blkbx-lab CLI
+        - mechlab CLI
         - blkbx_lab Python API
+        - BLKBXS Python API
+        - MAND8 Python API
+        - DUE Python API
         - Qwen3.5 claims demo
-        - Packaging or release docs
+        - Packaging, release docs, or extras
     validations:
       required: true

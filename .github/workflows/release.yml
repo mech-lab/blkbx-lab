@@ -42,13 +42,22 @@ jobs:
           python -m pip install dist/*.whl
           python - <<'PY'
           import blkbx_lab as bl
+          import blkbxs
+          import due
+          import mand8
+          import mech_lab as ml
 
           result = bl.demo(output_dir="artifacts/release-ci")
           print(result.manifest_path)
           print(result.receipt_path)
           print(bl.verify(result.receipt_path).report)
+          print(blkbxs.doctor().report)
+          print(mand8.receipt.create()["schema"])
+          print(due.receipt.create()["schema"])
+          print(ml.research.describe()["extra"])
           PY
           blkbx-lab doctor >/dev/null
+          mechlab doctor >/dev/null
 
       - name: Upload distribution artifacts
         uses: actions/upload-artifact@v4
@@ -88,7 +97,7 @@ jobs:
       id-token: write
     environment:
       name: pypi
-      url: https://pypi.org/p/blkbx-lab
+      url: https://pypi.org/p/mechlab-sdk
     steps:
       - name: Download distribution artifacts
         uses: actions/download-artifact@v4

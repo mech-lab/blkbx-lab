@@ -78,6 +78,45 @@ impl From<ink_core::error::Error> for HostError {
     }
 }
 
+fn receipt_encoding_allows_issuance(encoding: &str) -> bool {
+    encoding == RECEIPT_ENCODING_TLV_V2
+}
+
+fn receipt_encoding_check(encoding: &str) -> Value {
+    let status = match encoding {
+        RECEIPT_ENCODING_TLV_V2 => "ok",
+        RECEIPT_ENCODING_TLV_V1_LEGACY | RECEIPT_ENCODING_JSON_CANONICAL_V1 => "verify_only",
+        _ => "unsupported",
+    };
+    json!({
+        "name": "receipt_encoding",
+        "status": status,
+        "encoding": encoding,
+    })
+}
+
+fn receipt_encoding_note(encoding: &str) -> Option<String> {
+    match encoding {
+        RECEIPT_ENCODING_TLV_V2 => None,
+        RECEIPT_ENCODING_TLV_V1_LEGACY | RECEIPT_ENCODING_JSON_CANONICAL_V1 => Some(format!(
+            "receipt encoding {encoding} is verify-only compatibility mode; new receipts must use {RECEIPT_ENCODING_TLV_V2}"
+        )),
+        other => Some(format!(
+            "receipt encoding {other} is unsupported; new receipts must use {RECEIPT_ENCODING_TLV_V2}"
+        )),
+    }
+}
+
+fn ensure_issueable_receipt_encoding(encoding: &str) -> Result<(), HostError> {
+    if receipt_encoding_allows_issuance(encoding) {
+        return Ok(());
+    }
+    Err(HostError::InvalidInput(
+        receipt_encoding_note(encoding)
+            .unwrap_or_else(|| format!("new receipts must use {RECEIPT_ENCODING_TLV_V2}")),
+    ))
+}
+
 #[derive(Debug, Deserialize)]
 pub struct ManifestArtifactSpec {
     pub artifact_type: String,
@@ -573,6 +612,7 @@ pub fn gate(
                 .to_string(),
         ));
     }
+    ensure_issueable_receipt_encoding(&issuer.receipt_encoding)?;
     let now = now_timestamp();
     let issued_at = TimestampUtc {
         unix_seconds: now.unix_seconds,
@@ -644,12 +684,8 @@ pub fn gate(
         },
     };
     let digest = receipt_digest_for_encoding(&receipt, &payload, &issuer.receipt_encoding)?;
-    let signature = if issuer.receipt_encoding == RECEIPT_ENCODING_TLV_V2 {
-        Ed25519Signature(SigningKey::from_bytes(&issuer.secret_key).sign(&digest.0).to_bytes())
-    } else {
-        let signing_key = SigningKey::from_bytes(&issuer.secret_key);
-        Ed25519Signature(signing_key.sign(&digest.0).to_bytes())
-    };
+    let signing_key = SigningKey::from_bytes(&issuer.secret_key);
+    let signature = Ed25519Signature(signing_key.sign(&digest.0).to_bytes());
     let mut receipt = receipt;
     receipt.signing.payload_hash = digest_json(&digest);
     receipt.signing.signature = Base64UrlUnpadded::encode_string(&signature.0);
@@ -851,21 +887,33 @@ pub fn doctor(initialize_local_issuer: bool) -> Result<Value, HostError> {
         notes.push(format!("initialized signer {}", issuer.key_id));
         checks.push(json!({"name": "local_issuer", "status": "ok"}));
         checks.push(json!({"name": "signer_backend", "status": issuer.backend}));
-        checks.push(json!({"name": "receipt_encoding", "status": issuer.receipt_encoding}));
+        checks.push(receipt_encoding_check(&issuer.receipt_encoding));
         checks.push(json!({"name": "trust_registry", "status": "ok"}));
         checks.push(json!({"name": "revocation_list", "status": "ok"}));
-        demo_ready = issuer.requires_demo_consent();
-        real_replay_ready = issuer.backend == "file_ed25519";
+        if let Some(note) = receipt_encoding_note(&issuer.receipt_encoding) {
+            notes.push(note);
+        }
+        demo_ready = issuer.requires_demo_consent()
+            && receipt_encoding_allows_issuance(&issuer.receipt_encoding);
+        real_replay_ready = issuer.backend == "file_ed25519"
+            && receipt_encoding_allows_issuance(&issuer.receipt_encoding);
     } else if let Ok(config) = load_signer_config() {
+        let trust_registry_exists = config_root()?.join(&config.trust_registry_path).exists();
+        let revocation_list_exists = config_root()?.join(&config.revocation_list_path).exists();
         checks.push(json!({"name": "local_issuer", "status": "ok"}));
         checks.push(json!({"name": "signer_backend", "status": config.backend}));
-        checks.push(json!({"name": "receipt_encoding", "status": config.receipt_encoding}));
-        checks.push(json!({"name": "trust_registry", "status": if config_root()?.join(&config.trust_registry_path).exists() { "ok" } else { "missing" }}));
-        checks.push(json!({"name": "revocation_list", "status": if config_root()?.join(&config.revocation_list_path).exists() { "ok" } else { "missing" }}));
-        demo_ready = config.backend == "demo_file";
+        checks.push(receipt_encoding_check(&config.receipt_encoding));
+        checks.push(json!({"name": "trust_registry", "status": if trust_registry_exists { "ok" } else { "missing" }}));
+        checks.push(json!({"name": "revocation_list", "status": if revocation_list_exists { "ok" } else { "missing" }}));
+        if let Some(note) = receipt_encoding_note(&config.receipt_encoding) {
+            notes.push(note);
+        }
+        demo_ready = config.backend == "demo_file"
+            && receipt_encoding_allows_issuance(&config.receipt_encoding);
         real_replay_ready = config.backend == "file_ed25519"
-            && config_root()?.join(&config.trust_registry_path).exists()
-            && config_root()?.join(&config.revocation_list_path).exists();
+            && trust_registry_exists
+            && revocation_list_exists
+            && receipt_encoding_allows_issuance(&config.receipt_encoding);
     } else {
         checks.push(json!({"name": "local_issuer", "status": "missing"}));
         notes.push(

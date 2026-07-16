@@ -1,0 +1,66 @@
+{
+  "schema": "due.dispute_bundle.v1",
+  "bundle_id": "bundle_due_001",
+  "bundle_type": "legal_defensibility_bundle",
+  "audience": "counsel",
+  "generated_at": "2026-07-16T13:30:00Z",
+  "institutional_question": "Can this AI-assisted action survive challenge, dispute, discovery, privilege review, disclosure review, and liability scrutiny?",
+  "bundle_sections": [
+    "Matter Context",
+    "Authority",
+    "Privilege",
+    "Disclosure",
+    "Human Review",
+    "Dispute Readiness"
+  ],
+  "notes": "Readable by counsel, legal ops, compliance, or an accelerator reviewer.",
+  "receipt": {
+    "schema": "due.legal_action_receipt.v1",
+    "receipt_id": "rcpt_due_001",
+    "action_id": "act_due_001",
+    "issued_at": "2026-07-16T13:00:00Z",
+    "domain_context": {
+      "product_surface": "contract-review-copilot",
+      "matter_id": "matter-2026-042",
+      "jurisdiction": "England and Wales",
+      "parties": {
+        "client": "LexHarbor",
+        "counterparty": "North Bay Systems Ltd"
+      },
+      "case_type": "pre_dispute_contract"
+    },
+    "event_trail": [
+      {
+        "event_type": "ai_assisted_legal_action_recorded",
+        "payload": {
+          "action_name": "draft_termination_notice",
+          "action_type": "adverse_action",
+          "description": "AI-assisted draft for a vendor termination notice.",
+          "legal_basis": "Master services agreement section 11.2",
+          "materiality": "high",
+          "adverse_action": true,
+          "chain_of_custody_ref": "custody-2026-042"
+        }
+      }
+    ],
+    "human_review": {
+      "reviewer": "counsel@lexharbor.example",
+      "notes": "Reviewed for privilege boundaries and disclosure scope.",
+      "status": "reviewed",
+      "reviewed_at": "2026-07-16T13:25:00Z"
+    },
+    "integrity": {
+      "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "signature_algorithm": "stub-v1",
+      "signature": null,
+      "core_binding": null
+    }
+  },
+  "summary": "legal_defensibility_bundle for counsel: matter-2026-042 with 1 receipt events",
+  "integrity": {
+    "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "signature_algorithm": "stub-v1",
+    "signature": null,
+    "core_binding": null
+  }
+}

@@ -1,26 +1,53 @@
 # BLKBX Lab
 
-> Open-source Ink Receipt gates for accountable AI agents.
->
-> `qwen35` is the installed deterministic demo. Receipt gates are the standard.
+Open-source Ink Receipt gates for accountable AI agents.
 
-BLKBX Lab lets developers wrap agent actions with signed, verifiable policy gates. The v0.7 public surface ships a deterministic `qwen35` demo, writes v2 Ink artifacts locally, and routes trust-critical receipt logic through a `no_std` Rust core plus a thin host/PyO3 bridge.
+`qwen35` is the installed deterministic demo. Receipt gates are the standard.
 
-## Install
+Black Box Labs builds receipt-native infrastructure for high-assurance AI.
+
+> INK Receipts are the proof primitive. BLKBXS applies them to banking. MAND8 applies them to insurance. DUE applies them to legal defensibility.
+
+## Sibling Product Slices
+
+This repository now carries sibling product slices under the Black Box Labs umbrella:
+
+- `BLKBXS SDK`: the current root OSS receipt surface
+- `MAND8 SDK`: insurance-facing receipts and evidence bundles
+- `DUE SDK`: legal-facing defensibility receipts and evidence bundles
+
+MAND8 and DUE are siblings. DUE is not buried inside MAND8.
+
+MAND8 is UK-first by design. Its delegated-authority framing starts with the Lloyd's and London market workflow rather than treating the UK as a later localization pass.
+
+## Current Shipped Surface
+
+Black Box Labs is the product brand. `mechlab-sdk` is the current PyPI install target for `v0.9.1`. A plain install carries the current root runtime plus stable `blkbxs`, `mand8`, and `due` Python APIs. Both `blkbx-lab` and `mechlab` CLIs are available, and both `blkbx_lab` and `mech_lab` imports remain available.
 
 ```bash
-pip install --pre blkbx-lab
+pip install --pre mechlab-sdk
 ```
 
-## 60-second quickstart
+Opt-in extras:
 
-CLI:
+```bash
+pip install --pre "mechlab-sdk[research]"
+pip install --pre "mechlab-sdk[experimental]"
+pip install --pre "mechlab-sdk[all]"
+```
 
 ```bash
 blkbx-lab demo qwen35 --output-dir artifacts/qwen35
 blkbx-lab verify artifacts/qwen35/ink_receipt.v2.json
 blkbx-lab tamper artifacts/qwen35/ink_receipt.v2.json
 blkbx-lab verify artifacts/qwen35/ink_receipt.tampered.v2.json
+```
+
+```bash
+mechlab demo qwen35 --output-dir artifacts/qwen35
+mechlab verify artifacts/qwen35/ink_receipt.v2.json
+mechlab tamper artifacts/qwen35/ink_receipt.v2.json
+mechlab verify artifacts/qwen35/ink_receipt.tampered.v2.json
 ```
 
 Python:
@@ -34,36 +61,44 @@ print(result.receipt_path)
 print(bl.verify(result.receipt_path).report)
 ```
 
-## What You Get
+```python
+import mech_lab as ml
 
-- Action Evidence Bundle: `ink_manifest.v2.json` plus the run artifacts for the action proposal.
-- Receipt: `ink_receipt.v2.json` for the gate decision.
-- Comparison Packet: `receipt_comparison.v2.json` for left/right receipt comparisons.
+result = ml.demo(output_dir="artifacts/qwen35")
+print(result.manifest_path)
+print(result.receipt_path)
+print(ml.verify(result.receipt_path).report)
+```
 
-## Public Contract
+Product APIs from the same install:
 
-- Package: `blkbx-lab`
-- CLI: `blkbx-lab`
-- Python namespace: `blkbx_lab`
-- `demo()` returns `InkReceiptResult`
-- `trace()` returns `ActionEvidenceBundle`
-- `analyze()` returns `GateAnalysisResult`
-- `gate()` requires explicit demo signer approval when the configured signer backend is `demo_file`
-- `compare()` returns `ReceiptComparisonPacket`
+```python
+import blkbxs
+import due
+import mand8
 
-## How It Works
+print(blkbxs.doctor().report)
+print(mand8.receipt.create()["schema"])
+print(due.receipt.create()["schema"])
+```
+
+## Repo Map
 
 ```text
-blkbx-lab CLI / blkbx_lab SDK
-        |
-        +-- python/blkbx_lab/       public API, CLI entrypoints, adapters, result objects
-        |
-        +-- rust/crates/ink-py/     PyO3 bridge into the host crate
-        |
-        +-- rust/crates/ink-host/   filesystem, config loading, signer backends, verification
-        |
-        +-- rust/crates/ink-core/   no_std receipt core, transcript hashing, signing helpers
+blkbx-lab/
+  python/blkbx_lab/               shared runtime and umbrella namespaces
+  python/blkbxs/                  banking-facing public facade
+  python/mand8/                   insurance-facing public facade
+  python/due/                     legal-facing public facade
+  rust/crates/ink-core/           receipt core
+  rust/crates/ink-host/           host/runtime verification
+  rust/crates/ink-py/             PyO3 bridge
+  products/
+    mand8-sdk/                    insurance-facing source slice
+    due-sdk/                      legal-facing source slice
 ```
+
+The slice directories remain source slices and repo organization units. The shipped pip artifact is `mechlab-sdk`, and its stable wheel surface now carries the `blkbxs`, `mand8`, and `due` Python packages directly.
 
 ## Docs
 
@@ -71,12 +106,15 @@ blkbx-lab CLI / blkbx_lab SDK
 - [Public object spec](docs/public-object-spec.md)
 - [Developer architecture](docs/developer-architecture.md)
 - [Migration and compatibility](docs/migration-compatibility.md)
+- [Product architecture](docs/product-architecture.md)
+- [Brand architecture](docs/brand-architecture.md)
+- [Receipt domain model](docs/receipt-domain-model.md)
 - [Qwen3.5 validation report](docs/research/qwen35-validation-report.md)
 
 ## Current Limits
 
-- The public surface ships the installed `qwen35` deterministic demo, not a full multi-runtime adapter matrix.
-- `report()` renders canonical `release-summary` and `comparison-summary` views from existing v2 Ink artifacts only.
-- `compare()` accepts manifest targets only when a sibling `ink_receipt.v2.json` already exists; it does not run `gate()` implicitly.
-- The default local bootstrap uses a demo signer backend, but the host layer also supports config-backed file signing plus trust-registry and revocation files under `INKRECEIPTS_CONFIG_DIR`.
-- The repository now carries only the OSS receipt surface; historical research material belongs in a separate history-preserving research repo.
+- The root public surface still ships the installed `qwen35` deterministic demo rather than a full multi-runtime adapter matrix.
+- The new MAND8 and DUE slices use stub integrity adapters, not heavy cryptography or production signer infrastructure.
+- Research and experimental helpers live under `blkbx_lab.research` and `blkbx_lab.experimental`, but the supported dependency path for them is still opt-in extras.
+- Shared `packages/*` primitives are part of the target architecture, but this pass does not migrate the current root runtime into that structure.
+- `products/*` remain in-repo slices under the Black Box Labs umbrella rather than separate published PyPI artifacts.

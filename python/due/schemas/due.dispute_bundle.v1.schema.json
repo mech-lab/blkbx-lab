@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DUE Dispute Bundle",
+  "type": "object",
+  "required": [
+    "schema",
+    "bundle_id",
+    "bundle_type",
+    "audience",
+    "generated_at",
+    "institutional_question",
+    "receipt",
+    "summary",
+    "integrity"
+  ],
+  "properties": {
+    "schema": {
+      "const": "due.dispute_bundle.v1"
+    },
+    "bundle_id": {
+      "type": "string"
+    },
+    "bundle_type": {
+      "type": "string"
+    },
+    "audience": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "institutional_question": {
+      "type": "string"
+    },
+    "bundle_sections": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "receipt": {
+      "type": "object"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "integrity": {
+      "type": "object",
+      "required": [
+        "digest",
+        "signature_algorithm",
+        "signature",
+        "core_binding"
+      ],
+      "properties": {
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "signature_algorithm": {
+          "const": "stub-v1"
+        },
+        "signature": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "core_binding": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

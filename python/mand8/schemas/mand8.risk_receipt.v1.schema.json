@@ -1,0 +1,143 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MAND8 Risk Receipt",
+  "type": "object",
+  "required": [
+    "schema",
+    "receipt_id",
+    "action_id",
+    "issued_at",
+    "domain_context",
+    "event_trail",
+    "human_review",
+    "integrity"
+  ],
+  "properties": {
+    "schema": {
+      "const": "mand8.risk_receipt.v1"
+    },
+    "receipt_id": {
+      "type": "string"
+    },
+    "action_id": {
+      "type": "string"
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "domain_context": {
+      "type": "object",
+      "required": [
+        "exposure_unit_id",
+        "policy_ref",
+        "risk_class",
+        "insured_value",
+        "currency"
+      ],
+      "properties": {
+        "exposure_unit_id": {
+          "type": "string"
+        },
+        "policy_ref": {
+          "type": "string"
+        },
+        "risk_class": {
+          "type": "string"
+        },
+        "insured_value": {
+          "type": "number"
+        },
+        "currency": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "event_trail": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "event_type",
+          "payload"
+        ],
+        "properties": {
+          "event_type": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "human_review": {
+      "type": "object",
+      "required": [
+        "reviewer",
+        "notes",
+        "status",
+        "reviewed_at"
+      ],
+      "properties": {
+        "reviewer": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "type": "string"
+        },
+        "reviewed_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "integrity": {
+      "type": "object",
+      "required": [
+        "digest",
+        "signature_algorithm",
+        "signature",
+        "core_binding"
+      ],
+      "properties": {
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "signature_algorithm": {
+          "const": "stub-v1"
+        },
+        "signature": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "core_binding": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

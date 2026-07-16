@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DUE Matter Context",
+  "type": "object",
+  "required": [
+    "matter_id",
+    "jurisdiction",
+    "parties",
+    "case_type"
+  ],
+  "properties": {
+    "matter_id": {
+      "type": "string"
+    },
+    "jurisdiction": {
+      "type": "string"
+    },
+    "parties": {
+      "type": "object"
+    },
+    "case_type": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

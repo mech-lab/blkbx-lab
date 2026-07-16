@@ -8,7 +8,7 @@ Short tagline:
 
 Product line:
 
-`Qwen3.5 is the installed demo. Receipt gates are the standard.`
+``qwen35` is the installed deterministic demo. Receipt gates are the standard.`
 
 Technical strapline:
 
@@ -16,7 +16,7 @@ Technical strapline:
 
 Lead paragraph:
 
-`BLKBX Lab` lets developers wrap agent actions with signed, verifiable policy gates. The public release surface ships a Qwen3.5 claims demo, writes Ink artifacts locally, and keeps verification small enough to inspect from the CLI or Python.
+`BLKBX Lab` lets developers wrap agent actions with signed, verifiable policy gates. The public release surface ships the installed `qwen35` deterministic demo, writes Ink artifacts locally, and keeps verification small enough to inspect from the CLI or Python.
 
 ## PyPI Description
 
@@ -26,7 +26,7 @@ Short description:
 
 Proof line:
 
-`The public surface ships a Qwen3.5 claims demo that emits ink_manifest.v2.json and ink_receipt.v2.json locally.`
+`The public surface ships the installed qwen35 deterministic demo that emits ink_manifest.v2.json and ink_receipt.v2.json locally.`
 
 ## GitHub Release Lead
 
@@ -34,7 +34,7 @@ Proof line:
 
 ## Social Launch Caption
 
-`BLKBX Lab v0.7.0 is live. Install blkbx-lab, run the Qwen3.5 claims demo, and inspect the Ink receipt artifacts locally.`
+`BLKBX Lab v0.9.0 is live. Install blkbx-lab, run the qwen35 deterministic demo, and inspect the Ink receipt artifacts locally.`
 
 ## Known-Limit Language
 

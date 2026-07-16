@@ -3,6 +3,10 @@ name = "ink-py"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+description.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+repository.workspace = true
 
 [lib]
 name = "_ink_native"

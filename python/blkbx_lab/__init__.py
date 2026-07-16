@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from . import experimental, research
 from .api import analyze, compare, demo, doctor, explain, gate, report, tamper, trace, verify
 from .results import (
     ActionEvidenceBundle,
@@ -20,6 +21,8 @@ __all__ = [
     "tamper",
     "trace",
     "verify",
+    "research",
+    "experimental",
     "ActionEvidenceBundle",
     "DoctorResult",
     "GateAnalysisResult",

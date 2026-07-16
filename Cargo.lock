@@ -229,7 +229,7 @@ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
 name = "ink-core"
-version = "0.7.0"
+version = "0.9.1"
 dependencies = [
  "arbitrary",
  "ed25519-dalek",
@@ -239,7 +239,7 @@ dependencies = [
 
 [[package]]
 name = "ink-host"
-version = "0.7.0"
+version = "0.9.1"
 dependencies = [
  "base64ct",
  "dirs",
@@ -255,7 +255,7 @@ dependencies = [
 
 [[package]]
 name = "ink-py"
-version = "0.7.0"
+version = "0.9.1"
 dependencies = [
  "ink-host",
  "pyo3",

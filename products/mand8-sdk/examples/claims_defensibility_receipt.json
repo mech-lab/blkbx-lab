@@ -1,0 +1,72 @@
+{
+  "schema": "mand8.risk_receipt.v1",
+  "receipt_id": "rcpt_mand8_claims_001",
+  "action_id": "act_mand8_claims_001",
+  "issued_at": "2026-07-16T12:10:00Z",
+  "domain_context": {
+    "exposure_unit_id": "uk-motor-eu-008",
+    "policy_ref": "BINDER-MOTOR-008",
+    "risk_class": "commercial_motor",
+    "insured_value": 1500000.0,
+    "currency": "GBP",
+    "territory": "UK",
+    "market_segment": "lloyds_delegated_authority",
+    "binder_ref": "BINDER-MOTOR-008",
+    "managing_agent": "City Wharf Managing Agency Ltd",
+    "coverholder": "Dockside Coverholder Ltd",
+    "policy_conditions": [
+      "Telematics feed active",
+      "Human escalation on anomaly score above threshold"
+    ],
+    "exclusions": [
+      "Undeclared fleet categories"
+    ],
+    "regulators": [
+      "FCA",
+      "PRA"
+    ]
+  },
+  "event_trail": [
+    {
+      "event_type": "underwriting_action_emitted",
+      "payload": {
+        "action": "claim_triage_decision",
+        "decision": "refer_for_review"
+      }
+    },
+    {
+      "event_type": "incident_recorded",
+      "payload": {
+        "incident_id": "inc-claims-001",
+        "incident_type": "claims_defensibility_review",
+        "severity": "medium",
+        "description": "Telematics anomaly triggered manual review.",
+        "claims_impact": "manual_referral",
+        "resolution": {
+          "outcome": "claim_referred"
+        }
+      }
+    },
+    {
+      "event_type": "human_review_recorded",
+      "payload": {
+        "reviewer": "claims.handler@mand8.example",
+        "notes": "Referral preserved for claims defensibility and policy-condition review.",
+        "status": "reviewed",
+        "reviewed_at": "2026-07-16T12:15:00Z"
+      }
+    }
+  ],
+  "human_review": {
+    "reviewer": "claims.handler@mand8.example",
+    "notes": "Referral preserved for claims defensibility and policy-condition review.",
+    "status": "reviewed",
+    "reviewed_at": "2026-07-16T12:15:00Z"
+  },
+  "integrity": {
+    "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "signature_algorithm": "stub-v1",
+    "signature": null,
+    "core_binding": null
+  }
+}

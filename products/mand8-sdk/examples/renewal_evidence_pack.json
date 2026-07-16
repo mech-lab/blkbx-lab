@@ -1,0 +1,78 @@
+{
+  "schema": "mand8.bundle.v1",
+  "bundle_id": "bundle_mand8_renewal_001",
+  "bundle_type": "renewal_evidence_pack",
+  "audience": "carrier_innovation_team",
+  "generated_at": "2026-07-16T12:20:00Z",
+  "institutional_question": "Can this AI risk be priced, underwritten, monitored, renewed, and defended?",
+  "market_context": {
+    "territory": "UK",
+    "market_segment": "lloyds_delegated_authority",
+    "binder_ref": "B1234UK2026",
+    "managing_agent": "Lime Street Managing Agency Ltd"
+  },
+  "bundle_sections": [
+    "Authority Receipt",
+    "Exposure Unit",
+    "Risk Controls",
+    "Override State",
+    "Human Review"
+  ],
+  "notes": "Renewal evidence pack prepared for delegated-authority review.",
+  "receipt": {
+    "schema": "mand8.risk_receipt.v1",
+    "receipt_id": "rcpt_mand8_uk_001",
+    "action_id": "act_mand8_uk_001",
+    "issued_at": "2026-07-16T12:00:00Z",
+    "domain_context": {
+      "exposure_unit_id": "uk-cyber-eu-042",
+      "policy_ref": "B1234UK2026",
+      "risk_class": "cyber",
+      "insured_value": 5000000.0,
+      "currency": "GBP",
+      "territory": "UK",
+      "market_segment": "lloyds_delegated_authority",
+      "binder_ref": "B1234UK2026",
+      "managing_agent": "Lime Street Managing Agency Ltd",
+      "coverholder": "North Dock Coverholder Ltd",
+      "policy_conditions": [
+        "Quarterly model drift review"
+      ],
+      "exclusions": [
+        "Silent cyber outside declared products"
+      ],
+      "regulators": [
+        "FCA",
+        "PRA"
+      ]
+    },
+    "event_trail": [
+      {
+        "event_type": "underwriting_action_emitted",
+        "payload": {
+          "action": "ai_underwriting_action",
+          "decision": "bind_with_controls"
+        }
+      }
+    ],
+    "human_review": {
+      "reviewer": "syndicate.underwriter@mand8.example",
+      "notes": "Renewal reviewed for portfolio monitoring.",
+      "status": "reviewed",
+      "reviewed_at": "2026-07-16T12:05:00Z"
+    },
+    "integrity": {
+      "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+      "signature_algorithm": "stub-v1",
+      "signature": null,
+      "core_binding": null
+    }
+  },
+  "summary": "renewal_evidence_pack for carrier_innovation_team: B1234UK2026 with 1 receipt events",
+  "integrity": {
+    "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "signature_algorithm": "stub-v1",
+    "signature": null,
+    "core_binding": null
+  }
+}

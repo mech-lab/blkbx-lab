@@ -20,9 +20,6 @@ FORBIDDEN_RELEASE_TERMS = (
     "HybridTDA",
     "hybridtda",
     "pip install hybridtda",
-    "mechlab-sdk",
-    "`mechlab`",
-    "`mech_lab`",
     "mair_manifest.v1.json",
     "assurance_receipt.v1.json",
     "backend_comparison.v1.json",
@@ -74,7 +71,7 @@ def ensure_release_workflow_uses_authored_notes() -> None:
     _check("pypa/gh-action-pypi-publish@release/v1" in workflow, "release workflow does not publish tagged distributions to PyPI")
     _check("name: pypi" in workflow, "release workflow is missing the pypi environment")
     _check("id-token: write" in workflow, "release workflow is missing the id-token permission required for trusted publishing")
-    _check("https://pypi.org/p/blkbx-lab" in workflow, "release workflow does not point to the blkbx-lab PyPI project")
+    _check("https://pypi.org/p/mechlab-sdk" in workflow, "release workflow does not point to the mechlab-sdk PyPI project")
 
 
 def ensure_host_ready_assets() -> None:

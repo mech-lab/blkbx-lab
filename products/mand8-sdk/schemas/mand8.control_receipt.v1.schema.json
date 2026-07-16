@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MAND8 Control Receipt",
+  "type": "object",
+  "required": [
+    "control_id",
+    "control_name",
+    "status"
+  ],
+  "properties": {
+    "control_id": {
+      "type": "string"
+    },
+    "control_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "control_type": {
+      "type": "string"
+    },
+    "evidence_ref": {
+      "type": "string"
+    },
+    "details": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}

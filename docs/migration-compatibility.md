@@ -26,11 +26,11 @@ The product repo no longer ships research trees, legacy compatibility namespaces
 
 ## Signing Compatibility
 
-- current default encoding: `INK-CORE-TLV-V2`
-- explicit compatibility encoding: `INK-CORE-TRANSCRIPT-V1`
-- governed alternate encoding: `INK-CORE-JSON-CANONICAL-V1`
+- current issuance encoding: `INK-CORE-TLV-V2`
+- verify-only compatibility encoding: `INK-CORE-TRANSCRIPT-V1`
+- verify-only compatibility encoding: `INK-CORE-JSON-CANONICAL-V1`
 
-The `signing.transcript_encoding` field is part of the public compatibility contract. Verifiers must treat it as authoritative rather than assuming a single implicit transcript format.
+The `signing.transcript_encoding` field remains part of the public verification contract for historical receipts. Verifiers use it to select the correct compatibility verification path, but new receipts must be signed only as `INK-CORE-TLV-V2`.
 
 ## Qwen Note
 

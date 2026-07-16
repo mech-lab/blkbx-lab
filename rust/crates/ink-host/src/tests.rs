@@ -11,10 +11,12 @@ use serde_json::json;
 
 use super::{
     create_manifest, doctor, gate, key_id_for_public, load_signer_config,
-    revocation_list_digest, verify, HostError, LegacyTrustPolicyJson, LegacyTrustedKeyJson,
-    RevocationListJson, RevokedKeyJson, SignerConfigJson, TrustRegistryJson, ACTIVE_PUBLIC_FILE,
-    ACTIVE_SECRET_FILE, LEGACY_TRUST_POLICY_FILE, REVOCATION_LIST_FILE, SIGNER_CONFIG_FILE,
-    TRUST_REGISTRY_FILE,
+    receipt_digest_for_encoding, receipt_payload_from_json, revocation_list_digest, verify,
+    HostError, LegacyTrustPolicyJson, LegacyTrustedKeyJson, ReceiptJson, RevocationListJson,
+    RevokedKeyJson, SignerConfigJson, TrustRegistryJson, ACTIVE_PUBLIC_FILE,
+    ACTIVE_SECRET_FILE, LEGACY_TRUST_POLICY_FILE, RECEIPT_ENCODING_JSON_CANONICAL_V1,
+    RECEIPT_ENCODING_TLV_V1_LEGACY, RECEIPT_ENCODING_TLV_V2, REVOCATION_LIST_FILE,
+    SIGNER_CONFIG_FILE, TRUST_REGISTRY_FILE,
 };
 use crate::digest_json;
 use ink_core::digest::sha256;
@@ -314,35 +316,87 @@ fn host_verify_rejects_mismatched_runtime_projection() {
 }
 
 #[test]
-fn host_gate_supports_file_signer_with_json_canonical_encoding() {
+fn host_gate_rejects_verify_only_receipt_encodings() {
     let _guard = ENV_LOCK.lock().unwrap();
     let root = unique_temp_dir("inkreceipts-host-file-signer");
     let config_root = root.join("config");
     env::set_var("INKRECEIPTS_CONFIG_DIR", &config_root);
     fs::create_dir_all(&root).unwrap();
     doctor(true).unwrap();
+    write_bundle(&root);
+    let manifest_path = write_manifest_fixture(&root, "urn:ink:action:file-signer");
+
+    let signer_path = config_root.join(SIGNER_CONFIG_FILE);
+    for encoding in [
+        RECEIPT_ENCODING_TLV_V1_LEGACY,
+        RECEIPT_ENCODING_JSON_CANONICAL_V1,
+    ] {
+        let mut signer: SignerConfigJson =
+            serde_json::from_str(&fs::read_to_string(&signer_path).unwrap()).unwrap();
+        signer.backend = "file_ed25519".to_string();
+        signer.receipt_encoding = encoding.to_string();
+        fs::write(&signer_path, serde_json::to_vec_pretty(&signer).unwrap()).unwrap();
+
+        let doc = doctor(false).unwrap();
+        assert_eq!(doc["demo_ready"], json!(false));
+        assert_eq!(doc["real_replay_ready"], json!(false));
+        assert!(doc["checks"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|check| {
+                check["name"] == "receipt_encoding"
+                    && check["status"] == "verify_only"
+                    && check["encoding"] == json!(encoding)
+            }));
+
+        let gated = gate(&manifest_path, &policy_path(), None, None, false);
+        assert!(
+            matches!(gated, Err(HostError::InvalidInput(message)) if message.contains("verify-only compatibility mode")
+                && message.contains(RECEIPT_ENCODING_TLV_V2))
+        );
+    }
+
+    let _ = fs::remove_dir_all(&root);
+}
+
+#[test]
+fn host_verify_accepts_json_canonical_compat_receipts() {
+    let _guard = ENV_LOCK.lock().unwrap();
+    let root = unique_temp_dir("inkreceipts-host-json-canonical-compat");
+    let config_root = root.join("config");
+    env::set_var("INKRECEIPTS_CONFIG_DIR", &config_root);
+    fs::create_dir_all(&root).unwrap();
+    doctor(true).unwrap();
+    write_bundle(&root);
 
     let signer_path = config_root.join(SIGNER_CONFIG_FILE);
     let mut signer: SignerConfigJson =
         serde_json::from_str(&fs::read_to_string(&signer_path).unwrap()).unwrap();
     signer.backend = "file_ed25519".to_string();
-    signer.receipt_encoding = "INK-CORE-JSON-CANONICAL-V1".to_string();
+    signer.receipt_encoding = RECEIPT_ENCODING_TLV_V2.to_string();
     fs::write(&signer_path, serde_json::to_vec_pretty(&signer).unwrap()).unwrap();
 
-    let doc = doctor(false).unwrap();
-    assert_eq!(doc["demo_ready"], json!(false));
-    assert_eq!(doc["real_replay_ready"], json!(true));
-
-    write_bundle(&root);
-    let manifest_path = write_manifest_fixture(&root, "urn:ink:action:file-signer");
+    let manifest_path = write_manifest_fixture(&root, "urn:ink:action:json-canonical-compat");
     let gated = gate(&manifest_path, &policy_path(), None, None, false).unwrap();
     let receipt_path = PathBuf::from(gated["receipt_path"].as_str().unwrap());
-    let receipt: serde_json::Value =
+    let mut receipt: ReceiptJson =
         serde_json::from_str(&fs::read_to_string(&receipt_path).unwrap()).unwrap();
-    assert_eq!(
-        receipt["signing"]["transcript_encoding"],
-        json!("INK-CORE-JSON-CANONICAL-V1")
-    );
+
+    let signer = load_signer_config().unwrap();
+    let secret_key_text = fs::read_to_string(config_root.join(&signer.secret_key_path)).unwrap();
+    let secret_key_bytes = Base64UrlUnpadded::decode_vec(secret_key_text.trim()).unwrap();
+    let signing_key = SigningKey::from_bytes(&secret_key_bytes.try_into().unwrap());
+
+    receipt.signing.transcript_encoding = RECEIPT_ENCODING_JSON_CANONICAL_V1.to_string();
+    let payload = receipt_payload_from_json(&receipt).unwrap();
+    let digest =
+        receipt_digest_for_encoding(&receipt, &payload, RECEIPT_ENCODING_JSON_CANONICAL_V1)
+            .unwrap();
+    receipt.signing.payload_hash = digest_json(&digest);
+    receipt.signing.signature =
+        Base64UrlUnpadded::encode_string(&signing_key.sign(&digest.0).to_bytes());
+    fs::write(&receipt_path, serde_json::to_vec_pretty(&receipt).unwrap()).unwrap();
 
     let verified = verify(&receipt_path, Some(&manifest_path)).unwrap();
     assert_eq!(verified["verification"]["overall"], "pass");

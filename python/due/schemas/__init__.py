@@ -1,0 +1,1 @@
+"""DUE packaged schema assets."""

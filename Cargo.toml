@@ -10,7 +10,11 @@ resolver = "2"
 edition = "2021"
 authors = ["BLKBX Lab contributors"]
 license = "MIT"
-version = "0.7.0"
+version = "0.9.1"
+description = "Model-agnostic Ink Receipts with a no_std, no_alloc Rust trust waist"
+documentation = "https://github.com/mech-lab/blkbx-lab"
+homepage = "https://github.com/mech-lab/blkbx-lab"
+repository = "https://github.com/mech-lab/blkbx-lab"
 
 [workspace.dependencies]
 base64ct = { version = "1.7", default-features = false, features = ["alloc"] }

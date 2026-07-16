@@ -1,0 +1,80 @@
+{
+  "schema": "mand8.bundle.v1",
+  "bundle_id": "bundle_mand8_actuarial_001",
+  "bundle_type": "actuarial_signal_export",
+  "audience": "actuary",
+  "generated_at": "2026-07-16T12:25:00Z",
+  "institutional_question": "Can this AI risk be priced, underwritten, monitored, renewed, and defended?",
+  "market_context": {
+    "territory": "UK",
+    "market_segment": "lloyds_delegated_authority",
+    "binder_ref": "B1234UK2026",
+    "managing_agent": "Lime Street Managing Agency Ltd"
+  },
+  "bundle_sections": [
+    "Exposure Unit",
+    "Risk Controls",
+    "Portfolio Monitoring"
+  ],
+  "notes": "Actuarial signal export for portfolio monitoring.",
+  "receipt": {
+    "schema": "mand8.risk_receipt.v1",
+    "receipt_id": "rcpt_mand8_act_001",
+    "action_id": "act_mand8_act_001",
+    "issued_at": "2026-07-16T12:24:00Z",
+    "domain_context": {
+      "exposure_unit_id": "uk-cyber-eu-315",
+      "policy_ref": "B5678UK2026",
+      "risk_class": "cyber",
+      "insured_value": 2500000.0,
+      "currency": "GBP",
+      "territory": "UK",
+      "market_segment": "lloyds_delegated_authority",
+      "binder_ref": "B5678UK2026",
+      "managing_agent": "Lime Street Managing Agency Ltd",
+      "coverholder": "North Dock Coverholder Ltd",
+      "policy_conditions": [
+        "Monthly anomaly monitoring"
+      ],
+      "exclusions": [],
+      "regulators": [
+        "FCA",
+        "PRA"
+      ]
+    },
+    "event_trail": [
+      {
+        "event_type": "control_check_recorded",
+        "payload": {
+          "control_id": "ctl-loss-frequency-monitor",
+          "control_name": "Loss frequency monitor",
+          "status": "pass",
+          "control_type": "portfolio_monitoring",
+          "evidence_ref": "ev-loss-monitor-2026-07",
+          "details": {
+            "loss_ratio_signal": 0.74
+          }
+        }
+      }
+    ],
+    "human_review": {
+      "reviewer": "portfolio.actuary@mand8.example",
+      "notes": "Signal export approved for quarterly portfolio monitoring.",
+      "status": "reviewed",
+      "reviewed_at": "2026-07-16T12:25:00Z"
+    },
+    "integrity": {
+      "digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+      "signature_algorithm": "stub-v1",
+      "signature": null,
+      "core_binding": null
+    }
+  },
+  "summary": "actuarial_signal_export for actuary: B5678UK2026 with 1 receipt events",
+  "integrity": {
+    "digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    "signature_algorithm": "stub-v1",
+    "signature": null,
+    "core_binding": null
+  }
+}

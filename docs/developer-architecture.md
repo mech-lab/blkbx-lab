@@ -47,7 +47,7 @@ This crate is the product's trust waist. It stays `no_std` and owns the semantic
 
 - TLV v2 is the current default signed transcript.
 - TLV legacy v1 remains supported for explicit compatibility verification.
-- canonical JSON v1 is supported as a governed host-level encoding choice.
+- canonical JSON v1 remains supported only for compatibility verification of existing receipts.
 
 ## Assets (`policies/`, `schemas/`, `tests/`, `docs/`)
 
