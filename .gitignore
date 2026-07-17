@@ -15,4 +15,5 @@ target/
 blkbx-trace-*/
 blkbx-compare-*/
 qwen35-claims-*/
+artifacts/
 python/blkbx_lab/_ink_native*.so

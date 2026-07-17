@@ -23,10 +23,16 @@ def test_workspace_crates_share_the_v09_release_version():
     root_version = root_project["project"]["version"]
     workspace = _toml(ROOT / "Cargo.toml")
     assert workspace["workspace"]["package"]["version"] == root_version
-    cargo_paths = (
-        ROOT / "rust" / "crates" / "ink-core" / "Cargo.toml",
-        ROOT / "rust" / "crates" / "ink-host" / "Cargo.toml",
-        ROOT / "rust" / "crates" / "ink-py" / "Cargo.toml",
-    )
+    cargo_paths = sorted((ROOT / "rust" / "crates").glob("*/Cargo.toml"))
+    crate_names = {_toml(path)["package"]["name"] for path in cargo_paths}
+    assert crate_names == {
+        "ink-cli",
+        "ink-core",
+        "ink-host",
+        "ink-py",
+        "ink-vectors",
+        "ink-verify",
+        "ink-wasm",
+    }
     versions = {_toml(path)["package"]["version"]["workspace"] for path in cargo_paths}
     assert versions == {True}

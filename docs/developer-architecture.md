@@ -1,58 +1,68 @@
 # Developer Architecture
 
-BLKBX Lab is structured into the following layers:
+BLKBX Lab now has two Rust layers with a deliberate split:
 
 ```text
 blkbx-lab CLI / blkbx_lab SDK
         |
         +-- python/blkbx_lab/       public API, CLI parser, packaged adapters, result objects
         |
-        +-- rust/crates/ink-py/     PyO3 bindings exposed as blkbx_lab._ink_native
+        +-- rust/crates/ink-py/     PyO3 bridge exposed as blkbx_lab._ink_native
         |
-        +-- rust/crates/ink-host/   manifest IO, policy evaluation, signer config, trust registry
+        +-- rust/crates/ink-host/   std adapter, manifest IO, signer config, v2 compatibility
         |
-        +-- rust/crates/ink-core/   no_std receipt core, transcript encodings, digest/signature logic
+        +-- rust/crates/ink-core/   domain-neutral no_std kernel
+        |       |
+        |       +-- rust/crates/ink-verify/   optional no_std attestation verification
+        |       +-- rust/crates/ink-vectors/  deterministic kernel vectors
+        |       +-- rust/crates/ink-cli/      local kernel CLI
+        |       +-- rust/crates/ink-wasm/     portable verifier target
         |
         +-- policies/ schemas/      shipped policy and schema assets
         |
         +-- tests/ docs/            product-facing verification and documentation
 ```
 
-## Public Facade (`python/blkbx_lab/`)
+## Public Facade
 
-This is the canonical SDK and CLI surface. Release-facing docs, examples, and tests should target this layer.
+`python/blkbx_lab/` remains the release-facing SDK and CLI surface for the shipped umbrella wheel.
 
-## Python Package (`python/blkbx_lab/`)
+## Kernel Layer
 
-This package owns:
+`rust/crates/ink-core/` is now the kernel trust waist:
 
-- the public `blkbx_lab` namespace
-- the installed `qwen35` deterministic demo adapter
-- CLI entrypoints and public result objects
-- compatibility normalization for deprecated adapter-selection flags
+- `no_std`
+- safe Rust
+- deterministic receipt envelope
+- canonical encoding
+- hash commitments
+- replay and compare semantics
+- bundle validation
 
-## Host Layer (`rust/crates/ink-host/`)
+This layer is domain-neutral. It does not own banking, insurance, or legal semantics.
 
-This crate owns:
+## Verification Layer
 
-- manifest creation and evidence hashing
-- policy evaluation and receipt issuance
-- signer backend config loading
-- trust-registry and revocation-list enforcement
-- receipt verification and comparison packet signing
+`rust/crates/ink-verify/` adds optional signature verification over kernel receipts without moving private-key operations into the kernel.
 
-## Core Layer (`rust/crates/ink-core/`)
+## Compatibility Layer
 
-This crate is the product's trust waist. It stays `no_std` and owns the semantic receipt model plus the signed transcript encoders:
+`rust/crates/ink-host/` remains the `std` adapter that:
 
-- TLV v2 is the current default signed transcript.
-- TLV legacy v1 remains supported for explicit compatibility verification.
-- canonical JSON v1 remains supported only for compatibility verification of existing receipts.
+- creates and reads the current `ink.manifest.v2`
+- issues and verifies the current `ink.receipt.v2`
+- projects current v2 receipts into the neutral kernel envelope during verification
+- verifies historical encodings
+- loads signer config, trust registries, and revocation data
 
-## Assets (`policies/`, `schemas/`, `tests/`, `docs/`)
+The current shipped v2 receipt path is intentionally a host-level compatibility surface above the new kernel.
 
-Only shipped product assets remain in this repository. Research trees, compatibility packages, notebooks, and legacy experimental crates are intentionally out of scope for the product repo.
+## Product Layers
 
-## Repo Boundary
+BLKBXS, MAND8, and DUE remain above the kernel:
 
-This repository is now the OSS receipt-core/product tree. If historical research material needs to be preserved, it belongs in a separate history-preserving research repo rather than mixed into this install surface.
+- `BLKBXS`: bankability evidence
+- `MAND8`: insurability evidence
+- `DUE`: legal defensibility evidence
+
+They bind schemas and compose artifacts. They do not redefine the kernel semantics.

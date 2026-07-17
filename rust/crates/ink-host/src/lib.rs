@@ -8,10 +8,19 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use base64ct::{Base64UrlUnpadded, Encoding};
 use dirs::config_dir;
 use ed25519_dalek::{Signer, SigningKey};
-use rand::RngCore;
-use ink_core::compare::{compare_receipts, ComparisonOut, VerifiedReceiptSummary};
+use ink_core::bounded::{DomainTag, IssuerId, SchemaAuthority, SchemaId};
 use ink_core::controls::{ControlObservation, ControlSet, ControlStatus, ControlType};
 use ink_core::digest::{sha256, write_tlv, Sha256Sink};
+use ink_core::legacy::compare::{compare_receipts, ComparisonOut, VerifiedReceiptSummary};
+use ink_core::legacy::policy::{
+    evaluate_policy, CompiledPolicy, CompiledRule, ConditionNode, ConditionOp, ConditionValue,
+    Decision, EvaluationOut, PluginTrustFact, PolicyFacts, PolicyInput, ReasonCodeSlot,
+    ReasonWriter, RiskClass, RuleEffect,
+};
+use ink_core::legacy::receipt::{
+    build_receipt_payload, receipt_transcript_hash, receipt_transcript_hash_legacy_v1, IssuerClaim,
+    PolicyBinding, ReceiptInput, ReceiptPayload, ReceiptProfile, ReceiptSchemaVersion,
+};
 use ink_core::limits;
 use ink_core::manifest::{ArtifactRef, ArtifactType, ManifestBinding, MediaType};
 use ink_core::model_waist::{
@@ -21,21 +30,13 @@ use ink_core::model_waist::{
     PluginTrustLevel, ProviderRoutingClaim, ReplayStrength, RequestedOutput, RuntimeClaim,
     RuntimeKind, TokenUsage,
 };
-use ink_core::policy::{
-    evaluate_policy, CompiledPolicy, CompiledRule, ConditionNode, ConditionOp, ConditionValue,
-    Decision, EvaluationOut, PluginTrustFact, PolicyFacts, PolicyInput, ReasonCodeSlot,
-    ReasonWriter, RiskClass, RuleEffect,
-};
-use ink_core::receipt::{
-    build_receipt_payload, receipt_transcript_hash, receipt_transcript_hash_legacy_v1,
-    IssuerClaim, PolicyBinding, ReceiptInput, ReceiptPayload, ReceiptProfile,
-    ReceiptSchemaVersion,
-};
 use ink_core::signing::verify_receipt_signature_for_digest;
 use ink_core::types::{
     ActionId, BoundedBytes, Ed25519PublicKey, Ed25519Signature, KeyId, ReceiptId, Sha256Digest,
     TimestampUtc,
 };
+use ink_core::{Digest as KernelDigest, ReceiptEnvelope};
+use rand::RngCore;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256, Sha512};
@@ -633,9 +634,7 @@ pub fn gate(
             },
             manifest_hash: bundle.manifest_hash,
             policy: PolicyBinding {
-                policy_id: leak_bounded::<{ limits::MAX_POLICY_ID_LEN }>(
-                    policy.file.id.clone(),
-                )?,
+                policy_id: leak_bounded::<{ limits::MAX_POLICY_ID_LEN }>(policy.file.id.clone())?,
                 policy_version: leak_bounded::<{ limits::MAX_POLICY_VERSION_LEN }>(
                     policy.file.version.clone(),
                 )?,
@@ -732,7 +731,10 @@ pub fn verify(receipt_path: &Path, manifest_path: Option<&Path>) -> Result<Value
     ensure_key_not_revoked(&trusted.key_id)?;
     let payload = receipt_payload_from_json(&receipt)?;
     let signature = Ed25519Signature(decode_fixed::<64>(&receipt.signing.signature)?);
-    let digest = receipt_digest_for_encoding(&receipt, &payload, &receipt.signing.transcript_encoding)?;
+    let digest =
+        receipt_digest_for_encoding(&receipt, &payload, &receipt.signing.transcript_encoding)?;
+    let kernel_receipt = project_v2_receipt_to_kernel(&receipt, &payload)?;
+    let kernel_report = ink_core::verify::verify_receipt(&kernel_receipt)?;
     let expected_payload_hash = digest_json(&digest);
     let payload_hash_valid = receipt.signing.payload_hash.digest == expected_payload_hash.digest
         && receipt.signing.payload_hash.algorithm == expected_payload_hash.algorithm;
@@ -746,12 +748,22 @@ pub fn verify(receipt_path: &Path, manifest_path: Option<&Path>) -> Result<Value
     let sibling = sibling_manifest(receipt_path);
     let manifest_candidate = manifest_path.map(PathBuf::from).or(sibling);
     let mut scope = "receipt-only";
-    let mut overall = if signature_valid { "pass" } else { "fail" };
+    let kernel_projection_valid = kernel_report.valid;
+    let mut overall = if signature_valid && kernel_projection_valid {
+        "pass"
+    } else {
+        "fail"
+    };
     let mut checks = vec![
         json!({"id": "payload.hash", "status": if payload_hash_valid { "pass" } else { "fail" }, "reason_code": if payload_hash_valid { "RECEIPT_PAYLOAD_HASH_MATCH" } else { "RECEIPT_PAYLOAD_HASH_MISMATCH" }}),
         json!({"id": "receipt.signature", "status": if signature_valid { "pass" } else { "fail" }, "reason_code": if signature_valid { "RECEIPT_SIGNATURE_VALID" } else { "RECEIPT_SIGNATURE_INVALID" }}),
         json!({"id": "issuer.trust", "status": "pass", "reason_code": "ISSUER_KEY_TRUSTED"}),
         json!({"id": "issuer.revocation", "status": "pass", "reason_code": "ISSUER_KEY_NOT_REVOKED"}),
+        json!({
+            "id": "kernel.projection",
+            "status": if kernel_projection_valid { "pass" } else { "fail" },
+            "reason_code": if kernel_projection_valid { "KERNEL_PROJECTION_VALID" } else { "KERNEL_PROJECTION_INVALID" },
+        }),
     ];
     if let Some(ref manifest_path) = manifest_candidate {
         let bundle = load_bundle(manifest_path, None)?;
@@ -1039,12 +1051,8 @@ fn load_policy(policy_path: &Path) -> Result<PolicyBundle, HostError> {
         });
     }
     let compiled = CompiledPolicy {
-        policy_id: leak_bounded::<{ limits::MAX_POLICY_ID_LEN }>(
-            file.id.clone(),
-        )?,
-        policy_version: leak_bounded::<{ limits::MAX_POLICY_VERSION_LEN }>(
-            file.version.clone(),
-        )?,
+        policy_id: leak_bounded::<{ limits::MAX_POLICY_ID_LEN }>(file.id.clone())?,
+        policy_version: leak_bounded::<{ limits::MAX_POLICY_VERSION_LEN }>(file.version.clone())?,
         policy_hash: sha256(&raw),
         nodes: Box::leak(nodes.into_boxed_slice()),
         rules: Box::leak(rules.into_boxed_slice()),
@@ -1402,17 +1410,13 @@ fn receipt_payload_from_json(receipt: &ReceiptJson) -> Result<ReceiptPayload<'st
         action_id: leak_action_id(receipt.action_id.clone())?,
         issued_at: TimestampUtc::new(receipt.issued_at, 0)?,
         issuer: IssuerClaim {
-            name: leak_bounded::<{ limits::MAX_ISSUER_NAME_LEN }>(
-                receipt.issuer.name.clone(),
-            )?,
+            name: leak_bounded::<{ limits::MAX_ISSUER_NAME_LEN }>(receipt.issuer.name.clone())?,
             key_id: leak_key_id(receipt.issuer.key_id.clone())?,
             public_key: Ed25519PublicKey(decode_fixed::<32>(&receipt.issuer.public_key)?),
         },
         manifest_hash: parse_digest(&receipt.manifest_hash)?,
         policy: PolicyBinding {
-            policy_id: leak_bounded::<{ limits::MAX_POLICY_ID_LEN }>(
-                receipt.policy.id.clone(),
-            )?,
+            policy_id: leak_bounded::<{ limits::MAX_POLICY_ID_LEN }>(receipt.policy.id.clone())?,
             policy_version: leak_bounded::<{ limits::MAX_POLICY_VERSION_LEN }>(
                 receipt.policy.version.clone(),
             )?,
@@ -1427,6 +1431,61 @@ fn receipt_payload_from_json(receipt: &ReceiptJson) -> Result<ReceiptPayload<'st
     };
     payload.validate()?;
     Ok(payload)
+}
+
+// Current ink.receipt.v2 artifacts stay host-level, but the host should still be
+// able to project them into the neutral kernel envelope and exercise the new
+// canonical hashing and lifecycle rules.
+fn project_v2_receipt_to_kernel(
+    receipt: &ReceiptJson,
+    payload: &ReceiptPayload<'_>,
+) -> Result<ReceiptEnvelope, HostError> {
+    let schema_id = SchemaId::from_str("ink.receipt.v2")?;
+    let schema_authority = SchemaAuthority::from_str("ink-host")?;
+    let domain_tag = DomainTag::from_str("compat-v2")?;
+    let issuer_id = kernel_projection_issuer_id(&receipt.issuer.key_id)?;
+    let sequence = u64::try_from(receipt.issued_at).map_err(|_| {
+        HostError::InvalidInput("receipt issued_at must be non-negative".to_string())
+    })?;
+    let claim_hash = kernel_projection_claim_hash(receipt, payload)?;
+    let trace_hash = to_kernel_digest(receipt_transcript_hash(payload)?);
+
+    let projected = ReceiptEnvelope::create(
+        schema_id,
+        to_kernel_digest(sha256(b"ink.receipt.v2")),
+        schema_authority,
+        domain_tag,
+        to_kernel_digest(payload.model.invocation.action_hash),
+        issuer_id,
+        sequence,
+        claim_hash,
+        to_kernel_digest(payload.evidence_summary_hash),
+        to_kernel_digest(payload.policy.policy_hash),
+        trace_hash,
+        ink_core::ParentHashes::new(),
+    );
+    projected.seal().map_err(HostError::from)
+}
+
+fn kernel_projection_issuer_id(key_id: &str) -> Result<IssuerId, HostError> {
+    let key_hash = sha256(key_id.as_bytes());
+    let compact = format!("issuer:{}", hex::encode(&key_hash.0[..16]));
+    IssuerId::from_str(&compact).map_err(HostError::from)
+}
+
+fn kernel_projection_claim_hash(
+    receipt: &ReceiptJson,
+    payload: &ReceiptPayload<'_>,
+) -> Result<KernelDigest, HostError> {
+    let mut parts = Vec::with_capacity(4 + receipt.reason_codes.len());
+    parts.push(payload.action_id.as_bytes());
+    parts.push(receipt.decision.as_bytes());
+    parts.push(receipt.facts.risk_class.as_bytes());
+    parts.push(receipt.policy.id.as_bytes());
+    for reason in &receipt.reason_codes {
+        parts.push(reason.as_bytes());
+    }
+    ink_core::hash::hash_many_labeled(b"compat-v2.claim", &parts).map_err(HostError::from)
 }
 
 fn sign_comparison_packet(
@@ -1552,7 +1611,9 @@ fn load_trusted_key(key_id: &str, issuer_name: &str) -> Result<TrustedIssuerJson
     registry
         .issuers
         .into_iter()
-        .find(|entry| entry.key_id == key_id && entry.status == "active" && entry.issuer_name == issuer_name)
+        .find(|entry| {
+            entry.key_id == key_id && entry.status == "active" && entry.issuer_name == issuer_name
+        })
         .ok_or_else(|| HostError::Trust(format!("unknown trusted key {key_id}")))
 }
 
@@ -1595,7 +1656,10 @@ fn write_private_key(path: &Path, secret_key: &[u8; 32]) -> Result<(), HostError
     }
 }
 
-fn load_issuer_from_config(root: &Path, config: &SignerConfigJson) -> Result<LocalIssuer, HostError> {
+fn load_issuer_from_config(
+    root: &Path,
+    config: &SignerConfigJson,
+) -> Result<LocalIssuer, HostError> {
     let secret_path = resolve_config_path(root, &config.secret_key_path);
     let public_path = resolve_config_path(root, &config.public_key_path);
     let secret_key = decode_fixed::<32>(&fs::read_to_string(&secret_path)?)?;
@@ -1628,7 +1692,8 @@ fn migrate_legacy_trust_policy(root: &Path) -> Result<bool, HostError> {
     let mut migrated = false;
     let registry_path = root.join(TRUST_REGISTRY_FILE);
     if !registry_path.exists() {
-        let legacy: LegacyTrustPolicyJson = serde_json::from_str(&fs::read_to_string(&legacy_path)?)?;
+        let legacy: LegacyTrustPolicyJson =
+            serde_json::from_str(&fs::read_to_string(&legacy_path)?)?;
         let mut issuers = Vec::new();
         for key in legacy.trusted_keys {
             issuers.push(TrustedIssuerJson {
@@ -1770,13 +1835,17 @@ fn load_revocation_list() -> Result<RevocationListJson, HostError> {
         .issuers
         .into_iter()
         .find(|entry| entry.key_id == list.signing.key_id && entry.status == "active")
-        .ok_or_else(|| HostError::Trust(format!("unknown revocation signer {}", list.signing.key_id)))?;
+        .ok_or_else(|| {
+            HostError::Trust(format!("unknown revocation signer {}", list.signing.key_id))
+        })?;
     let digest = revocation_list_digest(&list)?;
     let payload_hash = digest_json(&digest);
     if payload_hash.digest != list.signing.payload_hash.digest
         || payload_hash.algorithm != list.signing.payload_hash.algorithm
     {
-        return Err(HostError::Trust("revocation list payload hash mismatch".to_string()));
+        return Err(HostError::Trust(
+            "revocation list payload hash mismatch".to_string(),
+        ));
     }
     verify_receipt_signature_for_digest(
         &digest,
@@ -1843,9 +1912,7 @@ fn hash_manifest(manifest: &ManifestJson) -> Result<Sha256Digest, HostError> {
                     .schema
                     .as_ref()
                     .map(|schema| sha256(schema.id.as_bytes())),
-                path_hint: leak_bounded::<{ limits::MAX_PATH_HINT_LEN }>(
-                    artifact.path.clone(),
-                )?,
+                path_hint: leak_bounded::<{ limits::MAX_PATH_HINT_LEN }>(artifact.path.clone())?,
             })
         })
         .collect::<Result<Vec<_>, HostError>>()?;
@@ -1976,6 +2043,10 @@ fn write_json<T: Serialize>(path: &Path, value: &T) -> Result<(), HostError> {
 
 fn parse_digest(value: &DigestJson) -> Result<Sha256Digest, HostError> {
     parse_hex_digest(&value.digest)
+}
+
+fn to_kernel_digest(value: Sha256Digest) -> KernelDigest {
+    KernelDigest(value.0)
 }
 
 fn parse_hex_digest(value: &str) -> Result<Sha256Digest, HostError> {

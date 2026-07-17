@@ -1,3 +1,7 @@
+use core::fmt;
+
+pub type Result<T> = core::result::Result<T, Error>;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {
     EmptyValue,
@@ -22,4 +26,72 @@ pub enum Error {
     SignatureError,
     InvalidByteClass,
     TlvValueTooLarge,
+    TooManyParents,
+    UnsupportedHashAlgorithm,
+    UnsupportedSignatureAlgorithm,
+    InvalidLifecycleState,
+    InvalidEncoding,
+    HashMismatch,
+    SignatureVerificationFailed,
+    MissingSignature,
+    InvalidSchemaBinding,
+    InvalidParentRelation,
+    InvalidBundle,
+    ReplayMismatch,
+    InvalidDiff,
+    BufferTooSmall,
+    InvalidLengthPrefix,
+    UnknownField,
+    TruncatedInput,
+    InvalidVersion,
+    BundleTooLarge,
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let message = match self {
+            Self::EmptyValue => "empty value",
+            Self::ValueTooLong => "value too long",
+            Self::ContainsNul => "contains nul byte",
+            Self::InvalidUtf8 => "invalid utf-8",
+            Self::InvalidTimestamp => "invalid timestamp",
+            Self::InvalidRuntimeShape => "invalid runtime shape",
+            Self::InvalidModelShape => "invalid model shape",
+            Self::TooManyArtifacts => "too many artifacts",
+            Self::TooManyControls => "too many controls",
+            Self::TooManyReasons => "too many reasons",
+            Self::TooManyRules => "too many rules",
+            Self::TooManyConditionNodes => "too many condition nodes",
+            Self::InvalidRuleRoot => "invalid rule root",
+            Self::InvalidConditionIndex => "invalid condition index",
+            Self::InvalidConditionShape => "invalid condition shape",
+            Self::InvalidConditionCycle => "invalid condition cycle",
+            Self::InvalidRequestedOutputShape => "invalid requested output shape",
+            Self::InvalidTokenUsageTotals => "invalid token usage totals",
+            Self::InconsistentReceiptPayload => "inconsistent receipt payload",
+            Self::SignatureError => "signature error",
+            Self::InvalidByteClass => "invalid byte class",
+            Self::TlvValueTooLarge => "tlv value too large",
+            Self::TooManyParents => "too many parent hashes",
+            Self::UnsupportedHashAlgorithm => "unsupported hash algorithm",
+            Self::UnsupportedSignatureAlgorithm => "unsupported signature algorithm",
+            Self::InvalidLifecycleState => "invalid lifecycle state",
+            Self::InvalidEncoding => "invalid canonical encoding",
+            Self::HashMismatch => "hash mismatch",
+            Self::SignatureVerificationFailed => "signature verification failed",
+            Self::MissingSignature => "missing signature",
+            Self::InvalidSchemaBinding => "invalid schema binding",
+            Self::InvalidParentRelation => "invalid parent relation",
+            Self::InvalidBundle => "invalid bundle",
+            Self::ReplayMismatch => "replay mismatch",
+            Self::InvalidDiff => "invalid diff",
+            Self::BufferTooSmall => "buffer too small",
+            Self::InvalidLengthPrefix => "invalid length prefix",
+            Self::UnknownField => "unknown field",
+            Self::TruncatedInput => "truncated input",
+            Self::InvalidVersion => "invalid version",
+            Self::BundleTooLarge => "bundle too large",
+        };
+        f.write_str(message)
+    }
 }

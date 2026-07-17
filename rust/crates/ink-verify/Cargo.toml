@@ -1,0 +1,17 @@
+[package]
+name = "ink-verify"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+repository.workspace = true
+
+[lib]
+name = "ink_verify"
+path = "src/lib.rs"
+
+[dependencies]
+ed25519-dalek.workspace = true
+ink-core = { path = "../ink-core" }

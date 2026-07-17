@@ -13,10 +13,9 @@ use super::{
     create_manifest, doctor, gate, key_id_for_public, load_signer_config,
     receipt_digest_for_encoding, receipt_payload_from_json, revocation_list_digest, verify,
     HostError, LegacyTrustPolicyJson, LegacyTrustedKeyJson, ReceiptJson, RevocationListJson,
-    RevokedKeyJson, SignerConfigJson, TrustRegistryJson, ACTIVE_PUBLIC_FILE,
-    ACTIVE_SECRET_FILE, LEGACY_TRUST_POLICY_FILE, RECEIPT_ENCODING_JSON_CANONICAL_V1,
-    RECEIPT_ENCODING_TLV_V1_LEGACY, RECEIPT_ENCODING_TLV_V2, REVOCATION_LIST_FILE,
-    SIGNER_CONFIG_FILE, TRUST_REGISTRY_FILE,
+    RevokedKeyJson, SignerConfigJson, TrustRegistryJson, ACTIVE_PUBLIC_FILE, ACTIVE_SECRET_FILE,
+    LEGACY_TRUST_POLICY_FILE, RECEIPT_ENCODING_JSON_CANONICAL_V1, RECEIPT_ENCODING_TLV_V1_LEGACY,
+    RECEIPT_ENCODING_TLV_V2, REVOCATION_LIST_FILE, SIGNER_CONFIG_FILE, TRUST_REGISTRY_FILE,
 };
 use crate::digest_json;
 use ink_core::digest::sha256;
@@ -212,6 +211,11 @@ fn host_gate_still_emits_v2_receipt_semantics_with_hardened_core() {
     let verified = verify(&receipt_path, Some(&manifest_path)).unwrap();
     assert_eq!(verified["verification"]["overall"], "pass");
     assert_eq!(verified["verification"]["scope"], "full-evidence");
+    assert!(verified["verification"]["checks"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|check| check["id"] == "kernel.projection" && check["status"] == "pass"));
 
     let _ = fs::remove_dir_all(&root);
 }
@@ -340,15 +344,11 @@ fn host_gate_rejects_verify_only_receipt_encodings() {
         let doc = doctor(false).unwrap();
         assert_eq!(doc["demo_ready"], json!(false));
         assert_eq!(doc["real_replay_ready"], json!(false));
-        assert!(doc["checks"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .any(|check| {
-                check["name"] == "receipt_encoding"
-                    && check["status"] == "verify_only"
-                    && check["encoding"] == json!(encoding)
-            }));
+        assert!(doc["checks"].as_array().unwrap().iter().any(|check| {
+            check["name"] == "receipt_encoding"
+                && check["status"] == "verify_only"
+                && check["encoding"] == json!(encoding)
+        }));
 
         let gated = gate(&manifest_path, &policy_path(), None, None, false);
         assert!(

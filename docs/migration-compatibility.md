@@ -9,6 +9,18 @@ The release-facing contract is:
 - Python namespace: `blkbx_lab`
 - artifacts: `ink_manifest.v2.json`, `ink_receipt.v2.json`, `receipt_comparison.v2.json`
 
+## Kernel v1 Boundary
+
+The new `INK Receipts` kernel lives below that public surface:
+
+- `ink-core`: neutral receipt envelope, canonical encoding, replay, compare
+- `ink-verify`: optional portable attestation verification
+- `ink-host`: compatibility issuance and verification for current `ink.receipt.v2` / `ink.manifest.v2`
+
+The shipped v2 JSON/TLV artifacts remain the compatibility contract for the current root runtime. They are not the new kernel envelope.
+
+`ink-host` now projects current v2 receipts onto the kernel envelope internally during verification. That keeps the legacy artifact format stable while exercising the new deterministic kernel semantics underneath.
+
 ## Deprecated Selectors
 
 The public package still tolerates some deprecated adapter-selection inputs for the installed deterministic demo:

@@ -90,8 +90,12 @@ blkbx-lab/
   python/blkbxs/                  banking-facing public facade
   python/mand8/                   insurance-facing public facade
   python/due/                     legal-facing public facade
-  rust/crates/ink-core/           receipt core
-  rust/crates/ink-host/           host/runtime verification
+  rust/crates/ink-core/           domain-neutral deterministic kernel
+  rust/crates/ink-verify/         optional no_std signature verification
+  rust/crates/ink-vectors/        deterministic kernel vectors
+  rust/crates/ink-cli/            local kernel CLI
+  rust/crates/ink-wasm/           portable verifier target
+  rust/crates/ink-host/           std adapter and v2 compatibility surface
   rust/crates/ink-py/             PyO3 bridge
   products/
     mand8-sdk/                    insurance-facing source slice
@@ -100,12 +104,16 @@ blkbx-lab/
 
 The slice directories remain source slices and repo organization units. The shipped pip artifact is `mechlab-sdk`, and its stable wheel surface now carries the `blkbxs`, `mand8`, and `due` Python packages directly.
 
+The root public CLIs remain `blkbx-lab` and `mechlab`. The new `ink` CLI is a kernel-facing verifier tool, not a replacement for the umbrella product CLIs.
+
 ## Docs
 
 - [CLI and API contract](docs/mvp-cli-api-contract.md)
 - [Public object spec](docs/public-object-spec.md)
 - [Developer architecture](docs/developer-architecture.md)
 - [Migration and compatibility](docs/migration-compatibility.md)
+- [Formal semantics draft](FORMAL_SEMANTICS.md)
+- [Reproducibility guide](REPRODUCIBILITY.md)
 - [Product architecture](docs/product-architecture.md)
 - [Brand architecture](docs/brand-architecture.md)
 - [Receipt domain model](docs/receipt-domain-model.md)

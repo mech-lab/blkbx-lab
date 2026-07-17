@@ -1,7 +1,7 @@
 use ed25519_dalek::{Signer, SigningKey, Verifier, VerifyingKey};
 
 use crate::error::Error;
-use crate::receipt::{receipt_transcript_hash, ReceiptPayload};
+use crate::legacy::receipt::{receipt_transcript_hash, ReceiptPayload};
 use crate::types::{Ed25519PublicKey, Ed25519Signature};
 
 pub trait ReceiptSigner {

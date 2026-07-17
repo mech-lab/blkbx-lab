@@ -1,0 +1,20 @@
+[package]
+name = "ink-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "ink"
+path = "src/main.rs"
+
+[dependencies]
+hex.workspace = true
+ink-core = { path = "../ink-core" }
+ink-verify = { path = "../ink-verify" }
+serde.workspace = true
+serde_json.workspace = true
