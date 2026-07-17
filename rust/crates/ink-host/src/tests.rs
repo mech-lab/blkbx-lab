@@ -451,7 +451,11 @@ fn host_verify_uses_shared_public_vector_fixture() {
 
     let vector = shared_vector(0);
     let receipt_path = root.join("ink_receipt.v2.json");
-    fs::write(&receipt_path, serde_json::to_vec_pretty(&vector.receipt).unwrap()).unwrap();
+    fs::write(
+        &receipt_path,
+        serde_json::to_vec_pretty(&vector.receipt).unwrap(),
+    )
+    .unwrap();
     let manifest_path = root.join("ink_manifest.v2.json");
     fs::write(
         &manifest_path,

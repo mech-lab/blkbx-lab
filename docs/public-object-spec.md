@@ -1,6 +1,6 @@
 # Public Object Spec
 
-BLKBX Lab exposes the following public result objects from `blkbx_lab.objects`.
+BLKBX Lab exposes these public result objects from `blkbx_lab.objects`.
 
 ## DoctorResult
 
@@ -52,7 +52,7 @@ class GateAnalysisResult:
 class InkReceiptResult:
     action_id: str
     receipt_path: str
-    manifest_path: str
+    manifest_path: str | None
     decision: str
     summary: dict[str, Any]
     verification: dict[str, Any]
@@ -74,8 +74,9 @@ class ReceiptComparisonPacket:
 
 ## Shared Conventions
 
-- All result objects provide `to_dict()`.
-- `demo()` returns `InkReceiptResult`.
+- All public result objects provide `to_dict()`.
+- `demo()` and `gate()` return `InkReceiptResult`.
 - `trace()` returns `ActionEvidenceBundle`.
 - `analyze()` returns `GateAnalysisResult`.
 - `compare()` returns `ReceiptComparisonPacket`.
+- `verify()` returns an `InkReceiptResult` whose `manifest_path` may be `None` when only a receipt path is supplied.

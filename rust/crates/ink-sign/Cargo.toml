@@ -1,5 +1,5 @@
 [package]
-name = "ink-wasm"
+name = "ink-sign"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -9,16 +9,9 @@ homepage.workspace = true
 repository.workspace = true
 
 [lib]
-name = "ink_wasm"
+name = "ink_sign"
 path = "src/lib.rs"
-crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-hex.workspace = true
+ed25519-dalek.workspace = true
 ink-core = { path = "../ink-core" }
-ink-verify = { path = "../ink-verify" }
-wasm-bindgen.workspace = true
-
-[dev-dependencies]
-ink-vectors = { path = "../ink-vectors" }
-serde_json.workspace = true

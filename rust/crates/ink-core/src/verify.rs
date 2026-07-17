@@ -1,13 +1,16 @@
-use crate::{Bundle, Digest, ReceiptEnvelope, Result};
+use crate::{receipt::AttestationStatus, Bundle, Digest, ReceiptEnvelope, Result};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct VerificationReport {
     pub valid: bool,
-    pub hash_valid: bool,
+    pub body_hash_valid: bool,
+    pub sealed_hash_valid: bool,
     pub schema_valid: bool,
     pub lifecycle_valid: bool,
-    pub attestation_present: bool,
-    pub computed_hash: Digest,
+    pub attestation_binding_valid: bool,
+    pub attestation_status: AttestationStatus,
+    pub computed_body_hash: Digest,
+    pub computed_sealed_hash: Option<Digest>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -19,8 +22,8 @@ pub struct BundleVerificationReport {
 }
 
 pub fn verify_receipt(receipt: &ReceiptEnvelope) -> Result<VerificationReport> {
-    let computed_hash = crate::canon::compute_receipt_hash(receipt)?;
-    let hash_valid = computed_hash == receipt.canonical_hash;
+    let computed_body_hash = crate::canon::compute_receipt_body_hash(receipt)?;
+    let body_hash_valid = computed_body_hash == receipt.body_hash;
     let schema_valid = !receipt.schema_id.is_empty()
         && !receipt.schema_authority.is_empty()
         && !receipt.domain_tag.is_empty();
@@ -28,13 +31,39 @@ pub fn verify_receipt(receipt: &ReceiptEnvelope) -> Result<VerificationReport> {
         receipt.lifecycle_state,
         crate::lifecycle::LifecycleState::Draft
     );
+    let attestation_status = if receipt.attestation.is_some() {
+        AttestationStatus::Present
+    } else {
+        AttestationStatus::Missing
+    };
+    let attestation_binding_valid = receipt
+        .attestation
+        .map(|attestation| attestation.validate(receipt).is_ok())
+        .unwrap_or(true);
+    let computed_sealed_hash = if receipt.attestation.is_some() {
+        Some(crate::canon::compute_sealed_receipt_hash(receipt)?)
+    } else {
+        None
+    };
+    let sealed_hash_valid = match (receipt.sealed_hash, computed_sealed_hash) {
+        (None, None) => true,
+        (Some(expected), Some(actual)) => expected == actual,
+        _ => false,
+    };
     Ok(VerificationReport {
-        valid: hash_valid && schema_valid && lifecycle_valid,
-        hash_valid,
+        valid: body_hash_valid
+            && sealed_hash_valid
+            && schema_valid
+            && lifecycle_valid
+            && attestation_binding_valid,
+        body_hash_valid,
+        sealed_hash_valid,
         schema_valid,
         lifecycle_valid,
-        attestation_present: receipt.attestation.is_some(),
-        computed_hash,
+        attestation_binding_valid,
+        attestation_status,
+        computed_body_hash,
+        computed_sealed_hash,
     })
 }
 

@@ -15,7 +15,7 @@ Preferred phrasing:
 - `Action Evidence Bundle`
 - `Receipt`
 - `Comparison Packet`
-- `Qwen3.5 claims demo`
+- `qwen35 deterministic demo`
 - `local policy gate`
 
 Avoid:
@@ -28,9 +28,10 @@ Avoid:
 ## Naming
 
 - Use `BLKBX Lab` for the product.
-- Use `blkbx-lab` for the published package and CLI.
-- Use `blkbx_lab` for the Python namespace.
-- Keep deprecated pre-BLKBX public names inside migration-specific material only.
+- Use `mechlab-sdk` for install and published-package language.
+- Use `blkbx-lab` for primary CLI examples.
+- Use `blkbx_lab` for the primary Python namespace.
+- Keep compatibility aliases and pre-BLKBX public names inside migration-specific material only.
 - Do not use `HybridTDA`, `hybridtda`, or `pip install hybridtda` in release-facing materials.
 
 ## Visual Rules
@@ -45,6 +46,6 @@ Avoid:
 ## Release Notes
 
 - Lead with what shipped.
-- State the public contract early.
+- State the install package and primary CLI early.
 - State CLI and API impact explicitly.
 - State current limits without hedging.

@@ -1,11 +1,60 @@
-use crate::bounded::{DomainTag, IssuerId, SchemaAuthority, SchemaId};
-use crate::{Digest, Ed25519PublicKey, Ed25519Signature, ParentHashes, Result, SignatureAlgorithm};
+use crate::bounded::{DomainTag, IssuerId, PublicKeyId, SchemaAuthority, SchemaId};
+use crate::{Digest, ParentHashes, Result, SignatureBytes, SignatureProfileId, SignedMessageHash};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct AttestationRef {
-    pub algorithm: SignatureAlgorithm,
-    pub public_key: Ed25519PublicKey,
-    pub signature: Ed25519Signature,
+pub struct ValidityWindow {
+    pub not_before_sequence: u64,
+    pub not_after_sequence: u64,
+}
+
+impl ValidityWindow {
+    pub const fn new(not_before_sequence: u64, not_after_sequence: u64) -> Self {
+        Self {
+            not_before_sequence,
+            not_after_sequence,
+        }
+    }
+
+    pub const fn contains(self, sequence: u64) -> bool {
+        sequence >= self.not_before_sequence && sequence <= self.not_after_sequence
+    }
+
+    pub const fn is_valid(self) -> bool {
+        self.not_before_sequence <= self.not_after_sequence
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AttestationStatus {
+    Missing,
+    Present,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AttestationEnvelope {
+    pub profile_id: SignatureProfileId,
+    pub issuer_id: IssuerId,
+    pub public_key_id: PublicKeyId,
+    pub signature: SignatureBytes,
+    pub signed_message_hash: SignedMessageHash,
+    pub sequence: u64,
+    pub validity_window: Option<ValidityWindow>,
+}
+
+impl AttestationEnvelope {
+    pub fn validate(&self, receipt: &ReceiptEnvelope) -> Result<()> {
+        if self.issuer_id != receipt.issuer_id || self.sequence != receipt.sequence {
+            return Err(crate::Error::InvalidAttestationBinding);
+        }
+        if self
+            .validity_window
+            .map(|window| !window.is_valid())
+            .unwrap_or(false)
+        {
+            return Err(crate::Error::InvalidValidityWindow);
+        }
+        Ok(())
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -24,8 +73,9 @@ pub struct ReceiptEnvelope {
     pub trace_hash: Digest,
     pub parent_hashes: ParentHashes,
     pub lifecycle_state: crate::lifecycle::LifecycleState,
-    pub canonical_hash: Digest,
-    pub attestation: Option<AttestationRef>,
+    pub body_hash: Digest,
+    pub sealed_hash: Option<Digest>,
+    pub attestation: Option<AttestationEnvelope>,
 }
 
 impl ReceiptEnvelope {
@@ -45,7 +95,8 @@ impl ReceiptEnvelope {
             trace_hash: Digest::zero(),
             parent_hashes: ParentHashes::new(),
             lifecycle_state: crate::lifecycle::LifecycleState::Draft,
-            canonical_hash: Digest::zero(),
+            body_hash: Digest::zero(),
+            sealed_hash: None,
             attestation: None,
         }
     }
@@ -84,13 +135,17 @@ impl ReceiptEnvelope {
 
     pub fn seal(mut self) -> Result<Self> {
         self.lifecycle_state = crate::lifecycle::LifecycleState::Sealed;
-        self.canonical_hash = crate::canon::compute_receipt_hash(&self)?;
+        self.body_hash = crate::canon::compute_receipt_body_hash(&self)?;
+        self.sealed_hash = None;
         Ok(self)
     }
 
-    pub fn with_attestation(mut self, attestation: AttestationRef) -> Self {
+    pub fn with_attestation(mut self, attestation: AttestationEnvelope) -> Result<Self> {
+        attestation.validate(&self)?;
+        self.body_hash = crate::canon::compute_receipt_body_hash(&self)?;
         self.attestation = Some(attestation);
-        self
+        self.sealed_hash = Some(crate::canon::compute_sealed_receipt_hash(&self)?);
+        Ok(self)
     }
 }
 

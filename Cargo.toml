@@ -1,6 +1,7 @@
 [workspace]
 members = [
   "rust/crates/ink-core",
+  "rust/crates/ink-sign",
   "rust/crates/ink-verify",
   "rust/crates/ink-vectors",
   "rust/crates/ink-cli",

@@ -18,12 +18,11 @@ use ink_core::model_waist::{
     PluginTrustLevel, ProviderRoutingClaim, ReplayStrength, RequestedOutput, RuntimeClaim,
     RuntimeKind, TokenUsage,
 };
-use ink_core::signing::verify_receipt_signature_for_digest;
 use ink_core::types::{
-    ActionId, BoundedBytes, Ed25519PublicKey, Ed25519Signature, KeyId, ReceiptId, Sha256Digest,
-    TimestampUtc,
+    ActionId, BoundedBytes, Ed25519PublicKey, KeyId, ReceiptId, Sha256Digest, TimestampUtc,
 };
 use ink_core::{Digest as KernelDigest, ReceiptEnvelope};
+use ink_verify::{verify_ed25519_message_hash_bytes, VerificationPolicy};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use thiserror::Error;
@@ -132,13 +131,17 @@ pub struct ModelIdentityJson {
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum IdentityEvidenceJson {
     Declared,
-    ProviderDeclared { provider_model_id_hash: DigestJson },
+    ProviderDeclared {
+        provider_model_id_hash: DigestJson,
+    },
     LocalFilesHashed {
         weights_hash: DigestJson,
         tokenizer_hash: Option<DigestJson>,
         config_hash: Option<DigestJson>,
     },
-    ContainerHashed { image_hash: DigestJson },
+    ContainerHashed {
+        image_hash: DigestJson,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -519,9 +522,11 @@ fn verify_receipt_with_inputs(
     }
 
     let payload = receipt_payload_from_json(&receipt)?;
-    let digest = receipt_digest_for_encoding(&receipt, &payload, &receipt.signing.transcript_encoding)?;
+    let digest =
+        receipt_digest_for_encoding(&receipt, &payload, &receipt.signing.transcript_encoding)?;
     let expected_payload_hash = digest_json(&digest);
-    let payload_hash_valid = receipt.signing.payload_hash.algorithm == expected_payload_hash.algorithm
+    let payload_hash_valid = receipt.signing.payload_hash.algorithm
+        == expected_payload_hash.algorithm
         && receipt.signing.payload_hash.digest == expected_payload_hash.digest;
 
     let trusted_issuer_entry = trust_registry.and_then(|registry| {
@@ -542,18 +547,22 @@ fn verify_receipt_with_inputs(
     let trusted_issuer = trusted_issuer_entry.is_some() || pinned_public_key.is_some();
     let signature_valid = payload_hash_valid
         && receipt.signing.algorithm == "Ed25519"
-        && verify_receipt_signature_for_digest(
-            &digest,
-            &Ed25519Signature(decode_fixed::<64>(&receipt.signing.signature)?),
-            &verification_key,
+        && verify_ed25519_message_hash_bytes(
+            &digest.0,
+            &decode_fixed::<64>(&receipt.signing.signature)?,
+            &verification_key.0,
         )
-        .is_ok();
+        .unwrap_or(false);
 
     let kernel_receipt = project_v2_receipt_to_kernel(&receipt, &payload)?;
-    let kernel_report = ink_verify::verify_receipt(&kernel_receipt)?;
+    let kernel_report =
+        ink_verify::verify_receipt(&kernel_receipt, &[], VerificationPolicy::default())
+            .map_err(|err| ReceiptV2Error::Trust(format!("kernel verification failed: {err:?}")))?;
     let kernel_projection_valid = kernel_report.core.valid;
 
-    let manifest = manifest_json.map(serde_json::from_slice::<ManifestJson>).transpose()?;
+    let manifest = manifest_json
+        .map(serde_json::from_slice::<ManifestJson>)
+        .transpose()?;
     let mut scope = "receipt-only".to_string();
     let mut manifest_hash_valid = true;
     let mut evidence_summary_valid = true;
@@ -670,12 +679,11 @@ fn verify_receipt_with_inputs(
         });
     }
 
-    let verify_only_encoding =
-        receipt.signing.transcript_encoding != RECEIPT_ENCODING_TLV_V2
-            && matches!(
-                receipt.signing.transcript_encoding.as_str(),
-                RECEIPT_ENCODING_TLV_V1_LEGACY | RECEIPT_ENCODING_JSON_CANONICAL_V1
-            );
+    let verify_only_encoding = receipt.signing.transcript_encoding != RECEIPT_ENCODING_TLV_V2
+        && matches!(
+            receipt.signing.transcript_encoding.as_str(),
+            RECEIPT_ENCODING_TLV_V1_LEGACY | RECEIPT_ENCODING_JSON_CANONICAL_V1
+        );
 
     if verify_only_encoding {
         checks.push(VerificationCheck {
@@ -807,12 +815,12 @@ fn verify_revocations(
             code: "REVOCATION_LIST_UNSUPPORTED_SIGNATURE_ALGORITHM",
         });
     }
-    let signature_valid = verify_receipt_signature_for_digest(
-        &digest,
-        &Ed25519Signature(decode_fixed::<64>(&list.signing.signature)?),
-        &signer_key,
+    let signature_valid = verify_ed25519_message_hash_bytes(
+        &digest.0,
+        &decode_fixed::<64>(&list.signing.signature)?,
+        &signer_key.0,
     )
-    .is_ok();
+    .unwrap_or(false);
     if !signature_valid {
         return Ok(RevocationOutcome {
             checked: true,
@@ -1519,8 +1527,8 @@ mod tests {
     }
 
     fn load_vectors() -> VectorFile {
-        let path = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../../../test-vectors/ink-vectors.json");
+        let path =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../test-vectors/ink-vectors.json");
         serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap()
     }
 
@@ -1554,7 +1562,11 @@ mod tests {
         let vectors = load_vectors();
         for vector in &vectors.vectors {
             let report = run_vector(vector);
-            assert_eq!(report.status, vector.expect_status, "vector {}", vector.name);
+            assert_eq!(
+                report.status, vector.expect_status,
+                "vector {}",
+                vector.name
+            );
             assert_eq!(report.code, vector.expect_code, "vector {}", vector.name);
         }
     }

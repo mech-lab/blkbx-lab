@@ -117,9 +117,8 @@ impl App {
             string_or_none(self.value(FieldId::PinnedKey)),
         ) {
             Ok(report) => {
-                self.result = serde_json::to_string_pretty(&report).unwrap_or_else(|err| {
-                    format!("failed to render verification report: {err}")
-                });
+                self.result = serde_json::to_string_pretty(&report)
+                    .unwrap_or_else(|err| format!("failed to render verification report: {err}"));
             }
             Err(err) => {
                 self.result = format!("{err}");
@@ -259,8 +258,9 @@ fn verify_paths(
     policy: Option<&Path>,
     pinned_key: Option<&str>,
 ) -> Result<ink_receipt_v2::VerificationReportJson, ink_receipt_v2::ReceiptV2Error> {
-    let receipt =
-        receipt.ok_or_else(|| ink_receipt_v2::ReceiptV2Error::InvalidInput("receipt path is required".to_string()))?;
+    let receipt = receipt.ok_or_else(|| {
+        ink_receipt_v2::ReceiptV2Error::InvalidInput("receipt path is required".to_string())
+    })?;
     let manifest_bytes = read_optional_path(manifest)?;
     let controls_bytes = read_optional_path(controls)?;
     let trust_registry_bytes = read_optional_path(trust_registry)?;
@@ -277,10 +277,10 @@ fn verify_paths(
     )
 }
 
-fn read_optional_path(path: Option<&Path>) -> Result<Option<Vec<u8>>, ink_receipt_v2::ReceiptV2Error> {
-    path.map(std::fs::read)
-        .transpose()
-        .map_err(io_error)
+fn read_optional_path(
+    path: Option<&Path>,
+) -> Result<Option<Vec<u8>>, ink_receipt_v2::ReceiptV2Error> {
+    path.map(std::fs::read).transpose().map_err(io_error)
 }
 
 fn path_or_none(value: &str) -> Option<&Path> {
@@ -321,8 +321,8 @@ mod tests {
 
     #[test]
     fn shared_vector_drives_direct_verify_path() {
-        let root = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../../../test-vectors/ink-vectors.json");
+        let root =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../test-vectors/ink-vectors.json");
         let vectors: VectorFile = serde_json::from_slice(&std::fs::read(root).unwrap()).unwrap();
         let vector = &vectors.vectors[0];
         let dir = std::env::temp_dir().join(format!(

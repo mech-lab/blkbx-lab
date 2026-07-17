@@ -64,7 +64,7 @@ pub fn compare_receipts(left: &ReceiptEnvelope, right: &ReceiptEnvelope) -> Resu
     };
     Ok(ReceiptDiff {
         comparable: left.subject_hash == right.subject_hash,
-        same_hash: left.canonical_hash == right.canonical_hash,
+        same_hash: left.body_hash == right.body_hash,
         schema_changed,
         claim_changed,
         evidence_changed,

@@ -13,7 +13,6 @@ name = "ink_core"
 path = "src/lib.rs"
 
 [dependencies]
-ed25519-dalek.workspace = true
 sha2.workspace = true
 
 [dev-dependencies]

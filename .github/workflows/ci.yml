@@ -65,6 +65,9 @@ jobs:
       - name: Cargo test
         run: cargo test --workspace
 
+      - name: No-alloc kernel checks
+        run: ./scripts/check_no_alloc.sh
+
       - name: Clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
 

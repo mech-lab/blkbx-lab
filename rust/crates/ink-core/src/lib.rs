@@ -27,9 +27,11 @@ pub mod policy;
 pub mod receipt;
 pub mod replay;
 pub mod schema;
-pub mod signing;
 pub mod types;
 pub mod verify;
+
+#[cfg(test)]
+mod tests;
 
 pub use bundle::{Bundle, BundleDiff};
 pub use claim::{Claim, ClaimCommitment};
@@ -39,7 +41,7 @@ pub use event::{TraceEvent, TraceEventType};
 pub use evidence::{Evidence, EvidenceCommitment};
 pub use lifecycle::{is_valid_transition, LifecycleState};
 pub use policy::{Policy, PolicyCommitment, PolicyDecision};
-pub use receipt::{AttestationRef, ReceiptEnvelope};
+pub use receipt::{AttestationEnvelope, AttestationStatus, ReceiptEnvelope, ValidityWindow};
 pub use replay::ReplayReport;
 pub use schema::{Schema, SchemaCommitment};
 pub use verify::{BundleVerificationReport, VerificationReport};
@@ -57,6 +59,7 @@ pub const MAX_EVIDENCE_LEN: usize = 4096;
 pub const MAX_POLICY_LEN: usize = 2048;
 pub const MAX_TRACE_EVENT_LEN: usize = 1024;
 pub const MAX_BUNDLE_SIZE: usize = 100;
+pub const SIGNING_DOMAIN_SEPARATOR: &[u8] = b"INK-RECEIPT-SIGNATURE-V1";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -74,17 +77,35 @@ impl HashAlgorithm {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-pub enum SignatureAlgorithm {
-    Ed25519 = 0x01,
+pub enum SignatureProfileId {
+    InkSigEd25519V1,
+    Unknown(u8),
 }
 
-impl SignatureAlgorithm {
-    pub const fn from_u8(value: u8) -> Option<Self> {
+impl SignatureProfileId {
+    pub const fn from_u8(value: u8) -> Self {
         match value {
-            0x01 => Some(Self::Ed25519),
-            _ => None,
+            0x01 => Self::InkSigEd25519V1,
+            other => Self::Unknown(other),
         }
+    }
+
+    pub const fn as_u8(self) -> u8 {
+        match self {
+            Self::InkSigEd25519V1 => 0x01,
+            Self::Unknown(value) => value,
+        }
+    }
+
+    pub const fn as_bytes(self) -> &'static [u8] {
+        match self {
+            Self::InkSigEd25519V1 => b"INK-SIG-ED25519-V1",
+            Self::Unknown(_) => b"INK-SIG-UNSUPPORTED",
+        }
+    }
+
+    pub const fn is_supported(self) -> bool {
+        matches!(self, Self::InkSigEd25519V1)
     }
 }
 
@@ -154,6 +175,7 @@ pub mod bounded {
     bounded_string!(PolicyId, 64);
     bounded_string!(TraceId, 64);
     bounded_string!(BundleId, 64);
+    bounded_string!(PublicKeyId, 64);
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -238,3 +260,6 @@ impl Ed25519Signature {
         Self(bytes)
     }
 }
+
+pub type SignatureBytes = Ed25519Signature;
+pub type SignedMessageHash = Digest;

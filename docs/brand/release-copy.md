@@ -16,9 +16,9 @@ Technical strapline:
 
 Lead paragraph:
 
-`BLKBX Lab` lets developers wrap agent actions with signed, verifiable policy gates. The public release surface ships the installed `qwen35` deterministic demo, writes Ink artifacts locally, and keeps verification small enough to inspect from the CLI or Python.
+`BLKBX Lab` lets developers wrap agent actions with signed, verifiable policy gates. The shipped surface installs from `mechlab-sdk`, runs through `blkbx-lab`, writes Ink artifacts locally, and keeps verification small enough to inspect from the CLI or Python.
 
-## PyPI Description
+## Packaging Description
 
 Short description:
 
@@ -26,15 +26,15 @@ Short description:
 
 Proof line:
 
-`The public surface ships the installed qwen35 deterministic demo that emits ink_manifest.v2.json and ink_receipt.v2.json locally.`
+`The shipped surface installs from mechlab-sdk, runs the qwen35 deterministic demo through blkbx-lab, and emits ink_manifest.v2.json plus ink_receipt.v2.json locally.`
 
 ## GitHub Release Lead
 
-`This release updates the BLKBX Lab public contract: install blkbx-lab, generate a signed receipt, and verify the result from the canonical CLI or Python surface.`
+`This release updates the BLKBX Lab public contract: install mechlab-sdk, run blkbx-lab, generate a signed receipt, and verify the result from the primary CLI or Python surface.`
 
 ## Social Launch Caption
 
-`BLKBX Lab 1.0.0 is live. Install blkbx-lab, run the qwen35 deterministic demo, and inspect the Ink receipt artifacts locally.`
+`BLKBX Lab 1.0.0 is live. Install mechlab-sdk, run blkbx-lab with the qwen35 deterministic demo, and inspect the Ink receipt artifacts locally.`
 
 ## Known-Limit Language
 

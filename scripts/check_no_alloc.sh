@@ -4,11 +4,16 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
-if rg -n '\b(Vec|String|Box|BTreeMap|HashMap|alloc::)\b' rust/crates/ink-core/src \
-  --glob '!tests.rs' \
-  --glob '!legacy/**'; then
-  echo "no-alloc check failed: heap-backed constructs found in ink-core/src"
-  exit 1
-fi
+check_no_alloc() {
+  local crate_path="$1"
+  shift
+  if rg -n '\b(Vec|String|Box|BTreeMap|HashMap|alloc::)\b' "$crate_path" "$@"; then
+    echo "no-alloc check failed: heap-backed constructs found in $crate_path"
+    exit 1
+  fi
+}
 
-echo "ink-core no-alloc check passed"
+check_no_alloc rust/crates/ink-core/src --glob '!tests.rs' --glob '!legacy/**'
+check_no_alloc rust/crates/ink-verify/src
+
+echo "ink-core and ink-verify no-alloc checks passed"

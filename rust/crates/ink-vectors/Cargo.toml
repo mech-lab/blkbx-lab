@@ -13,6 +13,8 @@ name = "ink_vectors"
 path = "src/lib.rs"
 
 [dependencies]
+ed25519-dalek.workspace = true
 hex.workspace = true
 ink-core = { path = "../ink-core" }
+ink-sign = { path = "../ink-sign" }
 ink-verify = { path = "../ink-verify" }

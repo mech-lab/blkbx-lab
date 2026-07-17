@@ -30,12 +30,12 @@ use ink_core::model_waist::{
     PluginTrustLevel, ProviderRoutingClaim, ReplayStrength, RequestedOutput, RuntimeClaim,
     RuntimeKind, TokenUsage,
 };
-use ink_core::signing::verify_receipt_signature_for_digest;
 use ink_core::types::{
     ActionId, BoundedBytes, Ed25519PublicKey, Ed25519Signature, KeyId, ReceiptId, Sha256Digest,
     TimestampUtc,
 };
 use ink_core::{Digest as KernelDigest, ReceiptEnvelope};
+use ink_verify::verify_ed25519_message_hash_bytes;
 use rand::RngCore;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -729,7 +729,9 @@ pub fn verify(receipt_path: &Path, manifest_path: Option<&Path>) -> Result<Value
     let receipt: ReceiptJson = serde_json::from_str(&raw)?;
     let sibling = sibling_manifest(receipt_path);
     let manifest_candidate = manifest_path.map(PathBuf::from).or(sibling);
-    let controls_candidate = manifest_candidate.as_ref().and_then(|path| sibling_controls(path));
+    let controls_candidate = manifest_candidate
+        .as_ref()
+        .and_then(|path| sibling_controls(path));
     let manifest_bytes = manifest_candidate
         .as_ref()
         .map(fs::read)
@@ -750,7 +752,10 @@ pub fn verify(receipt_path: &Path, manifest_path: Option<&Path>) -> Result<Value
         .as_ref()
         .map(|config| resolve_config_path(&root, &config.revocation_list_path))
         .unwrap_or_else(|| root.join(REVOCATION_LIST_FILE));
-    let trust_registry_bytes = trust_path.exists().then(|| fs::read(&trust_path)).transpose()?;
+    let trust_registry_bytes = trust_path
+        .exists()
+        .then(|| fs::read(&trust_path))
+        .transpose()?;
     let revocation_list_bytes = revocation_path
         .exists()
         .then(|| fs::read(&revocation_path))
@@ -788,9 +793,7 @@ pub fn verify(receipt_path: &Path, manifest_path: Option<&Path>) -> Result<Value
         "UNTRUSTED_REVOCATION_LIST_SIGNER"
         | "REVOCATION_LIST_PAYLOAD_HASH_MISMATCH"
         | "REVOCATION_LIST_UNSUPPORTED_SIGNATURE_ALGORITHM"
-        | "REVOCATION_LIST_INVALID_SIGNATURE" => {
-            return Err(HostError::Trust(report.code.clone()))
-        }
+        | "REVOCATION_LIST_INVALID_SIGNATURE" => return Err(HostError::Trust(report.code.clone())),
         _ => {}
     }
     let checks = report
@@ -1871,12 +1874,19 @@ fn load_revocation_list() -> Result<RevocationListJson, HostError> {
             "revocation list payload hash mismatch".to_string(),
         ));
     }
-    verify_receipt_signature_for_digest(
-        &digest,
-        &Ed25519Signature(decode_fixed::<64>(&list.signing.signature)?),
-        &Ed25519PublicKey(decode_fixed::<32>(&trusted.public_key)?),
+    let signature_valid = verify_ed25519_message_hash_bytes(
+        &digest.0,
+        &decode_fixed::<64>(&list.signing.signature)?,
+        &decode_fixed::<32>(&trusted.public_key)?,
     )
-    .map_err(HostError::from)?;
+    .map_err(|err| {
+        HostError::Trust(format!("revocation signature verification failed: {err:?}"))
+    })?;
+    if !signature_valid {
+        return Err(HostError::Trust(
+            "revocation list signature mismatch".to_string(),
+        ));
+    }
     Ok(list)
 }
 

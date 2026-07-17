@@ -14,7 +14,7 @@ Canonical files:
 - [`tokens.json`](tokens.json): color, typography, spacing, and naming rules
 - [`tokens.css`](tokens.css): docs and README token implementation
 - [`usage.md`](usage.md): short engineer guidance for release-facing copy and visuals
-- [`release-copy.md`](release-copy.md): launch-ready copy blocks for README, PyPI, GitHub Releases, and social
+- [`release-copy.md`](release-copy.md): launch-ready copy blocks for README, release notes, and packaging-facing descriptions
 
 Launch asset kit:
 
@@ -28,6 +28,7 @@ Launch asset kit:
 Naming rule:
 
 - use `BLKBX Lab` for product copy
-- use `blkbx-lab` for the package and CLI
-- use `blkbx_lab` for the Python namespace
-- keep deprecated pre-BLKBX public names inside migration-specific material only
+- use `mechlab-sdk` for install and published-package language
+- use `blkbx-lab` for primary CLI examples
+- use `blkbx_lab` for the primary Python namespace
+- keep compatibility aliases and pre-BLKBX names inside migration-specific material only
