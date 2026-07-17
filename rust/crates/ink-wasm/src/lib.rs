@@ -20,7 +20,7 @@ pub fn verify_receipt(bytes: &[u8]) -> String {
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn verify_bundle(bytes: &[u8]) -> String {
-    if bytes.len() % 32 != 0 {
+    if !bytes.len().is_multiple_of(32) {
         return report_json(false, "error:invalid_bundle_bytes");
     }
     let mut bundle = ink_core::Bundle::new();

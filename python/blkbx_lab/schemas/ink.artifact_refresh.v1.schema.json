@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blkbx-lab.dev/schemas/ink.artifact_refresh.v1.schema.json",
+  "title": "ink.artifact_refresh.v1",
+  "description": "Artifact refresh result schema for the shared evidence kernel.",
+  "type": "object",
+  "required": ["schema", "artifact_id", "stale", "stale_reasons", "changed_receipts", "changed_documents", "changed_attestations", "new_gaps", "resolved_gaps", "requires_reviewer_attention", "refresh_recommended", "refresh_blocking"],
+  "properties": {
+    "schema": {"const": "ink.artifact_refresh.v1"},
+    "artifact_id": {"type": "string"},
+    "stale": {"type": "boolean"},
+    "stale_reasons": {"type": "array", "items": {"type": "string"}},
+    "changed_receipts": {"type": "array", "items": {"type": "string"}},
+    "changed_documents": {"type": "array", "items": {"type": "string"}},
+    "changed_attestations": {"type": "array", "items": {"type": "string"}},
+    "new_gaps": {"type": "array", "items": {"type": "object"}},
+    "resolved_gaps": {"type": "array", "items": {"type": "object"}},
+    "requires_reviewer_attention": {"type": "boolean"},
+    "refresh_recommended": {"type": "boolean"},
+    "refresh_blocking": {"type": "boolean"}
+  },
+  "additionalProperties": false
+}

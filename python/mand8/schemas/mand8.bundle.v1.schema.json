@@ -5,6 +5,7 @@
   "required": [
     "schema",
     "bundle_id",
+    "case_id",
     "bundle_type",
     "audience",
     "generated_at",
@@ -18,6 +19,9 @@
       "const": "mand8.bundle.v1"
     },
     "bundle_id": {
+      "type": "string"
+    },
+    "case_id": {
       "type": "string"
     },
     "bundle_type": {
@@ -54,6 +58,7 @@
         "schema",
         "receipt_id",
         "action_id",
+        "case_id",
         "issued_at",
         "domain_context",
         "event_trail",
@@ -68,6 +73,9 @@
           "type": "string"
         },
         "action_id": {
+          "type": "string"
+        },
+        "case_id": {
           "type": "string"
         },
         "issued_at": {
@@ -132,6 +140,30 @@
         }
       },
       "additionalProperties": false
+    },
+    "authority_receipts": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "incident_receipts": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "related_receipts": {
+      "type": "object"
+    },
+    "coverage_summary": {
+      "type": "object"
+    },
+    "verification_reports": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
     },
     "summary": {
       "type": "string"

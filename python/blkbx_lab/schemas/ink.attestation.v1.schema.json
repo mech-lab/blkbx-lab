@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blkbx-lab.dev/schemas/ink.attestation.v1.schema.json",
+  "title": "ink.attestation.v1",
+  "description": "Attestation schema for the shared evidence kernel.",
+  "type": "object",
+  "required": ["schema", "attestation_id", "issuer", "content", "signature"],
+  "properties": {
+    "schema": {"const": "ink.attestation.v1"},
+    "attestation_id": {"type": "string"},
+    "issuer": {"type": "string"},
+    "content": {"type": "string"},
+    "signature": {"type": "string"},
+    "validity_period": {"type": "object"}
+  },
+  "additionalProperties": false
+}

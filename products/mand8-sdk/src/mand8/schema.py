@@ -11,6 +11,7 @@ from jsonschema import Draft7Validator, FormatChecker
 SCHEMA_FILES = {
     "mand8.risk_receipt.v1": "mand8.risk_receipt.v1.schema.json",
     "mand8.exposure_unit.v1": "mand8.exposure_unit.v1.schema.json",
+    "mand8.authority_receipt.v1": "mand8.authority_receipt.v1.schema.json",
     "mand8.control_receipt.v1": "mand8.control_receipt.v1.schema.json",
     "mand8.incident_receipt.v1": "mand8.incident_receipt.v1.schema.json",
     "mand8.bundle.v1": "mand8.bundle.v1.schema.json",

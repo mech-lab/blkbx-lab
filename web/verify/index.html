@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>INK Receipts Verifier</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <p class="eyebrow">Independent Verification</p>
+        <h1>Verify receipts locally, outside the Rails platform.</h1>
+        <p class="lede">
+          This static verifier is the trust boundary companion to the shared commercial platform.
+          BLKBXS, MAND8, and DUE can package evidence, but verification still belongs to INK tooling.
+        </p>
+      </section>
+
+      <section class="panel">
+        <label for="receipt-input">Receipt JSON</label>
+        <textarea id="receipt-input" placeholder='Paste an `ink_receipt.v2.json` artifact here'></textarea>
+        <button id="verify-button" type="button">Validate Structure</button>
+        <pre id="verify-output">Awaiting local verification input.</pre>
+      </section>
+    </main>
+    <script type="module" src="verify.js"></script>
+  </body>
+</html>

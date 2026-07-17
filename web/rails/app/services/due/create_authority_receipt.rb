@@ -1,0 +1,16 @@
+module Due
+  class CreateAuthorityReceipt
+    def self.call(organization:, workspace:, actor: nil, body: {}, domain_metadata: {})
+      Ink::IssueReceipt.call(
+        organization: organization,
+        workspace: workspace,
+        actor: actor,
+        workflow_kind: "authority",
+        schema_key: "due.authority_receipt.v1",
+        schema_version: "1.0.0",
+        body: body,
+        domain_metadata: domain_metadata
+      )
+    end
+  end
+end

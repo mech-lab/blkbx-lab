@@ -37,6 +37,10 @@ def record(
             "outcome": outcome,
             "details": details or {},
         },
+        context_updates={
+            "last_override_id": override_id,
+            "last_override_outcome": outcome,
+        },
         human_review=review,
     )
 

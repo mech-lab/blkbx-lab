@@ -40,7 +40,7 @@ Release readiness gate:
 
 - the git worktree must be clean before any public tag
 - `python scripts/check_release_readiness.py` is the repo-native readiness check
-- `python scripts/check_local_release.py` is the repo-local orchestration command for the v0.9.1 release candidate
+- `python scripts/check_local_release.py` is the repo-local orchestration command for the `1.0.0` release candidate
 - [`docs/release-readiness.md`](docs/release-readiness.md) is the operator checklist for the final documentation and repo-ergonomics pass
 
 ## Prerequisites
@@ -53,11 +53,11 @@ Release readiness gate:
 python -m pip install -e ".[dev]"
 ```
 
-## Local v0.9.1 Release Candidate
+## Local 1.0.0 Release Candidate
 
 The local release-readiness target is the root `mechlab-sdk` distribution only.
 
-In-repo slices under `products/` may remain in the workspace, but the public pip story is the single `mechlab-sdk` wheel. The slice directories are not separate published artifacts.
+In-repo slices under `products/` may remain in the workspace, but the public pip story is the single `mechlab-sdk` wheel. The slice directories are not separate published artifacts. `web/rails` and `packages/ink-ts-verify` may also ship in-repo, but they remain non-shipping scaffolds and do not change the public release artifact boundary.
 
 Run the full local gate with:
 
@@ -90,7 +90,7 @@ Repo-side requirements:
 
 - the GitHub environment `pypi` must exist on the `mech-lab/blkbx-lab` repository
 - [`.github/workflows/release.yml`](.github/workflows/release.yml) must stay on the default branch
-- the first publish should run from a release tag such as `v0.1.0a2`
+- the first publish on this release line should run from a release tag such as `v1.0.0`
 
 ## Pre-release checks
 
@@ -109,7 +109,7 @@ Verify that:
 - the GitHub social preview PNG export is present at `assets/brand/og-card.png`
 - the Qwen validation report keeps workstation-specific paths inside its reproducibility appendix only
 
-Hosted publish steps remain below as follow-on operator guidance. They are not part of the local v0.9.0 readiness gate.
+Hosted publish steps remain below as follow-on operator guidance. They are not part of the local `1.0.0` readiness gate.
 
 ## Wheel smoke test
 
@@ -177,7 +177,7 @@ Verify that:
 
 ## Tag and publish
 
-- Tag releases as the package version, for example `v0.1.0a2`.
+- Tag releases as the package version, for example `v1.0.0`.
 - GitHub Releases should mirror the PyPI release notes for `mechlab-sdk`.
 - The release workflow creates a draft release from `.github/RELEASE_TEMPLATE.md`; edit the draft body before publishing it.
 - Tagged releases publish `dist/*` to PyPI through the `pypi` environment, and `workflow_dispatch` can publish the same distributions manually when needed.

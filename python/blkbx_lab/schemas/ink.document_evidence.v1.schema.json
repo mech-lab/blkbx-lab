@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blkbx-lab.dev/schemas/ink.document_evidence.v1.schema.json",
+  "title": "ink.document_evidence.v1",
+  "description": "Document evidence schema for the shared evidence kernel.",
+  "type": "object",
+  "required": ["schema", "source_id", "content_hash", "metadata"],
+  "properties": {
+    "schema": {"const": "ink.document_evidence.v1"},
+    "source_id": {"type": "string"},
+    "content_hash": {"type": "string"},
+    "metadata": {"type": "object"}
+  },
+  "additionalProperties": false
+}

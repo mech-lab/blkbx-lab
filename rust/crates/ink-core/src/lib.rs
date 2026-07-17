@@ -105,6 +105,7 @@ pub mod bounded {
                     }
                 }
 
+                #[allow(clippy::should_implement_trait)]
                 pub fn from_str(value: &str) -> crate::Result<Self> {
                     Self::from_bytes(value.as_bytes())
                 }

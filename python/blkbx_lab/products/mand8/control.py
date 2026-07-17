@@ -28,6 +28,10 @@ def record(
             "evidence_ref": evidence_ref,
             "details": details or {},
         },
+        context_updates={
+            "last_control_id": control_id,
+            "last_control_status": status,
+        },
         human_review=human_review,
     )
 

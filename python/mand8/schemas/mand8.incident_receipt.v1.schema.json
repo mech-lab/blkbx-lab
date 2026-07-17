@@ -3,12 +3,16 @@
   "title": "MAND8 Incident Receipt",
   "type": "object",
   "required": [
+    "case_id",
     "incident_id",
     "incident_type",
     "severity",
     "description"
   ],
   "properties": {
+    "case_id": {
+      "type": "string"
+    },
     "incident_id": {
       "type": "string"
     },

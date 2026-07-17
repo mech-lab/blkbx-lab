@@ -23,3 +23,4 @@ serde_json.workspace = true
 sha2.workspace = true
 thiserror.workspace = true
 ink-core = { path = "../ink-core" }
+ink-receipt-v2 = { path = "../ink-receipt-v2" }

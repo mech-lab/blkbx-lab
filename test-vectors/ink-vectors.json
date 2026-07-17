@@ -1,0 +1,828 @@
+{
+  "schema": "ink.vectors.v1",
+  "vectors": [
+    {
+      "name": "valid_tlv_v2_trusted_manifest",
+      "receipt": {
+        "schema": "ink.receipt.v2",
+        "receipt_id": "urn:ink:receipt:1784244290-719091000",
+        "receipt_profile": "thin_waist_v2",
+        "action_id": "urn:ink:action:20260716-232450-716259",
+        "issued_at": 1784244290,
+        "issuer": {
+          "name": "BLKBX Local Dev",
+          "key_id": "ed25519:a177619f1daf30c6189dee490148fc097f630749637c5c23cbf18944edf571a6",
+          "public_key": "Uniq4_0hX3tnRUCTIhofu5X-xuCOLPzK0buIWaoVYQk"
+        },
+        "manifest_hash": {
+          "algorithm": "sha-256",
+          "digest": "75d2e3d2d12e40e73809300c666c119436f23c4c79629b5af5365dd13ae67d22"
+        },
+        "policy": {
+          "id": "blkbx.demo-claims",
+          "version": "1.0.0",
+          "hash": {
+            "algorithm": "sha-256",
+            "digest": "1581227d30d975e532139eb26cae93c232a11fab824b8776c6ac7511c1a53dff"
+          }
+        },
+        "runtime": {
+          "runtime_kind": "deterministic_demo",
+          "execution_topology": "rule_based_local",
+          "replay_strength": "fully_replayable",
+          "determinism": { "deterministic": true, "seed_bound": true },
+          "isolation": { "process_isolated": true },
+          "provider_routing": {
+            "fallbacks_allowed": false,
+            "provider_pinned": true,
+            "data_collection_policy": "declared_deny"
+          }
+        },
+        "model": {
+          "schema": "ink.model-waist.v1",
+          "identity": {
+            "model_class": "deterministic_demo",
+            "model_ref_hash": {
+              "algorithm": "sha-256",
+              "digest": "769bf55b02d5872a853515959d61196d36379d5d5898138b798b62a5d4a5d3fd"
+            },
+            "model_slug": "qwen35-demo",
+            "identity_evidence": { "kind": "declared" }
+          },
+          "invocation": {
+            "action_hash": {
+              "algorithm": "sha-256",
+              "digest": "5618e101c93535b414e8312d488706d8b5c0109e3ec9fe368c25753d0ec16d48"
+            },
+            "messages_hash": {
+              "algorithm": "sha-256",
+              "digest": "1577f4b20236bcb5d7351a6acdf1b7b4bb2220d0b88d9742235d1a03a5b71ec5"
+            },
+            "system_prompt_hash": null,
+            "tool_spec_hash": null,
+            "response_schema_hash": {
+              "algorithm": "sha-256",
+              "digest": "645cbf4e55bc184441c908cb87ee8d9bdb45f6c4a87849711e8b55dc9c2af0e6"
+            },
+            "parameters_hash": {
+              "algorithm": "sha-256",
+              "digest": "652c01f8788fb77e21a7b613a35efc6e3d227d33b8992ece897a8278a811896b"
+            },
+            "requested_output": {
+              "kind": "json_schema",
+              "schema_hash": {
+                "algorithm": "sha-256",
+                "digest": "645cbf4e55bc184441c908cb87ee8d9bdb45f6c4a87849711e8b55dc9c2af0e6"
+              }
+            }
+          },
+          "observation": {
+            "output_text_hash": null,
+            "structured_output_hash": {
+              "algorithm": "sha-256",
+              "digest": "ceaa4c2534bdc26ffb247df3cb510d50e2418186a8cdaf85b042a5c91050707e"
+            },
+            "provider_metadata_hash": {
+              "algorithm": "sha-256",
+              "digest": "6c1f3f50de961f2194d38019e275796dc75edc412c6486def2ee75281d1ac218"
+            },
+            "finish_reason": "stop",
+            "usage": { "input_tokens": null, "output_tokens": null, "total_tokens": null }
+          },
+          "runtime": {
+            "runtime_kind": "deterministic_demo",
+            "execution_topology": "rule_based_local",
+            "replay_strength": "fully_replayable",
+            "determinism": { "deterministic": true, "seed_bound": true },
+            "isolation": { "process_isolated": true },
+            "provider_routing": {
+              "fallbacks_allowed": false,
+              "provider_pinned": true,
+              "data_collection_policy": "declared_deny"
+            }
+          },
+          "plugin": {
+            "plugin_id_hash": {
+              "algorithm": "sha-256",
+              "digest": "6c1f3f50de961f2194d38019e275796dc75edc412c6486def2ee75281d1ac218"
+            },
+            "plugin_version_hash": {
+              "algorithm": "sha-256",
+              "digest": "3bfc269594ef649228e9a74bab00f042efc91d5acc6fbee31a382e80d42388fe"
+            },
+            "plugin_api_version": "v1",
+            "maintainer_class": "first_party_reference",
+            "normalization": {
+              "input_normalized": true,
+              "output_normalized": true,
+              "raw_request_preserved": true,
+              "raw_response_preserved": true,
+              "secrets_redacted": true
+            },
+            "plugin_manifest_hash": {
+              "algorithm": "sha-256",
+              "digest": "da5a71d5c9f57d4b97c86da812c3d86021ecc09f1e7f3050dfd1c5b5c9bf856c"
+            },
+            "plugin_id_hint": "qwen35",
+            "trust_level": "first_party_reference"
+          }
+        },
+        "facts": {
+          "risk_class": "low",
+          "requires_human_review": false,
+          "binding_effect_present": false,
+          "provider_fallbacks_allowed": false,
+          "plugin_trust_level": "first_party_reference",
+          "runtime_kind": "deterministic_demo",
+          "replay_strength": "fully_replayable",
+          "model_class": "deterministic_demo"
+        },
+        "decision": "pass",
+        "reason_codes": ["RUNTIME_DETERMINISTIC_DEMO"],
+        "evidence_summary_hash": {
+          "algorithm": "sha-256",
+          "digest": "9e38d3877584fe1476ba75cec7149bb587e4c35328161443bf96b2ed757e95ad"
+        },
+        "controls_summary_hash": {
+          "algorithm": "sha-256",
+          "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "signing": {
+          "transcript_encoding": "INK-CORE-TLV-V2",
+          "payload_hash": {
+            "algorithm": "sha-256",
+            "digest": "ab0bd393fce4f7331cfe27eb1a4dfaf0c1567e4f0be390dc85a5df85855de01c"
+          },
+          "algorithm": "Ed25519",
+          "key_id": "ed25519:a177619f1daf30c6189dee490148fc097f630749637c5c23cbf18944edf571a6",
+          "signature": "XpWV5_3ReeyJxdOZeo0frdKNKxPIXOc_m781ZtlQAfrrw0LO3rCYaLVzrCB5RVK_XMdGqn1DEErRZHkog378Dg"
+        }
+      },
+      "manifest": {
+        "schema": "ink.manifest.v2",
+        "action_id": "urn:ink:action:20260716-232450-716259",
+        "created_at": "2026-07-16T23:24:50.718262+00:00",
+        "artifacts": [
+          {
+            "artifact_type": "prompt_text",
+            "path": "prompt.txt",
+            "media_type": "text/plain; charset=utf-8",
+            "size_bytes": 51,
+            "hash": {
+              "algorithm": "sha-256",
+              "digest": "1577f4b20236bcb5d7351a6acdf1b7b4bb2220d0b88d9742235d1a03a5b71ec5"
+            }
+          },
+          {
+            "artifact_type": "action_json",
+            "path": "action.json",
+            "media_type": "application/json",
+            "size_bytes": 351,
+            "hash": {
+              "algorithm": "sha-256",
+              "digest": "6416e26c04ad88991eecdc2430bfb12c35b21000545aa16169e1d4b475d5716f"
+            },
+            "schema": { "id": "ink.action.v1", "version": "1.0.0" }
+          },
+          {
+            "artifact_type": "runtime_json",
+            "path": "runtime.json",
+            "media_type": "application/json",
+            "size_bytes": 176,
+            "hash": {
+              "algorithm": "sha-256",
+              "digest": "34aebe18ca55bb9b3a327bb50921501e7eb34711b9211beb6cbbb75fd9cef0fd"
+            },
+            "schema": { "id": "ink.runtime.v1", "version": "1.0.0" }
+          },
+          {
+            "artifact_type": "demo_mapping_json",
+            "path": "demo_mapping.json",
+            "media_type": "application/json",
+            "size_bytes": 261,
+            "hash": {
+              "algorithm": "sha-256",
+              "digest": "80a5504bffe267249bcdbb58b01b3ee7ca8c6e605aede3a03dc385bd418e9bb3"
+            },
+            "schema": { "id": "ink.demo-mapping.v1", "version": "1.0.0" }
+          },
+          {
+            "artifact_type": "model_waist_json",
+            "path": "model_waist.json",
+            "media_type": "application/json",
+            "size_bytes": 2951,
+            "hash": {
+              "algorithm": "sha-256",
+              "digest": "f826cd2e2737e34610567ab79ff39cecec9ffc16862d94309ff2bf36e1b76075"
+            },
+            "schema": { "id": "ink.model-waist.v1", "version": "1.0.0" }
+          }
+        ]
+      },
+      "trust_registry": {
+        "schema": "ink.trust-registry.v1",
+        "issuers": [
+          {
+            "key_id": "ed25519:a177619f1daf30c6189dee490148fc097f630749637c5c23cbf18944edf571a6",
+            "algorithm": "Ed25519",
+            "public_key": "Uniq4_0hX3tnRUCTIhofu5X-xuCOLPzK0buIWaoVYQk",
+            "issuer_name": "BLKBX Local Dev",
+            "org_name": "BLKBX Lab",
+            "status": "active"
+          }
+        ]
+      },
+      "verify_policy": {
+        "schema": "ink.verify-policy.v1",
+        "policy_id": "BANK_STRICT_POLICY",
+        "require_canonical_tlv_v2": true,
+        "allow_verify_only_formats": false,
+        "require_trusted_issuer": true,
+        "require_revocation_check": false,
+        "require_manifest_hash_match_when_manifest_present": true,
+        "require_evidence_summary_match_when_manifest_present": true,
+        "require_controls_summary_match_when_controls_present": true,
+        "allow_network": false
+      },
+      "pinned_public_key": null,
+      "expect_status": "valid",
+      "expect_code": "VALID_RECEIPT"
+    },
+    {
+      "name": "invalid_signature",
+      "receipt": {
+        "schema": "ink.receipt.v2",
+        "receipt_id": "urn:ink:receipt:1784244290-719091000",
+        "receipt_profile": "thin_waist_v2",
+        "action_id": "urn:ink:action:20260716-232450-716259",
+        "issued_at": 1784244290,
+        "issuer": {
+          "name": "BLKBX Local Dev",
+          "key_id": "ed25519:a177619f1daf30c6189dee490148fc097f630749637c5c23cbf18944edf571a6",
+          "public_key": "Uniq4_0hX3tnRUCTIhofu5X-xuCOLPzK0buIWaoVYQk"
+        },
+        "manifest_hash": {
+          "algorithm": "sha-256",
+          "digest": "75d2e3d2d12e40e73809300c666c119436f23c4c79629b5af5365dd13ae67d22"
+        },
+        "policy": {
+          "id": "blkbx.demo-claims",
+          "version": "1.0.0",
+          "hash": {
+            "algorithm": "sha-256",
+            "digest": "1581227d30d975e532139eb26cae93c232a11fab824b8776c6ac7511c1a53dff"
+          }
+        },
+        "runtime": {
+          "runtime_kind": "deterministic_demo",
+          "execution_topology": "rule_based_local",
+          "replay_strength": "fully_replayable",
+          "determinism": { "deterministic": true, "seed_bound": true },
+          "isolation": { "process_isolated": true },
+          "provider_routing": {
+            "fallbacks_allowed": false,
+            "provider_pinned": true,
+            "data_collection_policy": "declared_deny"
+          }
+        },
+        "model": {
+          "schema": "ink.model-waist.v1",
+          "identity": {
+            "model_class": "deterministic_demo",
+            "model_ref_hash": {
+              "algorithm": "sha-256",
+              "digest": "769bf55b02d5872a853515959d61196d36379d5d5898138b798b62a5d4a5d3fd"
+            },
+            "model_slug": "qwen35-demo",
+            "identity_evidence": { "kind": "declared" }
+          },
+          "invocation": {
+            "action_hash": {
+              "algorithm": "sha-256",
+              "digest": "5618e101c93535b414e8312d488706d8b5c0109e3ec9fe368c25753d0ec16d48"
+            },
+            "messages_hash": {
+              "algorithm": "sha-256",
+              "digest": "1577f4b20236bcb5d7351a6acdf1b7b4bb2220d0b88d9742235d1a03a5b71ec5"
+            },
+            "system_prompt_hash": null,
+            "tool_spec_hash": null,
+            "response_schema_hash": {
+              "algorithm": "sha-256",
+              "digest": "645cbf4e55bc184441c908cb87ee8d9bdb45f6c4a87849711e8b55dc9c2af0e6"
+            },
+            "parameters_hash": {
+              "algorithm": "sha-256",
+              "digest": "652c01f8788fb77e21a7b613a35efc6e3d227d33b8992ece897a8278a811896b"
+            },
+            "requested_output": {
+              "kind": "json_schema",
+              "schema_hash": {
+                "algorithm": "sha-256",
+                "digest": "645cbf4e55bc184441c908cb87ee8d9bdb45f6c4a87849711e8b55dc9c2af0e6"
+              }
+            }
+          },
+          "observation": {
+            "output_text_hash": null,
+            "structured_output_hash": {
+              "algorithm": "sha-256",
+              "digest": "ceaa4c2534bdc26ffb247df3cb510d50e2418186a8cdaf85b042a5c91050707e"
+            },
+            "provider_metadata_hash": {
+              "algorithm": "sha-256",
+              "digest": "6c1f3f50de961f2194d38019e275796dc75edc412c6486def2ee75281d1ac218"
+            },
+            "finish_reason": "stop",
+            "usage": { "input_tokens": null, "output_tokens": null, "total_tokens": null }
+          },
+          "runtime": {
+            "runtime_kind": "deterministic_demo",
+            "execution_topology": "rule_based_local",
+            "replay_strength": "fully_replayable",
+            "determinism": { "deterministic": true, "seed_bound": true },
+            "isolation": { "process_isolated": true },
+            "provider_routing": {
+              "fallbacks_allowed": false,
+              "provider_pinned": true,
+              "data_collection_policy": "declared_deny"
+            }
+          },
+          "plugin": {
+            "plugin_id_hash": {
+              "algorithm": "sha-256",
+              "digest": "6c1f3f50de961f2194d38019e275796dc75edc412c6486def2ee75281d1ac218"
+            },
+            "plugin_version_hash": {
+              "algorithm": "sha-256",
+              "digest": "3bfc269594ef649228e9a74bab00f042efc91d5acc6fbee31a382e80d42388fe"
+            },
+            "plugin_api_version": "v1",
+            "maintainer_class": "first_party_reference",
+            "normalization": {
+              "input_normalized": true,
+              "output_normalized": true,
+              "raw_request_preserved": true,
+              "raw_response_preserved": true,
+              "secrets_redacted": true
+            },
+            "plugin_manifest_hash": {
+              "algorithm": "sha-256",
+              "digest": "da5a71d5c9f57d4b97c86da812c3d86021ecc09f1e7f3050dfd1c5b5c9bf856c"
+            },
+            "plugin_id_hint": "qwen35",
+            "trust_level": "first_party_reference"
+          }
+        },
+        "facts": {
+          "risk_class": "low",
+          "requires_human_review": false,
+          "binding_effect_present": false,
+          "provider_fallbacks_allowed": false,
+          "plugin_trust_level": "first_party_reference",
+          "runtime_kind": "deterministic_demo",
+          "replay_strength": "fully_replayable",
+          "model_class": "deterministic_demo"
+        },
+        "decision": "pass",
+        "reason_codes": ["RUNTIME_DETERMINISTIC_DEMO"],
+        "evidence_summary_hash": {
+          "algorithm": "sha-256",
+          "digest": "9e38d3877584fe1476ba75cec7149bb587e4c35328161443bf96b2ed757e95ad"
+        },
+        "controls_summary_hash": {
+          "algorithm": "sha-256",
+          "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "signing": {
+          "transcript_encoding": "INK-CORE-TLV-V2",
+          "payload_hash": {
+            "algorithm": "sha-256",
+            "digest": "ab0bd393fce4f7331cfe27eb1a4dfaf0c1567e4f0be390dc85a5df85855de01c"
+          },
+          "algorithm": "Ed25519",
+          "key_id": "ed25519:a177619f1daf30c6189dee490148fc097f630749637c5c23cbf18944edf571a6",
+          "signature": "YpWV5_3ReeyJxdOZeo0frdKNKxPIXOc_m781ZtlQAfrrw0LO3rCYaLVzrCB5RVK_XMdGqn1DEErRZHkog378Dg"
+        }
+      },
+      "manifest": null,
+      "trust_registry": {
+        "schema": "ink.trust-registry.v1",
+        "issuers": [
+          {
+            "key_id": "ed25519:a177619f1daf30c6189dee490148fc097f630749637c5c23cbf18944edf571a6",
+            "algorithm": "Ed25519",
+            "public_key": "Uniq4_0hX3tnRUCTIhofu5X-xuCOLPzK0buIWaoVYQk",
+            "issuer_name": "BLKBX Local Dev",
+            "org_name": "BLKBX Lab",
+            "status": "active"
+          }
+        ]
+      },
+      "verify_policy": {
+        "schema": "ink.verify-policy.v1",
+        "policy_id": "BANK_STRICT_POLICY",
+        "require_canonical_tlv_v2": true,
+        "allow_verify_only_formats": false,
+        "require_trusted_issuer": true,
+        "require_revocation_check": false,
+        "require_manifest_hash_match_when_manifest_present": true,
+        "require_evidence_summary_match_when_manifest_present": true,
+        "require_controls_summary_match_when_controls_present": true,
+        "allow_network": false
+      },
+      "pinned_public_key": null,
+      "expect_status": "invalid",
+      "expect_code": "INVALID_SIGNATURE"
+    },
+    {
+      "name": "untrusted_issuer_strict",
+      "receipt": {
+        "schema": "ink.receipt.v2",
+        "receipt_id": "urn:ink:receipt:1784244290-719091000",
+        "receipt_profile": "thin_waist_v2",
+        "action_id": "urn:ink:action:20260716-232450-716259",
+        "issued_at": 1784244290,
+        "issuer": {
+          "name": "BLKBX Local Dev",
+          "key_id": "ed25519:a177619f1daf30c6189dee490148fc097f630749637c5c23cbf18944edf571a6",
+          "public_key": "Uniq4_0hX3tnRUCTIhofu5X-xuCOLPzK0buIWaoVYQk"
+        },
+        "manifest_hash": {
+          "algorithm": "sha-256",
+          "digest": "75d2e3d2d12e40e73809300c666c119436f23c4c79629b5af5365dd13ae67d22"
+        },
+        "policy": {
+          "id": "blkbx.demo-claims",
+          "version": "1.0.0",
+          "hash": {
+            "algorithm": "sha-256",
+            "digest": "1581227d30d975e532139eb26cae93c232a11fab824b8776c6ac7511c1a53dff"
+          }
+        },
+        "runtime": {
+          "runtime_kind": "deterministic_demo",
+          "execution_topology": "rule_based_local",
+          "replay_strength": "fully_replayable",
+          "determinism": { "deterministic": true, "seed_bound": true },
+          "isolation": { "process_isolated": true },
+          "provider_routing": {
+            "fallbacks_allowed": false,
+            "provider_pinned": true,
+            "data_collection_policy": "declared_deny"
+          }
+        },
+        "model": {
+          "schema": "ink.model-waist.v1",
+          "identity": {
+            "model_class": "deterministic_demo",
+            "model_ref_hash": {
+              "algorithm": "sha-256",
+              "digest": "769bf55b02d5872a853515959d61196d36379d5d5898138b798b62a5d4a5d3fd"
+            },
+            "model_slug": "qwen35-demo",
+            "identity_evidence": { "kind": "declared" }
+          },
+          "invocation": {
+            "action_hash": {
+              "algorithm": "sha-256",
+              "digest": "5618e101c93535b414e8312d488706d8b5c0109e3ec9fe368c25753d0ec16d48"
+            },
+            "messages_hash": {
+              "algorithm": "sha-256",
+              "digest": "1577f4b20236bcb5d7351a6acdf1b7b4bb2220d0b88d9742235d1a03a5b71ec5"
+            },
+            "system_prompt_hash": null,
+            "tool_spec_hash": null,
+            "response_schema_hash": {
+              "algorithm": "sha-256",
+              "digest": "645cbf4e55bc184441c908cb87ee8d9bdb45f6c4a87849711e8b55dc9c2af0e6"
+            },
+            "parameters_hash": {
+              "algorithm": "sha-256",
+              "digest": "652c01f8788fb77e21a7b613a35efc6e3d227d33b8992ece897a8278a811896b"
+            },
+            "requested_output": {
+              "kind": "json_schema",
+              "schema_hash": {
+                "algorithm": "sha-256",
+                "digest": "645cbf4e55bc184441c908cb87ee8d9bdb45f6c4a87849711e8b55dc9c2af0e6"
+              }
+            }
+          },
+          "observation": {
+            "output_text_hash": null,
+            "structured_output_hash": {
+              "algorithm": "sha-256",
+              "digest": "ceaa4c2534bdc26ffb247df3cb510d50e2418186a8cdaf85b042a5c91050707e"
+            },
+            "provider_metadata_hash": {
+              "algorithm": "sha-256",
+              "digest": "6c1f3f50de961f2194d38019e275796dc75edc412c6486def2ee75281d1ac218"
+            },
+            "finish_reason": "stop",
+            "usage": { "input_tokens": null, "output_tokens": null, "total_tokens": null }
+          },
+          "runtime": {
+            "runtime_kind": "deterministic_demo",
+            "execution_topology": "rule_based_local",
+            "replay_strength": "fully_replayable",
+            "determinism": { "deterministic": true, "seed_bound": true },
+            "isolation": { "process_isolated": true },
+            "provider_routing": {
+              "fallbacks_allowed": false,
+              "provider_pinned": true,
+              "data_collection_policy": "declared_deny"
+            }
+          },
+          "plugin": {
+            "plugin_id_hash": {
+              "algorithm": "sha-256",
+              "digest": "6c1f3f50de961f2194d38019e275796dc75edc412c6486def2ee75281d1ac218"
+            },
+            "plugin_version_hash": {
+              "algorithm": "sha-256",
+              "digest": "3bfc269594ef649228e9a74bab00f042efc91d5acc6fbee31a382e80d42388fe"
+            },
+            "plugin_api_version": "v1",
+            "maintainer_class": "first_party_reference",
+            "normalization": {
+              "input_normalized": true,
+              "output_normalized": true,
+              "raw_request_preserved": true,
+              "raw_response_preserved": true,
+              "secrets_redacted": true
+            },
+            "plugin_manifest_hash": {
+              "algorithm": "sha-256",
+              "digest": "da5a71d5c9f57d4b97c86da812c3d86021ecc09f1e7f3050dfd1c5b5c9bf856c"
+            },
+            "plugin_id_hint": "qwen35",
+            "trust_level": "first_party_reference"
+          }
+        },
+        "facts": {
+          "risk_class": "low",
+          "requires_human_review": false,
+          "binding_effect_present": false,
+          "provider_fallbacks_allowed": false,
+          "plugin_trust_level": "first_party_reference",
+          "runtime_kind": "deterministic_demo",
+          "replay_strength": "fully_replayable",
+          "model_class": "deterministic_demo"
+        },
+        "decision": "pass",
+        "reason_codes": ["RUNTIME_DETERMINISTIC_DEMO"],
+        "evidence_summary_hash": {
+          "algorithm": "sha-256",
+          "digest": "9e38d3877584fe1476ba75cec7149bb587e4c35328161443bf96b2ed757e95ad"
+        },
+        "controls_summary_hash": {
+          "algorithm": "sha-256",
+          "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "signing": {
+          "transcript_encoding": "INK-CORE-TLV-V2",
+          "payload_hash": {
+            "algorithm": "sha-256",
+            "digest": "ab0bd393fce4f7331cfe27eb1a4dfaf0c1567e4f0be390dc85a5df85855de01c"
+          },
+          "algorithm": "Ed25519",
+          "key_id": "ed25519:a177619f1daf30c6189dee490148fc097f630749637c5c23cbf18944edf571a6",
+          "signature": "XpWV5_3ReeyJxdOZeo0frdKNKxPIXOc_m781ZtlQAfrrw0LO3rCYaLVzrCB5RVK_XMdGqn1DEErRZHkog378Dg"
+        }
+      },
+      "manifest": null,
+      "trust_registry": null,
+      "verify_policy": {
+        "schema": "ink.verify-policy.v1",
+        "policy_id": "BANK_STRICT_POLICY",
+        "require_canonical_tlv_v2": true,
+        "allow_verify_only_formats": false,
+        "require_trusted_issuer": true,
+        "require_revocation_check": false,
+        "require_manifest_hash_match_when_manifest_present": true,
+        "require_evidence_summary_match_when_manifest_present": true,
+        "require_controls_summary_match_when_controls_present": true,
+        "allow_network": false
+      },
+      "pinned_public_key": null,
+      "expect_status": "invalid",
+      "expect_code": "UNTRUSTED_ISSUER"
+    },
+    {
+      "name": "manifest_hash_mismatch",
+      "receipt": {
+        "schema": "ink.receipt.v2",
+        "receipt_id": "urn:ink:receipt:1784244290-719091000",
+        "receipt_profile": "thin_waist_v2",
+        "action_id": "urn:ink:action:20260716-232450-716259",
+        "issued_at": 1784244290,
+        "issuer": {
+          "name": "BLKBX Local Dev",
+          "key_id": "ed25519:a177619f1daf30c6189dee490148fc097f630749637c5c23cbf18944edf571a6",
+          "public_key": "Uniq4_0hX3tnRUCTIhofu5X-xuCOLPzK0buIWaoVYQk"
+        },
+        "manifest_hash": {
+          "algorithm": "sha-256",
+          "digest": "75d2e3d2d12e40e73809300c666c119436f23c4c79629b5af5365dd13ae67d22"
+        },
+        "policy": {
+          "id": "blkbx.demo-claims",
+          "version": "1.0.0",
+          "hash": {
+            "algorithm": "sha-256",
+            "digest": "1581227d30d975e532139eb26cae93c232a11fab824b8776c6ac7511c1a53dff"
+          }
+        },
+        "runtime": {
+          "runtime_kind": "deterministic_demo",
+          "execution_topology": "rule_based_local",
+          "replay_strength": "fully_replayable",
+          "determinism": { "deterministic": true, "seed_bound": true },
+          "isolation": { "process_isolated": true },
+          "provider_routing": {
+            "fallbacks_allowed": false,
+            "provider_pinned": true,
+            "data_collection_policy": "declared_deny"
+          }
+        },
+        "model": {
+          "schema": "ink.model-waist.v1",
+          "identity": {
+            "model_class": "deterministic_demo",
+            "model_ref_hash": {
+              "algorithm": "sha-256",
+              "digest": "769bf55b02d5872a853515959d61196d36379d5d5898138b798b62a5d4a5d3fd"
+            },
+            "model_slug": "qwen35-demo",
+            "identity_evidence": { "kind": "declared" }
+          },
+          "invocation": {
+            "action_hash": {
+              "algorithm": "sha-256",
+              "digest": "5618e101c93535b414e8312d488706d8b5c0109e3ec9fe368c25753d0ec16d48"
+            },
+            "messages_hash": {
+              "algorithm": "sha-256",
+              "digest": "1577f4b20236bcb5d7351a6acdf1b7b4bb2220d0b88d9742235d1a03a5b71ec5"
+            },
+            "system_prompt_hash": null,
+            "tool_spec_hash": null,
+            "response_schema_hash": {
+              "algorithm": "sha-256",
+              "digest": "645cbf4e55bc184441c908cb87ee8d9bdb45f6c4a87849711e8b55dc9c2af0e6"
+            },
+            "parameters_hash": {
+              "algorithm": "sha-256",
+              "digest": "652c01f8788fb77e21a7b613a35efc6e3d227d33b8992ece897a8278a811896b"
+            },
+            "requested_output": {
+              "kind": "json_schema",
+              "schema_hash": {
+                "algorithm": "sha-256",
+                "digest": "645cbf4e55bc184441c908cb87ee8d9bdb45f6c4a87849711e8b55dc9c2af0e6"
+              }
+            }
+          },
+          "observation": {
+            "output_text_hash": null,
+            "structured_output_hash": {
+              "algorithm": "sha-256",
+              "digest": "ceaa4c2534bdc26ffb247df3cb510d50e2418186a8cdaf85b042a5c91050707e"
+            },
+            "provider_metadata_hash": {
+              "algorithm": "sha-256",
+              "digest": "6c1f3f50de961f2194d38019e275796dc75edc412c6486def2ee75281d1ac218"
+            },
+            "finish_reason": "stop",
+            "usage": { "input_tokens": null, "output_tokens": null, "total_tokens": null }
+          },
+          "runtime": {
+            "runtime_kind": "deterministic_demo",
+            "execution_topology": "rule_based_local",
+            "replay_strength": "fully_replayable",
+            "determinism": { "deterministic": true, "seed_bound": true },
+            "isolation": { "process_isolated": true },
+            "provider_routing": {
+              "fallbacks_allowed": false,
+              "provider_pinned": true,
+              "data_collection_policy": "declared_deny"
+            }
+          },
+          "plugin": {
+            "plugin_id_hash": {
+              "algorithm": "sha-256",
+              "digest": "6c1f3f50de961f2194d38019e275796dc75edc412c6486def2ee75281d1ac218"
+            },
+            "plugin_version_hash": {
+              "algorithm": "sha-256",
+              "digest": "3bfc269594ef649228e9a74bab00f042efc91d5acc6fbee31a382e80d42388fe"
+            },
+            "plugin_api_version": "v1",
+            "maintainer_class": "first_party_reference",
+            "normalization": {
+              "input_normalized": true,
+              "output_normalized": true,
+              "raw_request_preserved": true,
+              "raw_response_preserved": true,
+              "secrets_redacted": true
+            },
+            "plugin_manifest_hash": {
+              "algorithm": "sha-256",
+              "digest": "da5a71d5c9f57d4b97c86da812c3d86021ecc09f1e7f3050dfd1c5b5c9bf856c"
+            },
+            "plugin_id_hint": "qwen35",
+            "trust_level": "first_party_reference"
+          }
+        },
+        "facts": {
+          "risk_class": "low",
+          "requires_human_review": false,
+          "binding_effect_present": false,
+          "provider_fallbacks_allowed": false,
+          "plugin_trust_level": "first_party_reference",
+          "runtime_kind": "deterministic_demo",
+          "replay_strength": "fully_replayable",
+          "model_class": "deterministic_demo"
+        },
+        "decision": "pass",
+        "reason_codes": ["RUNTIME_DETERMINISTIC_DEMO"],
+        "evidence_summary_hash": {
+          "algorithm": "sha-256",
+          "digest": "9e38d3877584fe1476ba75cec7149bb587e4c35328161443bf96b2ed757e95ad"
+        },
+        "controls_summary_hash": {
+          "algorithm": "sha-256",
+          "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "signing": {
+          "transcript_encoding": "INK-CORE-TLV-V2",
+          "payload_hash": {
+            "algorithm": "sha-256",
+            "digest": "ab0bd393fce4f7331cfe27eb1a4dfaf0c1567e4f0be390dc85a5df85855de01c"
+          },
+          "algorithm": "Ed25519",
+          "key_id": "ed25519:a177619f1daf30c6189dee490148fc097f630749637c5c23cbf18944edf571a6",
+          "signature": "XpWV5_3ReeyJxdOZeo0frdKNKxPIXOc_m781ZtlQAfrrw0LO3rCYaLVzrCB5RVK_XMdGqn1DEErRZHkog378Dg"
+        }
+      },
+      "manifest": {
+        "schema": "ink.manifest.v2",
+        "action_id": "urn:ink:action:20260716-232450-716259",
+        "created_at": "2026-07-16T23:24:50.718262+00:00",
+        "artifacts": [
+          {
+            "artifact_type": "prompt_text",
+            "path": "prompt.txt",
+            "media_type": "text/plain; charset=utf-8",
+            "size_bytes": 51,
+            "hash": {
+              "algorithm": "sha-256",
+              "digest": "1577f4b20236bcb5d7351a6acdf1b7b4bb2220d0b88d9742235d1a03a5b71ec5"
+            }
+          },
+          {
+            "artifact_type": "action_json",
+            "path": "action.json",
+            "media_type": "application/json",
+            "size_bytes": 351,
+            "hash": {
+              "algorithm": "sha-256",
+              "digest": "6416e26c04ad88991eecdc2430bfb12c35b21000545aa16169e1d4b475d57160"
+            },
+            "schema": { "id": "ink.action.v1", "version": "1.0.0" }
+          }
+        ]
+      },
+      "trust_registry": {
+        "schema": "ink.trust-registry.v1",
+        "issuers": [
+          {
+            "key_id": "ed25519:a177619f1daf30c6189dee490148fc097f630749637c5c23cbf18944edf571a6",
+            "algorithm": "Ed25519",
+            "public_key": "Uniq4_0hX3tnRUCTIhofu5X-xuCOLPzK0buIWaoVYQk",
+            "issuer_name": "BLKBX Local Dev",
+            "org_name": "BLKBX Lab",
+            "status": "active"
+          }
+        ]
+      },
+      "verify_policy": {
+        "schema": "ink.verify-policy.v1",
+        "policy_id": "BANK_STRICT_POLICY",
+        "require_canonical_tlv_v2": true,
+        "allow_verify_only_formats": false,
+        "require_trusted_issuer": true,
+        "require_revocation_check": false,
+        "require_manifest_hash_match_when_manifest_present": true,
+        "require_evidence_summary_match_when_manifest_present": true,
+        "require_controls_summary_match_when_controls_present": true,
+        "allow_network": false
+      },
+      "pinned_public_key": null,
+      "expect_status": "invalid",
+      "expect_code": "MANIFEST_HASH_MISMATCH"
+    }
+  ]
+}

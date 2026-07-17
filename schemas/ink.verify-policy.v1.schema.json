@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blkbx-lab.dev/schemas/ink.verify-policy.v1.schema.json",
+  "title": "INK Verification Policy v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "policy_id",
+    "require_canonical_tlv_v2",
+    "allow_verify_only_formats",
+    "require_trusted_issuer",
+    "require_revocation_check",
+    "require_manifest_hash_match_when_manifest_present",
+    "require_evidence_summary_match_when_manifest_present",
+    "require_controls_summary_match_when_controls_present",
+    "allow_network"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ink.verify-policy.v1"
+    },
+    "policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "require_canonical_tlv_v2": {
+      "type": "boolean"
+    },
+    "allow_verify_only_formats": {
+      "type": "boolean"
+    },
+    "require_trusted_issuer": {
+      "type": "boolean"
+    },
+    "require_revocation_check": {
+      "type": "boolean"
+    },
+    "require_manifest_hash_match_when_manifest_present": {
+      "type": "boolean"
+    },
+    "require_evidence_summary_match_when_manifest_present": {
+      "type": "boolean"
+    },
+    "require_controls_summary_match_when_controls_present": {
+      "type": "boolean"
+    },
+    "allow_network": {
+      "type": "boolean"
+    }
+  }
+}

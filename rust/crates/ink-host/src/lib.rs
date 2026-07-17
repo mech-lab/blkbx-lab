@@ -727,66 +727,83 @@ pub fn verify(receipt_path: &Path, manifest_path: Option<&Path>) -> Result<Value
         return verify_legacy_v1(receipt_path, &value);
     }
     let receipt: ReceiptJson = serde_json::from_str(&raw)?;
-    let trusted = load_trusted_key(&receipt.issuer.key_id, &receipt.issuer.name)?;
-    ensure_key_not_revoked(&trusted.key_id)?;
-    let payload = receipt_payload_from_json(&receipt)?;
-    let signature = Ed25519Signature(decode_fixed::<64>(&receipt.signing.signature)?);
-    let digest =
-        receipt_digest_for_encoding(&receipt, &payload, &receipt.signing.transcript_encoding)?;
-    let kernel_receipt = project_v2_receipt_to_kernel(&receipt, &payload)?;
-    let kernel_report = ink_core::verify::verify_receipt(&kernel_receipt)?;
-    let expected_payload_hash = digest_json(&digest);
-    let payload_hash_valid = receipt.signing.payload_hash.digest == expected_payload_hash.digest
-        && receipt.signing.payload_hash.algorithm == expected_payload_hash.algorithm;
-    let signature_valid = payload_hash_valid
-        && verify_receipt_signature_for_digest(
-            &digest,
-            &signature,
-            &Ed25519PublicKey(decode_fixed::<32>(&trusted.public_key)?),
-        )
-        .is_ok();
     let sibling = sibling_manifest(receipt_path);
     let manifest_candidate = manifest_path.map(PathBuf::from).or(sibling);
-    let mut scope = "receipt-only";
-    let kernel_projection_valid = kernel_report.valid;
-    let mut overall = if signature_valid && kernel_projection_valid {
-        "pass"
-    } else {
-        "fail"
-    };
-    let mut checks = vec![
-        json!({"id": "payload.hash", "status": if payload_hash_valid { "pass" } else { "fail" }, "reason_code": if payload_hash_valid { "RECEIPT_PAYLOAD_HASH_MATCH" } else { "RECEIPT_PAYLOAD_HASH_MISMATCH" }}),
-        json!({"id": "receipt.signature", "status": if signature_valid { "pass" } else { "fail" }, "reason_code": if signature_valid { "RECEIPT_SIGNATURE_VALID" } else { "RECEIPT_SIGNATURE_INVALID" }}),
-        json!({"id": "issuer.trust", "status": "pass", "reason_code": "ISSUER_KEY_TRUSTED"}),
-        json!({"id": "issuer.revocation", "status": "pass", "reason_code": "ISSUER_KEY_NOT_REVOKED"}),
-        json!({
-            "id": "kernel.projection",
-            "status": if kernel_projection_valid { "pass" } else { "fail" },
-            "reason_code": if kernel_projection_valid { "KERNEL_PROJECTION_VALID" } else { "KERNEL_PROJECTION_INVALID" },
-        }),
-    ];
-    if let Some(ref manifest_path) = manifest_candidate {
-        let bundle = load_bundle(manifest_path, None)?;
-        scope = "full-evidence";
-        if bundle.manifest_hash != parse_digest(&receipt.manifest_hash)? {
-            overall = "fail";
-            checks.push(json!({"id": "manifest.hash", "status": "fail", "reason_code": "MANIFEST_HASH_MISMATCH"}));
-        } else {
-            checks.push(json!({"id": "manifest.hash", "status": "pass", "reason_code": "MANIFEST_HASH_MATCH"}));
+    let controls_candidate = manifest_candidate.as_ref().and_then(|path| sibling_controls(path));
+    let manifest_bytes = manifest_candidate
+        .as_ref()
+        .map(fs::read)
+        .transpose()
+        .map_err(HostError::from)?;
+    let controls_bytes = controls_candidate
+        .as_ref()
+        .map(fs::read)
+        .transpose()
+        .map_err(HostError::from)?;
+    let root = config_root()?;
+    let signer = load_signer_config().ok();
+    let trust_path = signer
+        .as_ref()
+        .map(|config| resolve_config_path(&root, &config.trust_registry_path))
+        .unwrap_or_else(|| root.join(TRUST_REGISTRY_FILE));
+    let revocation_path = signer
+        .as_ref()
+        .map(|config| resolve_config_path(&root, &config.revocation_list_path))
+        .unwrap_or_else(|| root.join(REVOCATION_LIST_FILE));
+    let trust_registry_bytes = trust_path.exists().then(|| fs::read(&trust_path)).transpose()?;
+    let revocation_list_bytes = revocation_path
+        .exists()
+        .then(|| fs::read(&revocation_path))
+        .transpose()?;
+    let compatibility_policy =
+        serde_json::to_vec(&ink_receipt_v2::VerifyPolicyJson::host_compatibility())?;
+    let report = ink_receipt_v2::verify_receipt(
+        raw.as_bytes(),
+        manifest_bytes.as_deref(),
+        controls_bytes.as_deref(),
+        trust_registry_bytes.as_deref(),
+        revocation_list_bytes.as_deref(),
+        Some(compatibility_policy.as_slice()),
+        None,
+    )
+    .map_err(|err| match err {
+        ink_receipt_v2::ReceiptV2Error::Json(inner) => HostError::Json(inner),
+        ink_receipt_v2::ReceiptV2Error::Core(inner) => HostError::Core(inner),
+        ink_receipt_v2::ReceiptV2Error::InvalidInput(message) => HostError::InvalidInput(message),
+        ink_receipt_v2::ReceiptV2Error::Trust(message) => HostError::Trust(message),
+    })?;
+    match report.code.as_str() {
+        "REVOKED_ISSUER_KEY" => {
+            return Err(HostError::Trust(format!(
+                "trusted key {} is revoked",
+                receipt.signing.key_id
+            )))
         }
-        if bundle.evidence_summary_hash != parse_digest(&receipt.evidence_summary_hash)? {
-            overall = "fail";
-            checks.push(json!({"id": "evidence.summary", "status": "fail", "reason_code": "EVIDENCE_SUMMARY_MISMATCH"}));
-        } else {
-            checks.push(json!({"id": "evidence.summary", "status": "pass", "reason_code": "EVIDENCE_SUMMARY_MATCH"}));
+        "UNTRUSTED_ISSUER" => {
+            return Err(HostError::Trust(format!(
+                "unknown trusted key {}",
+                receipt.signing.key_id
+            )))
         }
-        if bundle.controls_summary_hash != parse_digest(&receipt.controls_summary_hash)? {
-            overall = "fail";
-            checks.push(json!({"id": "controls.summary", "status": "fail", "reason_code": "CONTROLS_SUMMARY_MISMATCH"}));
-        } else {
-            checks.push(json!({"id": "controls.summary", "status": "pass", "reason_code": "CONTROLS_SUMMARY_MATCH"}));
+        "UNTRUSTED_REVOCATION_LIST_SIGNER"
+        | "REVOCATION_LIST_PAYLOAD_HASH_MISMATCH"
+        | "REVOCATION_LIST_UNSUPPORTED_SIGNATURE_ALGORITHM"
+        | "REVOCATION_LIST_INVALID_SIGNATURE" => {
+            return Err(HostError::Trust(report.code.clone()))
         }
+        _ => {}
     }
+    let checks = report
+        .checks
+        .iter()
+        .map(|check| {
+            json!({
+                "id": check.id,
+                "status": check.status,
+                "reason_code": check.reason_code,
+            })
+        })
+        .collect::<Vec<_>>();
     Ok(json!({
         "action_id": receipt.action_id,
         "receipt_path": receipt_path,
@@ -798,8 +815,8 @@ pub fn verify(receipt_path: &Path, manifest_path: Option<&Path>) -> Result<Value
         },
         "verification": {
             "receipt_version": "v2",
-            "scope": scope,
-            "overall": overall,
+            "scope": report.scope,
+            "overall": if report.status == "valid" { "pass" } else { "fail" },
             "issuer_key_id": receipt.issuer.key_id,
             "checks": checks,
         },
@@ -808,8 +825,8 @@ pub fn verify(receipt_path: &Path, manifest_path: Option<&Path>) -> Result<Value
             receipt_path.display(),
             receipt.receipt_id,
             receipt.decision,
-            scope,
-            overall,
+            report.scope,
+            if report.status == "valid" { "pass" } else { "fail" },
         )
     }))
 }
@@ -1436,6 +1453,7 @@ fn receipt_payload_from_json(receipt: &ReceiptJson) -> Result<ReceiptPayload<'st
 // Current ink.receipt.v2 artifacts stay host-level, but the host should still be
 // able to project them into the neutral kernel envelope and exercise the new
 // canonical hashing and lifecycle rules.
+#[allow(dead_code)]
 fn project_v2_receipt_to_kernel(
     receipt: &ReceiptJson,
     payload: &ReceiptPayload<'_>,
@@ -1467,12 +1485,14 @@ fn project_v2_receipt_to_kernel(
     projected.seal().map_err(HostError::from)
 }
 
+#[allow(dead_code)]
 fn kernel_projection_issuer_id(key_id: &str) -> Result<IssuerId, HostError> {
     let key_hash = sha256(key_id.as_bytes());
     let compact = format!("issuer:{}", hex::encode(&key_hash.0[..16]));
     IssuerId::from_str(&compact).map_err(HostError::from)
 }
 
+#[allow(dead_code)]
 fn kernel_projection_claim_hash(
     receipt: &ReceiptJson,
     payload: &ReceiptPayload<'_>,
@@ -1606,6 +1626,7 @@ fn load_signer_config() -> Result<SignerConfigJson, HostError> {
     Ok(config)
 }
 
+#[allow(dead_code)]
 fn load_trusted_key(key_id: &str, issuer_name: &str) -> Result<TrustedIssuerJson, HostError> {
     let registry = load_trust_registry()?;
     registry
@@ -1647,12 +1668,12 @@ fn write_private_key(path: &Path, secret_key: &[u8; 32]) -> Result<(), HostError
             .open(path)?;
         file.write_all(Base64UrlUnpadded::encode_string(secret_key).as_bytes())?;
         file.flush()?;
-        return Ok(());
+        Ok(())
     }
     #[cfg(not(unix))]
     {
         fs::write(path, Base64UrlUnpadded::encode_string(secret_key))?;
-        return Ok(());
+        Ok(())
     }
 }
 
@@ -1745,6 +1766,7 @@ fn migrate_legacy_trust_policy(root: &Path) -> Result<bool, HostError> {
     Ok(migrated)
 }
 
+#[allow(dead_code)]
 fn load_trust_registry() -> Result<TrustRegistryJson, HostError> {
     let root = config_root()?;
     let path = root.join(TRUST_REGISTRY_FILE);
@@ -1819,6 +1841,7 @@ fn ensure_signed_revocation_list(
     Ok(())
 }
 
+#[allow(dead_code)]
 fn ensure_key_not_revoked(key_id: &str) -> Result<(), HostError> {
     let list = load_revocation_list()?;
     if list.revoked_keys.iter().any(|entry| entry.key_id == key_id) {
@@ -1827,6 +1850,7 @@ fn ensure_key_not_revoked(key_id: &str) -> Result<(), HostError> {
     Ok(())
 }
 
+#[allow(dead_code)]
 fn load_revocation_list() -> Result<RevocationListJson, HostError> {
     let root = config_root()?;
     let path = root.join(REVOCATION_LIST_FILE);
@@ -2045,6 +2069,7 @@ fn parse_digest(value: &DigestJson) -> Result<Sha256Digest, HostError> {
     parse_hex_digest(&value.digest)
 }
 
+#[allow(dead_code)]
 fn to_kernel_digest(value: Sha256Digest) -> KernelDigest {
     KernelDigest(value.0)
 }
@@ -2127,6 +2152,11 @@ fn now_timestamp() -> TimestampUtc {
 
 fn sibling_manifest(receipt_path: &Path) -> Option<PathBuf> {
     let candidate = receipt_path.parent()?.join("ink_manifest.v2.json");
+    candidate.exists().then_some(candidate)
+}
+
+fn sibling_controls(manifest_path: &Path) -> Option<PathBuf> {
+    let candidate = manifest_path.parent()?.join("controls.supplied.json");
     candidate.exists().then_some(candidate)
 }
 

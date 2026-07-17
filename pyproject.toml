@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "mechlab-sdk"
-version = "0.9.1"
+version = "1.0.0"
 description = "Model-agnostic Ink Receipts with a no_std, no_alloc Rust trust waist"
 authors = [{name = "BLKBX Lab contributors"}]
 readme = {file = "README.md", content-type = "text/markdown"}
@@ -40,7 +40,28 @@ mechlab = "blkbx_lab.cli:main"
 [tool.maturin]
 manifest-path = "rust/crates/ink-py/Cargo.toml"
 python-source = "python"
-python-packages = ["blkbx_lab", "mech_lab", "blkbxs", "mand8", "due"]
+python-packages = [
+  "blkbx_lab",
+  "blkbx_lab/adapters",
+  "blkbx_lab/artifacts",
+  "blkbx_lab/evidence",
+  "blkbx_lab/experimental",
+  "blkbx_lab/policies",
+  "blkbx_lab/products",
+  "blkbx_lab/products/blkbxs",
+  "blkbx_lab/products/due",
+  "blkbx_lab/products/mand8",
+  "blkbx_lab/research",
+  "blkbx_lab/schemas",
+  "mech_lab",
+  "blkbxs",
+  "mand8",
+  "mand8/bundles",
+  "mand8/schemas",
+  "due",
+  "due/bundles",
+  "due/schemas",
+]
 module-name = "blkbx_lab._ink_native"
 
 [tool.pytest.ini_options]

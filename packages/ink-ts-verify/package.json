@@ -1,0 +1,23 @@
+{
+  "name": "ink-ts-verify",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TypeScript verifier primitives kept in-repo for parity with the Rust INK verifier.",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist",
+    "src/generated/fieldIds.ts",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "generate:field-ids": "node ./scripts/generate-field-ids.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.6.3"
+  }
+}

@@ -17,7 +17,7 @@ Automated gates:
 - `python3 -m twine check dist/*`
 - fresh-venv wheel and sdist smoke installs
 
-The local v0.9.1 readiness target is the root `mechlab-sdk` distribution only. `products/*` remain source slices and repo organization units, but the stable `blkbxs`, `mand8`, and `due` Python surfaces now ship through that root wheel.
+The local `1.0.0` readiness target is the root `mechlab-sdk` distribution only. `products/*` remain source slices and repo organization units, but the stable `blkbxs`, `mand8`, and `due` Python surfaces now ship through that root wheel.
 
 What the readiness check enforces:
 
@@ -52,4 +52,5 @@ Maintained-versus-experimental split:
 - `blkbx_lab` plus the `blkbx-lab` CLI is the release surface that must stay documented and smoke-tested.
 - `blkbxs`, `mand8`, `due`, and `mech_lab` are part of the shipped root wheel surface and must stay importable from a clean install.
 - `blkbx_lab.research` and `blkbx_lab.experimental` stay opt-in helper namespaces whose dependency path is extras, not the default install.
-- `products/*` remain source slices and should not be treated as separate published artifacts for the v0.9.1 local release gate.
+- `products/*` remain source slices and should not be treated as separate published artifacts for the `1.0.0` local release gate.
+- `web/rails` and `packages/ink-ts-verify` are in-repo scaffolds only and must not be described as part of the published trust boundary or PyPI artifact set.

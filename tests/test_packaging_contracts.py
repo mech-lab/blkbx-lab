@@ -1,8 +1,11 @@
 import tomllib
 import subprocess
+from importlib.resources import files
 from pathlib import Path
 
+import blkbx_lab.artifacts as artifact_resources
 from blkbx_lab._version import __version__
+import blkbx_lab.evidence as evidence_resources
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,7 +31,28 @@ def test_root_package_uses_maturin_thin_waist_contract():
     }
     assert data["tool"]["maturin"]["manifest-path"] == "rust/crates/ink-py/Cargo.toml"
     assert data["tool"]["maturin"]["python-source"] == "python"
-    assert data["tool"]["maturin"]["python-packages"] == ["blkbx_lab", "mech_lab", "blkbxs", "mand8", "due"]
+    assert data["tool"]["maturin"]["python-packages"] == [
+        "blkbx_lab",
+        "blkbx_lab/adapters",
+        "blkbx_lab/artifacts",
+        "blkbx_lab/evidence",
+        "blkbx_lab/experimental",
+        "blkbx_lab/policies",
+        "blkbx_lab/products",
+        "blkbx_lab/products/blkbxs",
+        "blkbx_lab/products/due",
+        "blkbx_lab/products/mand8",
+        "blkbx_lab/research",
+        "blkbx_lab/schemas",
+        "mech_lab",
+        "blkbxs",
+        "mand8",
+        "mand8/bundles",
+        "mand8/schemas",
+        "due",
+        "due/bundles",
+        "due/schemas",
+    ]
     assert data["tool"]["maturin"]["module-name"] == "blkbx_lab._ink_native"
     assert data["tool"]["pytest"]["ini_options"] == {
         "testpaths": ["tests"],
@@ -55,3 +79,12 @@ def test_native_extension_is_not_tracked_in_git():
         text=True,
     ).stdout
     assert "_ink_native.abi3.so" not in tracked
+
+
+def test_schema_resources_are_available_from_python_packages():
+    evidence_schema = evidence_resources.load_schema("ink.evidence.record.v1")
+    artifact_schema = artifact_resources.load_schema("ink.export_manifest.v1")
+
+    assert evidence_schema["$id"].endswith("ink.evidence.record.v1.schema.json")
+    assert artifact_schema["$id"].endswith("ink.export_manifest.v1.schema.json")
+    assert files("blkbx_lab.schemas").joinpath("ink.evidence.record.v1.schema.json").is_file()

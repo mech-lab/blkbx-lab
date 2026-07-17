@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blkbx-lab.dev/schemas/ink.evidence.gap.v1.schema.json",
+  "title": "ink.evidence.gap.v1",
+  "description": "Evidence gap classification and tracking in the shared evidence kernel.",
+  "type": "object",
+  "required": ["schema", "gap_id", "requirement_id", "gap_type"],
+  "properties": {
+    "schema": {"const": "ink.evidence.gap.v1"},
+    "gap_id": {"type": "string"},
+    "requirement_id": {"type": "string"},
+    "gap_type": {"type": "string", "enum": ["missing", "stale", "insufficient", "reviewer_specific"]},
+    "missing_source": {"type": "string"},
+    "severity": {"type": "string"},
+    "reviewer_importance": {"type": "string"},
+    "remediation_path": {"type": "string"},
+    "estimated_effort": {"type": "string"},
+    "bundle_blocking": {"type": "boolean"},
+    "stale_after": {"type": "string"},
+    "notes": {"type": "string"},
+    "mapped_requirements": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

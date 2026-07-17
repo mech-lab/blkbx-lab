@@ -7,6 +7,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use base64ct::{Base64UrlUnpadded, Encoding};
 use ed25519_dalek::{Signer, SigningKey};
+use serde::Deserialize;
 use serde_json::json;
 
 use super::{
@@ -151,6 +152,26 @@ fn write_manifest_fixture(root: &Path, action_id: &str) -> PathBuf {
     )
     .unwrap();
     PathBuf::from(manifest["manifest_path"].as_str().unwrap())
+}
+
+#[derive(Debug, Deserialize)]
+struct SharedVectorFile {
+    vectors: Vec<SharedVector>,
+}
+
+#[derive(Debug, Deserialize)]
+struct SharedVector {
+    receipt: serde_json::Value,
+    manifest: Option<serde_json::Value>,
+    trust_registry: Option<serde_json::Value>,
+    #[serde(rename = "verify_policy")]
+    _verify_policy: Option<serde_json::Value>,
+}
+
+fn shared_vector(index: usize) -> SharedVector {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../test-vectors/ink-vectors.json");
+    let vectors: SharedVectorFile = serde_json::from_slice(&fs::read(path).unwrap()).unwrap();
+    vectors.vectors.into_iter().nth(index).unwrap()
 }
 
 #[test]
@@ -398,8 +419,54 @@ fn host_verify_accepts_json_canonical_compat_receipts() {
         Base64UrlUnpadded::encode_string(&signing_key.sign(&digest.0).to_bytes());
     fs::write(&receipt_path, serde_json::to_vec_pretty(&receipt).unwrap()).unwrap();
 
+    let trust_registry = fs::read(config_root.join(TRUST_REGISTRY_FILE)).unwrap();
+    let strict_policy =
+        serde_json::to_vec(&ink_receipt_v2::VerifyPolicyJson::bank_strict()).unwrap();
+    let strict_report = ink_receipt_v2::verify_receipt(
+        &fs::read(&receipt_path).unwrap(),
+        Some(&fs::read(&manifest_path).unwrap()),
+        None,
+        Some(&trust_registry),
+        None,
+        Some(&strict_policy),
+        None,
+    )
+    .unwrap();
+    assert_eq!(strict_report.status, "invalid");
+    assert_eq!(strict_report.code, "VERIFY_ONLY_FORMAT_REJECTED");
+
     let verified = verify(&receipt_path, Some(&manifest_path)).unwrap();
     assert_eq!(verified["verification"]["overall"], "pass");
+
+    let _ = fs::remove_dir_all(&root);
+}
+
+#[test]
+fn host_verify_uses_shared_public_vector_fixture() {
+    let _guard = ENV_LOCK.lock().unwrap();
+    let root = unique_temp_dir("inkreceipts-host-shared-vector");
+    let config_root = root.join("config");
+    env::set_var("INKRECEIPTS_CONFIG_DIR", &config_root);
+    fs::create_dir_all(&config_root).unwrap();
+
+    let vector = shared_vector(0);
+    let receipt_path = root.join("ink_receipt.v2.json");
+    fs::write(&receipt_path, serde_json::to_vec_pretty(&vector.receipt).unwrap()).unwrap();
+    let manifest_path = root.join("ink_manifest.v2.json");
+    fs::write(
+        &manifest_path,
+        serde_json::to_vec_pretty(&vector.manifest.unwrap()).unwrap(),
+    )
+    .unwrap();
+    fs::write(
+        config_root.join(TRUST_REGISTRY_FILE),
+        serde_json::to_vec_pretty(&vector.trust_registry.unwrap()).unwrap(),
+    )
+    .unwrap();
+
+    let verified = verify(&receipt_path, Some(&manifest_path)).unwrap();
+    assert_eq!(verified["verification"]["overall"], "pass");
+    assert_eq!(verified["verification"]["scope"], "full-evidence");
 
     let _ = fs::remove_dir_all(&root);
 }

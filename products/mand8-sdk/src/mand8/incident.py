@@ -36,5 +36,10 @@ def record(
             "claims_impact": claims_impact,
             "resolution": resolution or {},
         },
+        context_updates={
+            "last_incident_id": incident_id,
+            "last_incident_severity": severity,
+            "last_claims_impact": claims_impact,
+        },
         human_review=review,
     )

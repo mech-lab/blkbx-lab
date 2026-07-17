@@ -2,15 +2,17 @@
 
 from blkbx_lab._version import __version__
 
-from . import bundle, control, exposure, incident, override, receipt, schema
+from . import authority, bundle, control, exposure, incident, override, receipt, scenarios, schema
 
 __all__ = [
     "__version__",
+    "authority",
     "bundle",
     "control",
     "exposure",
     "incident",
     "override",
     "receipt",
+    "scenarios",
     "schema",
 ]

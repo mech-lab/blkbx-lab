@@ -50,6 +50,7 @@ impl ReceiptEnvelope {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn create(
         schema_id: SchemaId,
         schema_hash: Digest,

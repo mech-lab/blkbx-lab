@@ -67,5 +67,9 @@ def with_human_review(document: dict[str, Any], human_review: dict[str, Any] | N
     updated = clone(document)
     review = normalized_human_review(human_review)
     updated["human_review"] = review
-    updated.setdefault("event_trail", []).append(event("human_review_recorded", review))
+    payload = clone(review)
+    case_id = updated.get("case_id") or updated.get("domain_context", {}).get("case_id")
+    if case_id is not None:
+        payload.setdefault("case_id", case_id)
+    updated.setdefault("event_trail", []).append(event("human_review_recorded", payload))
     return refresh_integrity(updated)

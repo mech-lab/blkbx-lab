@@ -131,6 +131,8 @@ def run_smoke_tests() -> None:
             python_path,
             """
 import blkbx_lab as bl
+import blkbx_lab.artifacts as artifact_resources
+import blkbx_lab.evidence as evidence_resources
 import blkbxs
 import due
 import mand8
@@ -143,6 +145,8 @@ print(bl.verify(result.receipt_path).report)
 print(blkbxs.doctor().report)
 print(mand8.receipt.create()["schema"])
 print(due.receipt.create()["schema"])
+print(evidence_resources.load_schema("ink.evidence.record.v1")["$id"])
+print(artifact_resources.load_schema("ink.export_manifest.v1")["$id"])
 print(ml.research.describe()["extra"])
 """,
         )
@@ -159,6 +163,8 @@ print(ml.research.describe()["extra"])
             python_path,
             """
 import blkbx_lab as bl
+import blkbx_lab.artifacts as artifact_resources
+import blkbx_lab.evidence as evidence_resources
 import blkbxs
 import due
 import mand8
@@ -171,6 +177,8 @@ print(bl.verify(result.receipt_path).report)
 print(blkbxs.doctor().report)
 print(mand8.receipt.create()["schema"])
 print(due.receipt.create()["schema"])
+print(evidence_resources.load_schema("ink.evidence.record.v1")["$id"])
+print(artifact_resources.load_schema("ink.export_manifest.v1")["$id"])
 print(ml.experimental.describe()["extra"])
 """,
         )

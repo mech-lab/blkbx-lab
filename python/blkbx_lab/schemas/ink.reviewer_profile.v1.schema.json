@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blkbx-lab.dev/schemas/ink.reviewer_profile.v1.schema.json",
+  "title": "ink.reviewer_profile.v1",
+  "description": "Reviewer profile schema for the shared evidence kernel.",
+  "type": "object",
+  "required": ["schema", "profile_id", "vertical"],
+  "properties": {
+    "schema": {"const": "ink.reviewer_profile.v1"},
+    "profile_id": {"type": "string", "enum": ["bank_vendor_risk", "bank_model_risk", "carrier_innovation", "mga_capacity_provider", "broker_underwriter", "law_firm_security", "legal_innovation_partner"]},
+    "vertical": {"type": "string"},
+    "required_evidence_classes": {"type": "array", "items": {"type": "string"}},
+    "redaction_policy": {"type": "string", "enum": ["internal_full", "reviewer_minimum", "insurer_minimum", "bank_minimum", "legal_privileged", "public_summary"]},
+    "gap_severity_threshold": {"type": "string"},
+    "section_ordering": {"type": "array", "items": {"type": "string"}},
+    "required_disclaimers": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

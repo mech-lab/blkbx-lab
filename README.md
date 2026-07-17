@@ -22,7 +22,7 @@ MAND8 is UK-first by design. Its delegated-authority framing starts with the Llo
 
 ## Current Shipped Surface
 
-Black Box Labs is the product brand. `mechlab-sdk` is the current PyPI install target for `v0.9.1`. A plain install carries the current root runtime plus stable `blkbxs`, `mand8`, and `due` Python APIs. Both `blkbx-lab` and `mechlab` CLIs are available, and both `blkbx_lab` and `mech_lab` imports remain available.
+Black Box Labs is the product brand. `mechlab-sdk` `1.0.0` is the current PyPI install target. A plain install carries the current root runtime plus stable `blkbxs`, `mand8`, and `due` Python APIs. Both `blkbx-lab` and `mechlab` CLIs are available, and both `blkbx_lab` and `mech_lab` imports remain available.
 
 ```bash
 pip install --pre mechlab-sdk
@@ -97,12 +97,14 @@ blkbx-lab/
   rust/crates/ink-wasm/           portable verifier target
   rust/crates/ink-host/           std adapter and v2 compatibility surface
   rust/crates/ink-py/             PyO3 bridge
+  web/rails/                      in-repo workflow portal scaffold, not a shipped verifier surface
+  packages/ink-ts-verify/         in-repo TypeScript verifier primitive scaffold
   products/
     mand8-sdk/                    insurance-facing source slice
     due-sdk/                      legal-facing source slice
 ```
 
-The slice directories remain source slices and repo organization units. The shipped pip artifact is `mechlab-sdk`, and its stable wheel surface now carries the `blkbxs`, `mand8`, and `due` Python packages directly.
+The slice directories remain source slices and repo organization units. The shipped pip artifact is `mechlab-sdk`, and its stable wheel surface now carries the `blkbxs`, `mand8`, and `due` Python packages directly. The Rails and TypeScript directories are in-repo scaffolds and are not part of the published trust boundary or PyPI artifact set.
 
 The root public CLIs remain `blkbx-lab` and `mechlab`. The new `ink` CLI is a kernel-facing verifier tool, not a replacement for the umbrella product CLIs.
 
@@ -126,3 +128,4 @@ The root public CLIs remain `blkbx-lab` and `mechlab`. The new `ink` CLI is a ke
 - Research and experimental helpers live under `blkbx_lab.research` and `blkbx_lab.experimental`, but the supported dependency path for them is still opt-in extras.
 - Shared `packages/*` primitives are part of the target architecture, but this pass does not migrate the current root runtime into that structure.
 - `products/*` remain in-repo slices under the Black Box Labs umbrella rather than separate published PyPI artifacts.
+- `web/rails` and `packages/ink-ts-verify` are intentionally non-shipping scaffolds in this release line; the native Rust verifier remains the trust root.

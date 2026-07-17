@@ -15,6 +15,12 @@ def test_blkbxs_reaches_the_root_public_runtime() -> None:
 
 
 def test_mand8_public_api_and_packaged_assets_are_available() -> None:
+    authority_receipt = mand8.authority.record(
+        policy_ref="B1234UK2026",
+        binder_ref="B1234UK2026",
+        authority_id="auth-lma-binder-042",
+        managing_agent="Lime Street Managing Agency Ltd",
+    )
     risk_receipt = mand8.exposure.emit(
         exposure_unit_id="uk-cyber-eu-042",
         policy_ref="B1234UK2026",
@@ -22,15 +28,21 @@ def test_mand8_public_api_and_packaged_assets_are_available() -> None:
         insured_value=5000000.0,
         binder_ref="B1234UK2026",
         managing_agent="Lime Street Managing Agency Ltd",
+        authority_receipt=authority_receipt,
+        case_id=authority_receipt["case_id"],
     )
-    underwriting_bundle = mand8.bundle.export(risk_receipt)
+    underwriting_bundle = mand8.bundle.export(risk_receipt, authority_receipts=[authority_receipt])
 
     assert risk_receipt["schema"] == "mand8.risk_receipt.v1"
+    assert authority_receipt["schema"] == "mand8.authority_receipt.v1"
     assert underwriting_bundle["schema"] == "mand8.bundle.v1"
+    assert underwriting_bundle["case_id"] == risk_receipt["case_id"]
+    assert mand8.schema.validate(authority_receipt) is True
     assert mand8.schema.validate(risk_receipt) is True
     assert mand8.schema.validate(underwriting_bundle, "mand8.bundle.v1") is True
     assert "underwriting_evidence_bundle.md" in mand8.bundle.available_templates()
     assert "Authority Receipt" in mand8.bundle.load_template("underwriting_evidence_bundle.md")
+    assert len(mand8.scenarios.seeded_workspaces()) == 3
 
 
 def test_due_public_api_and_packaged_assets_are_available() -> None:

@@ -34,7 +34,7 @@ Proof line:
 
 ## Social Launch Caption
 
-`BLKBX Lab v0.9.0 is live. Install blkbx-lab, run the qwen35 deterministic demo, and inspect the Ink receipt artifacts locally.`
+`BLKBX Lab 1.0.0 is live. Install blkbx-lab, run the qwen35 deterministic demo, and inspect the Ink receipt artifacts locally.`
 
 ## Known-Limit Language
 

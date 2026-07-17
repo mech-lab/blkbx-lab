@@ -7,6 +7,8 @@ members = [
   "rust/crates/ink-wasm",
   "rust/crates/ink-host",
   "rust/crates/ink-py",
+  "rust/crates/ink-receipt-v2",
+  "rust/crates/ink-tui",
 ]
 resolver = "2"
 
@@ -14,7 +16,7 @@ resolver = "2"
 edition = "2021"
 authors = ["BLKBX Lab contributors"]
 license = "MIT"
-version = "0.9.1"
+version = "1.0.0"
 description = "Model-agnostic Ink Receipts with a no_std, no_alloc Rust trust waist"
 documentation = "https://github.com/mech-lab/blkbx-lab"
 homepage = "https://github.com/mech-lab/blkbx-lab"
@@ -22,11 +24,14 @@ repository = "https://github.com/mech-lab/blkbx-lab"
 
 [workspace.dependencies]
 base64ct = { version = "1.7", default-features = false, features = ["alloc"] }
+clap = { version = "4.5", features = ["derive"] }
+crossterm = "0.28"
 dirs = "6.0"
 ed25519-dalek = { version = "2.2", default-features = false }
 hex = "0.4"
 pyo3 = { version = "0.29", features = ["abi3-py310", "extension-module"] }
 rand = { version = "0.9", features = ["os_rng"] }
+ratatui = "0.29"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sha2 = { version = "0.10", default-features = false }

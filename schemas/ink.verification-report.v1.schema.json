@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blkbx-lab.dev/schemas/ink.verification-report.v1.schema.json",
+  "title": "INK Verification Report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "status",
+    "code",
+    "transcript_encoding",
+    "receipt_profile",
+    "issuer",
+    "key_id",
+    "payload_digest_alg",
+    "payload_digest_hex",
+    "signature_valid",
+    "trusted_issuer",
+    "revocation_checked",
+    "revocation_ok",
+    "policy_accepted",
+    "verification_engine",
+    "network_required",
+    "scope",
+    "checks"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ink.verification-report.v1"
+    },
+    "status": {
+      "enum": ["valid", "invalid"]
+    },
+    "code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "transcript_encoding": {
+      "type": "string",
+      "minLength": 1
+    },
+    "receipt_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issuer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "key_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "payload_digest_alg": {
+      "type": "string",
+      "minLength": 1
+    },
+    "payload_digest_hex": {
+      "type": "string",
+      "minLength": 1
+    },
+    "signature_valid": {
+      "type": "boolean"
+    },
+    "trusted_issuer": {
+      "type": "boolean"
+    },
+    "revocation_checked": {
+      "type": "boolean"
+    },
+    "revocation_ok": {
+      "type": "boolean"
+    },
+    "policy_accepted": {
+      "type": "boolean"
+    },
+    "verification_engine": {
+      "type": "string",
+      "minLength": 1
+    },
+    "network_required": {
+      "const": false
+    },
+    "scope": {
+      "enum": ["receipt-only", "full-evidence"]
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "reason_code"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": ["pass", "fail", "not_performed"]
+          },
+          "reason_code": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

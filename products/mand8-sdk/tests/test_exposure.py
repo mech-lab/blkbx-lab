@@ -4,10 +4,18 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from mand8 import control, exposure, override, schema  # noqa: E402
+from mand8 import authority, control, exposure, override, schema  # noqa: E402
 
 
 def test_exposure_emission_and_event_trail() -> None:
+    authority_receipt = authority.record(
+        policy_ref="B1234UK2026",
+        binder_ref="B1234UK2026",
+        authority_id="auth-lma-binder-042",
+        managing_agent="Lime Street Managing Agency Ltd",
+        coverholder="North Dock Coverholder Ltd",
+        case_id="case_lloyds_042",
+    )
     risk_receipt = exposure.emit(
         exposure_unit_id="uk-cyber-eu-042",
         policy_ref="B1234UK2026",
@@ -16,12 +24,8 @@ def test_exposure_emission_and_event_trail() -> None:
         binder_ref="B1234UK2026",
         managing_agent="Lime Street Managing Agency Ltd",
         coverholder="North Dock Coverholder Ltd",
-        authority_receipt={
-            "authority_id": "auth-lma-binder-042",
-            "construct": "delegated_authority",
-            "lloyds_binding_ref": "B1234UK2026",
-            "regulators": ["FCA", "PRA"],
-        },
+        authority_receipt=authority_receipt,
+        case_id="case_lloyds_042",
     )
     risk_receipt = control.record(
         risk_receipt,
@@ -53,6 +57,8 @@ def test_exposure_emission_and_event_trail() -> None:
         "override_recorded",
         "human_review_recorded",
     ]
+    assert risk_receipt["case_id"] == "case_lloyds_042"
+    assert all(entry["payload"]["case_id"] == "case_lloyds_042" for entry in risk_receipt["event_trail"])
     assert risk_receipt["domain_context"]["territory"] == "UK"
     assert risk_receipt["domain_context"]["market_segment"] == "lloyds_delegated_authority"
     assert risk_receipt["human_review"]["reviewer"] == "syndicate.underwriter@mand8.example"

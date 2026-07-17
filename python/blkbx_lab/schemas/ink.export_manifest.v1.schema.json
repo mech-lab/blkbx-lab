@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blkbx-lab.dev/schemas/ink.export_manifest.v1.schema.json",
+  "title": "ink.export_manifest.v1",
+  "description": "Export manifest schema for the shared evidence kernel.",
+  "type": "object",
+  "required": ["schema", "artifact_id", "export_id", "timestamp", "artifact_hash", "markdown_hash", "pdf_hash", "included_receipt_ids", "included_document_hashes", "included_attestation_ids", "verification_class", "exporter_version"],
+  "properties": {
+    "schema": {"const": "ink.export_manifest.v1"},
+    "artifact_id": {"type": "string"},
+    "export_id": {"type": "string"},
+    "timestamp": {"type": "string"},
+    "artifact_hash": {"type": "string"},
+    "markdown_hash": {"type": "string"},
+    "pdf_hash": {"type": "string"},
+    "included_receipt_ids": {"type": "array", "items": {"type": "string"}},
+    "included_document_hashes": {"type": "array", "items": {"type": "string"}},
+    "included_attestation_ids": {"type": "array", "items": {"type": "string"}},
+    "verification_class": {"type": "string", "enum": ["trusted_v2", "stub_integrity"]},
+    "exporter_version": {"type": "string"},
+    "signer_key_id": {"type": "string"}
+  },
+  "additionalProperties": false
+}

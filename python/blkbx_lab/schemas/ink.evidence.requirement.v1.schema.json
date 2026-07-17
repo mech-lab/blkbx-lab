@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blkbx-lab.dev/schemas/ink.evidence.requirement.v1.schema.json",
+  "title": "ink.evidence.requirement.v1",
+  "description": "Evidence requirement mapping from product receipts to standardized evidence kernel.",
+  "type": "object",
+  "required": ["schema", "requirement_id", "vertical", "artifact_type", "support_type"],
+  "properties": {
+    "schema": {"const": "ink.evidence.requirement.v1"},
+    "requirement_id": {"type": "string"},
+    "vertical": {"type": "string"},
+    "artifact_type": {"type": "string"},
+    "support_type": {"type": "string", "enum": ["machine_verifiable", "document_verifiable", "attestation_required"]},
+    "coverage_status": {"type": "string", "enum": ["covered", "missing", "stale", "insufficient", "reviewer_specific"]},
+    "reviewer_profiles": {"type": "array", "items": {"type": "string"}},
+    "mapped_receipts": {"type": "array", "items": {"type": "string"}},
+    "mapped_documents": {"type": "array", "items": {"type": "string"}},
+    "mapped_attestations": {"type": "array", "items": {"type": "string"}},
+    "notes": {"type": "string"}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blkbx-lab.dev/schemas/ink.redaction_profile.v1.schema.json",
+  "title": "ink.redaction_profile.v1",
+  "description": "Redaction profile schema for the shared evidence kernel.",
+  "type": "object",
+  "required": ["schema", "profile_id"],
+  "properties": {
+    "schema": {"const": "ink.redaction_profile.v1"},
+    "profile_id": {"type": "string", "enum": ["internal_full", "reviewer_minimum", "insurer_minimum", "bank_minimum", "legal_privileged", "public_summary"]},
+    "visibility_rules": {"type": "object"},
+    "output_format": {"type": "string", "enum": ["markdown", "json", "pdf"]}
+  },
+  "additionalProperties": false
+}

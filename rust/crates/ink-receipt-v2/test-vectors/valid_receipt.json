@@ -1,0 +1,13 @@
+{
+  "profile": "ink.receipt.v2",
+  "issuer": "Acme Bank",
+  "signing": {
+    "transcript_encoding": "tlv2",
+    "key_id": "acme-bank-key-1",
+    "signature": "3045022100a1b2c3d4e5f678901234567890abcdef1234567890abcdef1234567890abcdef022100fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  },
+  "payload": {
+    "digest_alg": "sha256",
+    "digest_hex": "a1b2c3d4e5f678901234567890abcdef1234567890abcdef1234567890abcdef"
+  }
+}

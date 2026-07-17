@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blkbx-lab.dev/schemas/ink.artifact.v1.schema.json",
+  "title": "ink.artifact.v1",
+  "description": "Canonical artifact model for the shared evidence kernel.",
+  "type": "object",
+  "required": ["schema", "artifact_id", "artifact_type", "vertical", "buyer_context", "reviewer_profile", "included_receipts", "included_documents", "included_attestations", "open_gaps", "export_version", "price_context", "retention_profile", "redaction_profile", "integrity", "refresh_state"],
+  "properties": {
+    "schema": {"const": "ink.artifact.v1"},
+    "artifact_id": {"type": "string"},
+    "artifact_type": {"type": "string"},
+    "vertical": {"type": "string"},
+    "buyer_context": {"type": "object"},
+    "reviewer_profile": {"type": "string"},
+    "included_receipts": {"type": "array", "items": {"type": "string"}},
+    "included_documents": {"type": "array", "items": {"type": "string"}},
+    "included_attestations": {"type": "array", "items": {"type": "string"}},
+    "open_gaps": {"type": "array", "items": {"type": "object"}},
+    "export_version": {"type": "string"},
+    "price_context": {"type": "object"},
+    "retention_profile": {"type": "string", "enum": ["local_only", "days_30", "days_90", "year_1", "custom"]},
+    "redaction_profile": {"type": "string", "enum": ["internal_full", "reviewer_minimum", "insurer_minimum", "bank_minimum", "legal_privileged", "public_summary"]},
+    "integrity": {"type": "object"},
+    "refresh_state": {"type": "object"}
+  },
+  "additionalProperties": false
+}

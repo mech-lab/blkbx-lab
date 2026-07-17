@@ -6,6 +6,7 @@
     "schema",
     "receipt_id",
     "action_id",
+    "case_id",
     "issued_at",
     "domain_context",
     "event_trail",
@@ -22,6 +23,9 @@
     "action_id": {
       "type": "string"
     },
+    "case_id": {
+      "type": "string"
+    },
     "issued_at": {
       "type": "string",
       "format": "date-time"
@@ -29,6 +33,7 @@
     "domain_context": {
       "type": "object",
       "required": [
+        "case_id",
         "exposure_unit_id",
         "policy_ref",
         "risk_class",
@@ -36,6 +41,9 @@
         "currency"
       ],
       "properties": {
+        "case_id": {
+          "type": "string"
+        },
         "exposure_unit_id": {
           "type": "string"
         },

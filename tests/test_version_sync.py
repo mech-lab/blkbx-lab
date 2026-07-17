@@ -1,3 +1,4 @@
+import json
 import tomllib
 from pathlib import Path
 
@@ -11,14 +12,14 @@ def _toml(path: Path) -> dict:
     return tomllib.loads(path.read_text(encoding="utf-8"))
 
 
-def test_python_versions_are_synced_for_v09_release():
+def test_python_versions_are_synced_for_v1_release():
     root_project = _toml(ROOT / "pyproject.toml")
     root_version = root_project["project"]["version"]
 
     assert __version__ == root_version
 
 
-def test_workspace_crates_share_the_v09_release_version():
+def test_workspace_crates_share_the_v1_release_version():
     root_project = _toml(ROOT / "pyproject.toml")
     root_version = root_project["project"]["version"]
     workspace = _toml(ROOT / "Cargo.toml")
@@ -30,9 +31,22 @@ def test_workspace_crates_share_the_v09_release_version():
         "ink-core",
         "ink-host",
         "ink-py",
+        "ink-receipt-v2",
+        "ink-tui",
         "ink-vectors",
         "ink-verify",
         "ink-wasm",
     }
     versions = {_toml(path)["package"]["version"]["workspace"] for path in cargo_paths}
     assert versions == {True}
+
+
+def test_source_slice_manifests_track_the_root_release_version():
+    root_version = _toml(ROOT / "pyproject.toml")["project"]["version"]
+    assert _toml(ROOT / "products" / "due-sdk" / "pyproject.toml")["project"]["version"] == root_version
+    assert _toml(ROOT / "products" / "mand8-sdk" / "pyproject.toml")["project"]["version"] == root_version
+
+    due_package = json.loads((ROOT / "products" / "due-sdk" / "package.json").read_text(encoding="utf-8"))
+    mand8_package = json.loads((ROOT / "products" / "mand8-sdk" / "package.json").read_text(encoding="utf-8"))
+    assert due_package["version"] == root_version
+    assert mand8_package["version"] == root_version

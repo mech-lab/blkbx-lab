@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blkbx-lab.dev/schemas/ink.retention_profile.v1.schema.json",
+  "title": "ink.retention_profile.v1",
+  "description": "Retention profile schema for the shared evidence kernel.",
+  "type": "object",
+  "required": ["schema", "profile_id"],
+  "properties": {
+    "schema": {"const": "ink.retention_profile.v1"},
+    "profile_id": {"type": "string", "enum": ["local_only", "days_30", "days_90", "year_1", "custom"]},
+    "storage_duration": {"type": "string"}
+  },
+  "additionalProperties": false
+}

@@ -5,6 +5,9 @@ use ink_core::{
     canon, Claim, Digest, Evidence, ParentHashes, Policy, PolicyDecision, ReceiptEnvelope, Schema,
 };
 
+pub const PUBLIC_RECEIPT_VECTORS_JSON: &str =
+    include_str!("../../../../test-vectors/ink-vectors.json");
+
 pub struct ReceiptVector {
     pub name: &'static str,
     pub human_fixture: &'static str,

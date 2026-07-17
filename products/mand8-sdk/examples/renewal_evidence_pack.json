@@ -1,6 +1,7 @@
 {
   "schema": "mand8.bundle.v1",
   "bundle_id": "bundle_mand8_renewal_001",
+  "case_id": "case_mand8_uk_001",
   "bundle_type": "renewal_evidence_pack",
   "audience": "carrier_innovation_team",
   "generated_at": "2026-07-16T12:20:00Z",
@@ -23,8 +24,10 @@
     "schema": "mand8.risk_receipt.v1",
     "receipt_id": "rcpt_mand8_uk_001",
     "action_id": "act_mand8_uk_001",
+    "case_id": "case_mand8_uk_001",
     "issued_at": "2026-07-16T12:00:00Z",
     "domain_context": {
+      "case_id": "case_mand8_uk_001",
       "exposure_unit_id": "uk-cyber-eu-042",
       "policy_ref": "B1234UK2026",
       "risk_class": "cyber",
@@ -50,6 +53,7 @@
       {
         "event_type": "underwriting_action_emitted",
         "payload": {
+          "case_id": "case_mand8_uk_001",
           "action": "ai_underwriting_action",
           "decision": "bind_with_controls"
         }
@@ -68,7 +72,48 @@
       "core_binding": null
     }
   },
-  "summary": "renewal_evidence_pack for carrier_innovation_team: B1234UK2026 with 1 receipt events",
+  "authority_receipts": [
+    {
+      "schema": "mand8.authority_receipt.v1",
+      "receipt_id": "arcpt_mand8_auth_001",
+      "case_id": "case_mand8_uk_001",
+      "authority_id": "auth-lma-binder-042",
+      "construct": "delegated_authority",
+      "status": "within_authority",
+      "lloyds_binding_ref": "B1234UK2026",
+      "managing_agent": "Lime Street Managing Agency Ltd",
+      "coverholder": "North Dock Coverholder Ltd"
+    }
+  ],
+  "incident_receipts": [],
+  "related_receipts": {
+    "risk_receipt_id": "rcpt_mand8_uk_001",
+    "authority_receipt_ids": [
+      "arcpt_mand8_auth_001"
+    ],
+    "incident_receipt_ids": []
+  },
+  "coverage_summary": {
+    "risk_receipt_id": "rcpt_mand8_uk_001",
+    "authority_receipt_count": 1,
+    "incident_receipt_count": 0,
+    "control_check_count": 0,
+    "override_count": 0,
+    "human_review_status": "reviewed",
+    "latest_authority_status": "within_authority",
+    "latest_incident_severity": null,
+    "verification_statuses": [
+      "passed"
+    ],
+    "renewal_ready": false
+  },
+  "verification_reports": [
+    {
+      "status": "passed",
+      "report_ref": "verify/renewal-pack-report.json"
+    }
+  ],
+  "summary": "renewal_evidence_pack for carrier_innovation_team: B1234UK2026 with 1 receipt events, 1 authority receipts, and 0 incident receipts",
   "integrity": {
     "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
     "signature_algorithm": "stub-v1",

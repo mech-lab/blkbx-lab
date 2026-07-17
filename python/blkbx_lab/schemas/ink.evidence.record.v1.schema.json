@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blkbx-lab.dev/schemas/ink.evidence.record.v1.schema.json",
+  "title": "ink.evidence.record.v1",
+  "description": "Normalized evidence record projected from product receipts into the shared evidence kernel.",
+  "type": "object",
+  "required": ["schema", "record_id", "product", "action", "model"],
+  "properties": {
+    "schema": {"const": "ink.evidence.record.v1"},
+    "record_id": {"type": "string"},
+    "product": {"type": "string", "enum": ["blkbxs", "mand8", "due"]},
+    "action": {"type": "string"},
+    "model": {"type": "string"},
+    "input_commitments": {"type": "object"},
+    "output_commitments": {"type": "object"},
+    "policy_binding": {"type": "object"},
+    "control_evidence": {"type": "array", "items": {"type": "object"}},
+    "evaluation_evidence": {"type": "array", "items": {"type": "object"}},
+    "exception_evidence": {"type": "array", "items": {"type": "object"}},
+    "incident_evidence": {"type": "array", "items": {"type": "object"}},
+    "human_authority": {"type": "object"},
+    "disclosure_profile": {"type": "object"},
+    "integrity_provenance": {
+      "type": "object",
+      "required": ["verification_class"],
+      "properties": {
+        "verification_class": {"type": "string", "enum": ["trusted_v2", "stub_integrity"]},
+        "source_receipt_id": {"type": "string"},
+        "source_schema": {"type": "string"}
+      }
+    }
+  },
+  "additionalProperties": false
+}

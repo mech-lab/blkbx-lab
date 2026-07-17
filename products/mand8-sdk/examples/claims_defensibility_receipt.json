@@ -2,8 +2,10 @@
   "schema": "mand8.risk_receipt.v1",
   "receipt_id": "rcpt_mand8_claims_001",
   "action_id": "act_mand8_claims_001",
+  "case_id": "case_mand8_claims_001",
   "issued_at": "2026-07-16T12:10:00Z",
   "domain_context": {
+    "case_id": "case_mand8_claims_001",
     "exposure_unit_id": "uk-motor-eu-008",
     "policy_ref": "BINDER-MOTOR-008",
     "risk_class": "commercial_motor",
@@ -30,6 +32,7 @@
     {
       "event_type": "underwriting_action_emitted",
       "payload": {
+        "case_id": "case_mand8_claims_001",
         "action": "claim_triage_decision",
         "decision": "refer_for_review"
       }
@@ -37,6 +40,7 @@
     {
       "event_type": "incident_recorded",
       "payload": {
+        "case_id": "case_mand8_claims_001",
         "incident_id": "inc-claims-001",
         "incident_type": "claims_defensibility_review",
         "severity": "medium",
@@ -50,6 +54,7 @@
     {
       "event_type": "human_review_recorded",
       "payload": {
+        "case_id": "case_mand8_claims_001",
         "reviewer": "claims.handler@mand8.example",
         "notes": "Referral preserved for claims defensibility and policy-condition review.",
         "status": "reviewed",

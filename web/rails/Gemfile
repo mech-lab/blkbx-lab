@@ -1,0 +1,61 @@
+source "https://rubygems.org"
+
+ruby "3.2.0"
+
+gem "rails", "~> 7.1.0"
+gem "pg", "~> 1.5"
+gem "puma", "~> 6.0"
+gem "bootsnap", require: false
+gem "tzinfo-data", platforms: %i[ windows jruby ]
+
+# Authentication & Authorization
+gem "devise", "~> 4.9"
+gem "devise-jwt", "~> 0.11"
+gem "pundit", "~> 2.3"
+
+# API
+gem "jsonapi-serializer", "~> 2.2"
+gem "rack-cors", "~> 2.0"
+
+# Background Jobs
+gem "solid_queue", "~> 0.9"
+
+# Storage
+gem "aws-sdk-s3", "~> 1.140", require: false
+
+# Auditing
+gem "paper_trail", "~> 15.0"
+
+# Utilities
+gem "jwt", "~> 2.7"
+gem "kaminari", "~> 1.2"
+gem "dry-struct", "~> 1.6"
+gem "dry-validation", "~> 1.10"
+gem "dry-monads", "~> 1.6"
+
+# Monitoring
+gem "sentry-ruby", "~> 5.12"
+gem "sentry-rails", "~> 5.12"
+
+group :development, :test do
+  gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
+  gem "rspec-rails", "~> 6.0"
+  gem "factory_bot_rails", "~> 6.4"
+  gem "faker", "~> 3.2"
+  gem "shoulda-matchers", "~> 6.0"
+  gem "database_cleaner-active_record", "~> 2.1"
+end
+
+group :development do
+  gem "web-console", "~> 4.2"
+  gem "rubocop-rails-omakase", require: false
+  gem "brakeman", require: false
+  gem "annotate", "~> 3.2"
+end
+
+group :test do
+  gem "capybara", "~> 3.39"
+  gem "selenium-webdriver", "~> 4.15"
+  gem "webmock", "~> 3.19"
+  gem "vcr", "~> 6.2"
+end
