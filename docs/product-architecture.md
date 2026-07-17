@@ -2,59 +2,32 @@
 
 Black Box Labs builds receipt-native infrastructure for high-assurance AI.
 
-The umbrella story is:
+## Shipped OSS Surface
 
-> INK Receipts are the proof primitive. BLKBXS applies them to banking. MAND8 applies them to insurance. DUE applies them to legal defensibility.
+The current shipped OSS runtime is the root `mechlab-sdk` distribution:
 
-## Current Repo Shape
-
-The current shipped OSS runtime remains the root `mechlab-sdk` distribution:
-
-- package: `mechlab-sdk`
-- CLIs: `blkbx-lab`, `mechlab`
-- Python namespaces: `blkbx_lab`, `mech_lab`
-- stable product imports: `blkbxs`, `mand8`, `due`
-
-This pass keeps the single-wheel install story while using sibling product slices as the source organization model.
-
-```text
-blkbx-lab/
-  python/
-    blkbxs/
-    mand8/
-    due/
-  products/
-    mand8-sdk/
-    due-sdk/
-```
+- primary docs and CLI surface: `blkbx-lab`
+- primary Python surface: `blkbx_lab`
+- stable product imports from the same wheel: `blkbxs`, `mand8`, `due`
 
 ## Product Roles
 
-- `BLKBXS SDK`: banking-facing developer product
-- `MAND8 SDK`: insurance-facing developer product
-- `DUE SDK`: legal-facing developer product
-- `INK Receipts`: shared proof primitive
-- `Black Box Labs`: lab umbrella and repository
+- `INK Receipts`: the shared proof primitive and trust waist
+- `BLKBXS`: banking-facing evidence and verification framing
+- `MAND8`: insurance-facing evidence for pricing, underwriting, monitoring, renewals, and claims defensibility
+- `DUE`: legal-facing evidence for authority, privilege, disclosure, and dispute readiness
 
-## MAND8
+## Source-Slice Layout
 
-MAND8 asks:
+The repository carries sibling product source slices under `products/`:
 
-> Can this AI risk be priced, underwritten, monitored, renewed, and defended?
+- `products/mand8-sdk/`
+- `products/due-sdk/`
 
-MAND8 is UK-first by design. Delegated authority is a Lloyd's-native construct, and the Authority Receipt maps onto the binder logic that London market managing agents already operate, audit, and defend to the FCA and PRA. It is not positioned as a US insurance SDK retro-fitted for the UK.
+Those directories are in-repo source slices. They are not separate shipped package artifacts for the current release line.
 
-## DUE
+## Positioning Boundaries
 
-DUE asks:
-
-> Can this AI-assisted action survive dispute, discovery, privilege review, disclosure review, and liability scrutiny?
-
-DUE owns legal defensibility directly. It is not framed as “MAND8 for legal.”
-
-## Integration Path
-
-- Keep product language distinct by market.
-- Keep integrity/signing lightweight for now through stub interfaces.
-- Keep research and experimental helpers under umbrella namespaces with opt-in extras.
-- Bind both slices to shared `packages/*` primitives in a later pass.
+- MAND8 is not “banking governance with insurance words.”
+- DUE is not “MAND8 for legal.”
+- BLKBXS, MAND8, and DUE share infrastructure but keep their market language distinct.

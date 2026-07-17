@@ -1,5 +1,7 @@
 # Rust Core Hardening - Phase 2 Plan
 
+> Archived on July 17, 2026. Historical planning note, not active source-of-truth documentation.
+
 ## Overview
 This document outlines the continued hardening plan for the Rust core (inkreceipts-core) after the initial security hardening (v0.7.0). The plan is organized by priority and impact.
 

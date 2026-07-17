@@ -1,5 +1,7 @@
 # Qwen3.5 Tract/Bridge Interpretation
 
+> Archived on July 17, 2026. Historical research note, not active source-of-truth documentation.
+
 This document preserves the advanced tract/bridge interpretation model as research context. It is not part of the current canonical `blkbx-lab` public contract.
 
 ## Overview

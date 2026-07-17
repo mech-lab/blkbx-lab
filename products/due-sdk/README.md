@@ -1,33 +1,13 @@
-# DUE SDK
+# DUE SDK Source Slice
 
-DUE SDK makes AI actions legally defensible.
+DUE makes AI actions legally defensible.
 
-DUE SDK helps legaltech and legal-facing AI startups generate defensibility receipts from AI-assisted legal actions, matter context, authority checks, privilege decisions, disclosure events, human review, and dispute-relevant evidence.
+This directory is an in-repo source slice for the legal-facing DUE surface. The currently shipped stable `due` Python import rides through the root `mechlab-sdk` wheel rather than a separately published package.
 
-DUE owns legal defensibility directly. It is not positioned as “MAND8 for legal.”
-
-## Core Question
-
-> Can this AI-assisted action survive dispute, discovery, privilege review, disclosure review, and liability scrutiny?
-
-## API Surface
-
-- `due.receipt.create()`
-- `due.matter.bind()`
-- `due.action.record()`
-- `due.authority.check()`
-- `due.privilege.record()`
-- `due.disclosure.record()`
-- `due.dispute.export()`
-- `due.bundle.export()`
-- `due.schema.validate()`
-
-## Quickstart
+## Shipped Import Path
 
 ```bash
-cd products/due-sdk
-pip install -e .
-python examples/quickstart.py
+pip install --pre mechlab-sdk
 ```
 
 ```python
@@ -73,11 +53,6 @@ record = disclosure.record(
     recipient="North Bay Systems Ltd",
     content_summary="Approved outgoing notice only.",
     status="ready_if_required",
-    human_review={
-        "reviewer": "counsel@lexharbor.example",
-        "notes": "Reviewed for privilege boundaries and disclosure scope.",
-        "status": "reviewed",
-    },
 )
 
 ready = dispute.export(record, audience="counsel")
@@ -85,19 +60,19 @@ schema.validate(record)
 schema.validate(ready, "due.dispute_bundle.v1")
 ```
 
-## Bundle Types
+## Local Slice Workflow
 
-- Legal Defensibility Bundle
-- Privilege Review Bundle
-- Disclosure Evidence Bundle
-- Litigation Hold Bundle
-- AI Action Audit Trail
-- Matter-Level Evidence Pack
-- Dispute Readiness Bundle
-
-## Product Verification
+For source-slice development inside this repository:
 
 ```bash
 cd products/due-sdk
-python -m pytest tests
+pip install -e .
+python examples/quickstart.py
 ```
+
+## Related Docs
+
+- [API surface](docs/api-surface.md)
+- [Developer positioning](docs/developer-positioning.md)
+- [Legal domain model](docs/legal-domain-model.md)
+- [Application slice note](docs/legaltech-application-slice.md)

@@ -1,11 +1,9 @@
-# Legaltech Application Slice
+# DUE Application Slice Note
 
-DUE is the legal-facing sibling slice in the Black Box Labs architecture.
+This note describes one in-repo application framing for DUE. It is not the primary shipped package boundary.
 
-It is ready to be shown as a future legaltech application slice without being over-emphasized in Northwestern Mutual materials.
+## Current Narrative
 
-The right narrative is:
-
-- DUE is a legal-defensibility product
-- it stands beside MAND8 rather than underneath it
-- it is built for dispute readiness, privilege review, disclosure control, and liability scrutiny
+- DUE is the legal-facing sibling surface in the BLKBX Lab architecture.
+- It is built for dispute readiness, privilege review, disclosure control, and liability scrutiny.
+- It should not be positioned as a subordinate insurance variant.

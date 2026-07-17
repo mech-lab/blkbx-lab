@@ -1,20 +1,27 @@
 # Contributing to BLKBX Lab
 
-BLKBX Lab’s public contract is `blkbx-lab` / `blkbx_lab` plus Ink artifacts. New examples, docs, and tests should target that surface unless a change is explicitly about migration compatibility.
+BLKBX Lab’s shipped documentation contract is:
+
+- install package: `mechlab-sdk`
+- primary CLI docs surface: `blkbx-lab`
+- primary Python docs surface: `blkbx_lab`
+- public artifacts: `ink_manifest.v2.json`, `ink_receipt.v2.json`, `receipt_comparison.v2.json`
+
+Start from the [docs hub](docs/README.md) when changing public-facing material.
 
 ## Development Setup
 
 1. Clone the repository.
 2. Create a virtual environment: `python3 -m venv .venv`
-3. Activate the environment: `source .venv/bin/activate`
-4. Install in editable mode with dev dependencies: `pip install -e ".[dev]"`
+3. Activate it: `source .venv/bin/activate`
+4. Install editable dev dependencies: `pip install -e ".[dev]"`
 
 ## Testing
 
-Run the targeted public-contract checks while editing docs, release metadata, or examples:
+Run the focused public-contract checks when editing docs, release metadata, examples, or packaging-facing copy:
 
 ```bash
-python -m pytest -q \
+python3 -m pytest -q \
   tests/test_readme_example.py \
   tests/test_packaging_contracts.py \
   tests/test_release_readiness.py \
@@ -22,28 +29,26 @@ python -m pytest -q \
   tests/test_mech_lab_doctor.py
 ```
 
-Run the same verification matrix that CI uses when touching broader runtime code:
+Run the broader verification matrix when touching runtime or packaging code:
 
 ```bash
-python -m pytest -q
-python -m ruff check .
-python -m pyright
-```
-
-## Code Style
-
-We use `ruff` for linting and formatting, and `pyright` for type checking.
-
-```bash
-python -m ruff check .
-python -m ruff format .
-python -m pyright
+python3 -m pytest -q
+python3 -m ruff check .
+python3 -m pyright
 ```
 
 ## Documentation Rules
 
-- Use `blkbx-lab` for the package and CLI.
-- Use `blkbx_lab` for the Python namespace.
-- Treat deprecated compatibility shims as migration-only surfaces.
-- Use `ink_manifest.v1.json`, `ink_receipt.v1.json`, and `receipt_comparison.v1.json` when referring to public artifacts.
-- Treat `hybrid_mechlab`, `internal/trace/legacy_blt`, `internal/ink/legacy_mair`, and placeholder research modules as experimental or historical surfaces, not the public BLKBX release contract.
+- Use `mechlab-sdk` for install and published-package language.
+- Use `blkbx-lab` for primary CLI narration and examples.
+- Use `blkbx_lab` for the primary Python surface.
+- Keep compatibility aliases inside migration or compatibility sections only.
+- Use only shipped CLI verbs: `demo`, `doctor`, `trace`, `analyze`, `gate`, `verify`, `compare`, `tamper`, `explain`, `report`.
+- Use only `ink_manifest.v2.json`, `ink_receipt.v2.json`, and `receipt_comparison.v2.json` in active docs.
+- Treat `docs/archive/` as historical material, not onboarding or release-facing source of truth.
+
+## Code Style
+
+- Run `python3 -m ruff check .` before finalizing Python changes.
+- Keep public examples executable when possible, especially the first Python block in [`README.md`](README.md).
+- Update release-facing docs and release checks together when the public contract changes.

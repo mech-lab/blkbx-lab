@@ -61,6 +61,30 @@ def test_host_ready_social_preview_asset_exists():
     assert (ROOT / "assets" / "brand" / "og-card.png").exists()
 
 
+def test_docs_hub_and_archive_index_exist():
+    assert (ROOT / "docs" / "README.md").exists()
+    assert (ROOT / "docs" / "archive" / "README.md").exists()
+
+
+def test_archived_docs_live_under_docs_archive():
+    assert not (ROOT / "docs" / "SCALABILITY_IMPROVEMENTS_PLAN.md").exists()
+    assert not (ROOT / "docs" / "RUST_CORE_HARDENING_PHASE2.md").exists()
+    assert not (ROOT / "docs" / "HARDENING_IMPLEMENTATION.md").exists()
+    assert not (ROOT / "docs" / "PERFORMANCE_BENCHMARKS.md").exists()
+    assert not (ROOT / "docs" / "from-lab-to-blkbx.md").exists()
+    assert not (ROOT / "docs" / "rails-future-portal.md").exists()
+    assert not (ROOT / "docs" / "research" / "internal-subsystem-map.md").exists()
+    assert not (ROOT / "docs" / "research" / "qwen35-tract-bridge.md").exists()
+    assert (ROOT / "docs" / "archive" / "SCALABILITY_IMPROVEMENTS_PLAN.md").exists()
+    assert (ROOT / "docs" / "archive" / "RUST_CORE_HARDENING_PHASE2.md").exists()
+    assert (ROOT / "docs" / "archive" / "HARDENING_IMPLEMENTATION.md").exists()
+    assert (ROOT / "docs" / "archive" / "PERFORMANCE_BENCHMARKS.md").exists()
+    assert (ROOT / "docs" / "archive" / "from-lab-to-blkbx.md").exists()
+    assert (ROOT / "docs" / "archive" / "rails-future-portal.md").exists()
+    assert (ROOT / "docs" / "archive" / "research" / "internal-subsystem-map.md").exists()
+    assert (ROOT / "docs" / "archive" / "research" / "qwen35-tract-bridge.md").exists()
+
+
 def test_bug_report_template_uses_published_package_name():
     template = (ROOT / ".github" / "ISSUE_TEMPLATE" / "bug_report.yml").read_text(encoding="utf-8")
     assert "pip install --pre mechlab-sdk" in template

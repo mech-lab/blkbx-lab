@@ -1,196 +1,88 @@
 # Releasing `mechlab-sdk`
 
-This repo publishes one public distribution: `mechlab-sdk`.
+This repository publishes one public distribution: `mechlab-sdk`.
 
-Release-facing contract:
+Primary release-facing surface:
 
-- repository and product name: `blkbx-lab`
-- published package name: `mechlab-sdk`
-- CLI names: `blkbx-lab`, `mechlab`
-- Python namespaces: `blkbx_lab`, `mech_lab`
-- stable product imports: `blkbxs`, `mand8`, `due`
-- opt-in extras: `research`, `experimental`, `all`
+- install package: `mechlab-sdk`
+- primary CLI: `blkbx-lab`
+- primary Python namespace: `blkbx_lab`
+- stable product imports carried by the same wheel: `blkbxs`, `mand8`, `due`
 
-In-repo but not first-class public release surfaces:
-
-- `hybrid_mechlab`
-- `internal/trace/legacy_blt`
-- `internal/ink/legacy_mair`
-- `legacy/hybrid-mechlab-python`
-- `legacy/python-rust`
-- deprecated compatibility shims
-- `products/mand8-sdk` (source slice, not a separate published wheel)
-- `products/due-sdk` (source slice, not a separate published wheel)
-
-Brand release kit:
-
-- GitHub repo and release notes use [`.github/RELEASE_TEMPLATE.md`](.github/RELEASE_TEMPLATE.md)
-- PyPI long description is sourced from [`docs/pypi.md`](docs/pypi.md)
-- launch assets live under [`assets/brand/`](assets/brand)
-- brand tokens and copy rules live under [`docs/brand/`](docs/brand)
-- `assets/brand/og-card.png` is the live GitHub social preview export
-
-PyPI publish path:
-
-- tagged releases publish to PyPI from [`.github/workflows/release.yml`](.github/workflows/release.yml)
-- the same workflow can also publish manually through `workflow_dispatch`
-- the publish job uses GitHub trusted publishing through the `pypi` environment
-
-Release readiness gate:
-
-- the git worktree must be clean before any public tag
-- `python scripts/check_release_readiness.py` is the repo-native readiness check
-- `python scripts/check_local_release.py` is the repo-local orchestration command for the `1.0.0` release candidate
-- [`docs/release-readiness.md`](docs/release-readiness.md) is the operator checklist for the final documentation and repo-ergonomics pass
+Compatibility aliases are covered in the migration docs and compatibility smoke checks; they are not the primary documentation surface.
 
 ## Prerequisites
 
-- Python 3.10 through 3.13
-- Rust toolchain available for the legacy companion package checks
-- Python tooling installed:
+- Python `3.10+`
+- Rust toolchain from [`rust-toolchain.toml`](rust-toolchain.toml)
+- release workflow access for the `mech-lab/blkbx-lab` repository
+- PyPI trusted publisher configured for project `mechlab-sdk`
+
+## Pre-release Checks
+
+Run the full release-readiness path from a clean checkout when preparing a candidate:
 
 ```bash
-python -m pip install -e ".[dev]"
+python3 scripts/check_release_readiness.py
+python3 scripts/check_local_release.py
 ```
 
-## Local 1.0.0 Release Candidate
+The release-readiness script validates:
 
-The local release-readiness target is the root `mechlab-sdk` distribution only.
+- release-facing markdown terminology
+- archived versus active docs boundaries
+- authored release notes workflow usage
+- host-ready social preview assets
+- validation report appendix hygiene
 
-In-repo slices under `products/` may remain in the workspace, but the public pip story is the single `mechlab-sdk` wheel. The slice directories are not separate published artifacts. `web/rails` and `packages/ink-ts-verify` may also ship in-repo, but they remain non-shipping scaffolds and do not change the public release artifact boundary.
+## Local Release Candidate
 
-Run the full local gate with:
+For an in-progress local pass:
 
 ```bash
-python scripts/check_local_release.py
+python3 scripts/check_release_readiness.py --skip-clean-worktree
+python3 scripts/check_local_release.py \
+  --skip-clean-worktree \
+  --skip-build \
+  --skip-smoke
 ```
 
-That command orchestrates:
+## Build and Artifact Validation
 
-- release-facing doc and workflow hygiene via `check_release_readiness.py`
-- `ruff` on the repo root
-- the focused public-contract test suite
-- clean artifact generation for the current version only
-- `twine check` against the freshly built artifacts
-- fresh-venv wheel and sdist smoke installs
+The release script expects exactly one wheel and one sdist for the current version.
 
-Use `--skip-clean-worktree` only for in-progress local validation.
-
-## First-Time PyPI Setup
-
-Before the first public PyPI publish, create a pending trusted publisher for project `blkbx-lab` on PyPI with these values:
-
-- project name: `mechlab-sdk`
-- GitHub owner: `mech-lab`
-- GitHub repository: `blkbx-lab`
-- workflow file: `release.yml`
-- environment name: `pypi`
-
-Repo-side requirements:
-
-- the GitHub environment `pypi` must exist on the `mech-lab/blkbx-lab` repository
-- [`.github/workflows/release.yml`](.github/workflows/release.yml) must stay on the default branch
-- the first publish on this release line should run from a release tag such as `v1.0.0`
-
-## Pre-release checks
+Manual equivalents:
 
 ```bash
-python scripts/check_local_release.py
+python3 -m build
+python3 -m twine check dist/*
 ```
 
-Verify that:
+## Fresh Install Smoke
 
-- `python scripts/check_local_release.py` passes on a clean tree
-- the root build emits only `mechlab-sdk` distribution artifacts
-- the README quickstart examples still run from a fresh environment
-- `blkbx_lab`, `mech_lab`, `blkbxs`, `mand8`, and `due` import from a fresh environment
-- the compatibility shims still delegate and warn
-- the brand asset tests pass
-- the GitHub social preview PNG export is present at `assets/brand/og-card.png`
-- the Qwen validation report keeps workstation-specific paths inside its reproducibility appendix only
+The root wheel smoke path must prove:
 
-Hosted publish steps remain below as follow-on operator guidance. They are not part of the local `1.0.0` readiness gate.
+- `blkbx_lab` imports from a fresh environment
+- `blkbxs`, `mand8`, and `due` import from the same wheel
+- `blkbx-lab demo` and `blkbx-lab doctor` work from a clean install
 
-## Wheel smoke test
+## Compatibility Smoke
 
-```bash
-tmpdir=$(mktemp -d)
-python3 -m venv "$tmpdir/venv"
-source "$tmpdir/venv/bin/activate"
-python -m pip install --upgrade pip
-python -m pip install dist/*.whl
-python - <<'PY'
-import blkbx_lab as bl
-import blkbxs
-import due
-import mand8
+Compatibility aliases remain shipped and should still be smoke-tested during release validation. Keep those checks in release automation and in the migration docs rather than in the primary quickstart material.
 
-result = bl.demo(output_dir="artifacts/release-wheel")
-print(result.manifest_path)
-print(result.receipt_path)
-print(bl.verify(result.receipt_path).report)
-print(blkbxs.doctor().report)
-print(mand8.receipt.create()["schema"])
-print(due.receipt.create()["schema"])
-PY
-blkbx-lab doctor >/dev/null
-mechlab doctor >/dev/null
-```
+## Tag and Publish
 
-Verify that:
+1. Update versioned release notes using [`.github/RELEASE_TEMPLATE.md`](.github/RELEASE_TEMPLATE.md).
+2. Push the release tag that triggers [`.github/workflows/release.yml`](.github/workflows/release.yml).
+3. Confirm GitHub Release assets and PyPI artifacts match the tagged commit.
 
-- `import blkbx_lab` succeeds
-- `import mech_lab`, `import blkbxs`, `import mand8`, and `import due` succeed
-- both the `blkbx-lab` and `mechlab` CLIs are installed
-- the public quickstart works without installing any separate product wheel
+## Release-Facing Docs
 
-## sdist smoke test
+Before publishing, confirm these sources still agree:
 
-```bash
-tmpdir=$(mktemp -d)
-python3 -m venv "$tmpdir/venv"
-source "$tmpdir/venv/bin/activate"
-python -m pip install --upgrade pip
-python -m pip install dist/*.tar.gz
-python - <<'PY'
-import blkbx_lab as bl
-import blkbxs
-import due
-import mand8
-
-result = bl.demo(output_dir="artifacts/release-sdist")
-print(result.manifest_path)
-print(result.receipt_path)
-print(bl.verify(result.receipt_path).report)
-print(blkbxs.doctor().report)
-print(mand8.receipt.create()["schema"])
-print(due.receipt.create()["schema"])
-PY
-```
-
-Verify that:
-
-- `import blkbx_lab` succeeds
-- `import mech_lab`, `import blkbxs`, `import mand8`, and `import due` succeed
-- the public quickstart works from the source distribution
-- the product APIs remain bundled in the root wheel rather than requiring separate published packages
-
-## Tag and publish
-
-- Tag releases as the package version, for example `v1.0.0`.
-- GitHub Releases should mirror the PyPI release notes for `mechlab-sdk`.
-- The release workflow creates a draft release from `.github/RELEASE_TEMPLATE.md`; edit the draft body before publishing it.
-- Tagged releases publish `dist/*` to PyPI through the `pypi` environment, and `workflow_dispatch` can publish the same distributions manually when needed.
-- Upload only the root `dist/` artifacts.
-- Attach the branded launch assets from `assets/brand/og-card.svg`, `assets/brand/og-card.png`, `assets/brand/launch-card.svg`, and `assets/brand/release-header.svg`.
-
-## Live GitHub checks
-
-Before publishing the draft release, verify the live host state:
-
-- the GitHub repository metadata matches `.github/settings.yml`
-- the README renders correctly on GitHub
-- the release draft includes the branded asset attachments and a readable body
-- the repository social preview uses `assets/brand/og-card.png`
-- the social preview and attached SVG assets remain legible in GitHub light and dark themes
-- the PyPI trusted publisher matches `mechlab-sdk / mech-lab / blkbx-lab / release.yml / pypi`
+- [`README.md`](README.md)
+- [`docs/README.md`](docs/README.md)
+- [`docs/pypi.md`](docs/pypi.md)
+- [`docs/release-readiness.md`](docs/release-readiness.md)
+- [`docs/research/qwen35-validation-report.md`](docs/research/qwen35-validation-report.md)
+- [`docs/brand/release-copy.md`](docs/brand/release-copy.md)

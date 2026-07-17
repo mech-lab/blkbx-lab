@@ -1,22 +1,31 @@
 # Migration from `mech-lab`
 
-Black Box Labs is the product brand. `mechlab-sdk` is the current carrier package on PyPI, and the compatibility names remain active instead of retired.
+BLKBX Lab is the product name, but the shipped install package is `mechlab-sdk`.
 
 ## Name Mapping
 
-- Published package: `mechlab-sdk`
-- CLIs: `mechlab`, `blkbx-lab`
-- Runtime namespaces: `import mech_lab`, `import blkbx_lab`
-- Stable product imports from the same install: `import blkbxs`, `import mand8`, `import due`
-
-## Artifact Mapping
-
-- `mair_manifest.v1.json` -> `ink_manifest.v1.json`
-- `assurance_receipt.v1.json` -> `ink_receipt.v1.json`
-- `backend_comparison.v1.json` -> `receipt_comparison.v1.json`
+| Older or compatibility name | Current guidance |
+| --- | --- |
+| install command using `mech-lab` naming | install `mechlab-sdk` |
+| `mechlab` CLI | use `blkbx-lab` in primary docs and examples |
+| `mech_lab` Python namespace | use `blkbx_lab` in primary docs and examples |
 
 ## Migration Rule
 
-- Use `mechlab-sdk` for installation instructions.
-- Use `blkbx-lab` or `mechlab` for CLI examples when you want to show both installed entry points.
-- Use `blkbx_lab` for shared runtime examples and `blkbxs`, `mand8`, or `due` for market-specific Python examples.
+- For install instructions, use `mechlab-sdk`.
+- For new quickstarts, examples, and API narration, use `blkbx-lab` and `blkbx_lab`.
+- Keep compatibility aliases only where older automation or migration notes need them.
+
+## Artifact Rule
+
+Active docs should refer only to the shipped artifact set:
+
+- `ink_manifest.v2.json`
+- `ink_receipt.v2.json`
+- `receipt_comparison.v2.json`
+
+## Where to Link
+
+- public onboarding: [docs hub](README.md)
+- contract details: [CLI and API contract](mvp-cli-api-contract.md)
+- compatibility details: [migration and compatibility notes](migration-compatibility.md)

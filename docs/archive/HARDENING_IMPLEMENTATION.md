@@ -1,5 +1,7 @@
 # Rust Core Hardening Implementation Details
 
+> Archived on July 17, 2026. Historical implementation note, not active source-of-truth documentation.
+
 ## Cryptographic Security
 ### Constant-Time Operations
 - Implemented using `subtle` crate for all cryptographic comparisons

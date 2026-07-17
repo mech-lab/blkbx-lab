@@ -1,14 +1,16 @@
-# Developer Positioning
+# MAND8 Developer Positioning
 
-MAND8 SDK makes AI risk insurable.
+MAND8 makes AI risk insurable.
 
-It helps insurance-facing AI startups generate underwriter-ready risk receipts from AI actions, model decisions, controls, incidents, overrides, and exposure units so those systems can support pricing, monitoring, renewals, claims review, exclusions, and policy-condition evidence.
+It helps insurance-facing teams generate underwriter-ready evidence from AI actions, controls, incidents, overrides, and exposure units so those systems can support pricing, monitoring, renewals, claims review, exclusions, and policy-condition evidence.
 
-MAND8 is UK-first by design.
+## Positioning Boundaries
 
-Delegated authority is a Lloyd's-native construct. The Authority Receipt maps 1:1 onto the binder logic that London market managing agents already operate, audit, and defend to the FCA and PRA. This is not an American product retro-fitted for the UK. It starts here.
+- MAND8 is insurance-native, not a generic governance wrapper.
+- The UK-first delegated-authority frame is part of the product logic, not a marketing overlay.
+- Keep MAND8 distinct from the banking and legal sibling products.
 
-Use insurance-native language:
+## Preferred Insurance Language
 
 - insurability
 - exposure unit
@@ -19,4 +21,4 @@ Use insurance-native language:
 - policy conditions
 - risk controls
 - actuarial signal export
-- portfolio monitoring
+- delegated authority

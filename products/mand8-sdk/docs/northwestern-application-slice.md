@@ -1,15 +1,13 @@
-# Northwestern Application Slice
+# MAND8 Application Slice Note
 
-MAND8 is the Northwestern Mutual and gener8tor insurance application slice in this repository, but its technical design anchor is UK-first.
+This note describes one in-repo application framing for MAND8. It is not the primary shipped package boundary.
 
-That means:
+## Current Narrative
 
-- the delegated-authority frame is native, not bolted on later
-- the Authority Receipt maps to binder logic used in the London market
-- FCA and PRA defensibility are part of the product story from the start
+- MAND8 is an insurance-facing sibling surface inside the BLKBX Lab architecture.
+- The technical design anchor remains UK-first delegated authority.
+- Partner-facing application material should stay evidence-first and underwriter-readable.
 
-For Northwestern-facing application material, emphasize the broader insurance question:
+## Core Product Question
 
 > Can this AI risk be priced, underwritten, monitored, renewed, and defended?
-
-Do not over-position Northwestern material as a generic governance pitch. Keep it underwriter-readable and evidence-first.

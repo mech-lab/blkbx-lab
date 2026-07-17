@@ -1,5 +1,7 @@
 # Rails Future Portal
 
+> Archived on July 17, 2026. Historical future-state note, not active source-of-truth documentation.
+
 Rails is now carried in-repo as a scaffold for the `1.0.0` line.
 
 That is intentional.

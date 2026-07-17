@@ -1,8 +1,8 @@
 # ink-ts-verify
 
-TypeScript verifier primitives that mirror a narrow subset of the Rust receipt-verification surface.
+TypeScript verifier primitives that mirror a narrow subset of the native receipt-verification surface.
 
-This package is intentionally in-repo and non-shipping for the `1.0.0` release line. It exists to keep field ids, TLV primitives, and public vector handling aligned with the native verifier without changing the public trust boundary.
+This package is intentionally in-repo and non-shipping for the current release line. It exists to keep field ids, TLV primitives, and verifier-facing types aligned with the native Rust trust boundary without redefining that boundary.
 
 ## Commands
 

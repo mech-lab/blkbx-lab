@@ -32,7 +32,7 @@ Avoid:
 - Use `blkbx-lab` for primary CLI examples.
 - Use `blkbx_lab` for the primary Python namespace.
 - Keep compatibility aliases and pre-BLKBX public names inside migration-specific material only.
-- Do not use `HybridTDA`, `hybridtda`, or `pip install hybridtda` in release-facing materials.
+- Do not use retired pre-BLKBX package names or install commands in release-facing materials.
 
 ## Visual Rules
 

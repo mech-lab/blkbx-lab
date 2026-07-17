@@ -1,5 +1,7 @@
 # Rust Core Performance Benchmarks - Implementation Details
 
+> Archived on July 17, 2026. Historical benchmarking note, not active source-of-truth documentation.
+
 ## Critical Path Benchmarks
 ### Signing/Verification Operations
 - **Baseline**: 12ms per operation (measured with `criterion`)

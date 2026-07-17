@@ -1,8 +1,14 @@
-# API Surface
+# DUE API Surface
+
+The shipped stable `due` import rides through `mechlab-sdk`. This source slice mirrors that surface for local development.
+
+## Imports
 
 ```python
 from due import action, authority, bundle, disclosure, dispute, matter, privilege, receipt, schema
 ```
+
+## Core Calls
 
 ```python
 receipt.create(domain_context=None, event_type="legal_action_receipt_created", payload=None, human_review=None)

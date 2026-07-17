@@ -1,16 +1,16 @@
-# Developer Positioning
+# DUE Developer Positioning
 
-DUE SDK makes AI actions legally defensible.
+DUE makes AI actions legally defensible.
 
-DUE SDK helps legaltech and legal-facing AI startups generate defensibility receipts from AI-assisted legal actions, matter context, authority checks, privilege decisions, disclosure events, human review, and dispute-relevant evidence.
+It helps legaltech and legal-facing teams generate defensibility evidence from AI-assisted legal actions, matter context, authority checks, privilege decisions, disclosure events, human review, and dispute-relevant evidence.
 
-The core question is not “Can this AI be governed?”
+## Positioning Boundaries
 
-The core question is:
+- DUE is legal-native, not a governance relabel.
+- DUE stands beside MAND8 rather than underneath it.
+- Keep DUE language focused on legal reliance and dispute exposure.
 
-> Can this AI-assisted action survive challenge, dispute, discovery, privilege review, disclosure review, and liability scrutiny?
-
-Use legal-native language:
+## Preferred Legal Language
 
 - defensibility
 - matter context
@@ -21,9 +21,4 @@ Use legal-native language:
 - litigation hold
 - chain of custody
 - human review
-- legal reliance
-- materiality
-- adverse action
-- audit trail
 - dispute readiness
-- liability review

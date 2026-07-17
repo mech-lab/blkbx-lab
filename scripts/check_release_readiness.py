@@ -2,21 +2,14 @@
 from __future__ import annotations
 
 import argparse
+import re
 import subprocess
 from struct import unpack
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PUBLIC_RELEASE_SURFACES = (
-    ROOT / "README.md",
-    ROOT / "RELEASING.md",
-    ROOT / "docs" / "pypi.md",
-    ROOT / "docs" / "research" / "qwen35-validation-report.md",
-    ROOT / "docs" / "release-readiness.md",
-    ROOT / ".github" / "RELEASE_TEMPLATE.md",
-)
-FORBIDDEN_RELEASE_TERMS = (
+LEGACY_RELEASE_TERMS = (
     "HybridTDA",
     "hybridtda",
     "pip install hybridtda",
@@ -24,6 +17,38 @@ FORBIDDEN_RELEASE_TERMS = (
     "assurance_receipt.v1.json",
     "backend_comparison.v1.json",
 )
+ACTIVE_DOC_GLOBS = (
+    "README.md",
+    "CONTRIBUTING.md",
+    "RELEASING.md",
+    "REPRODUCIBILITY.md",
+    "SECURITY.md",
+    "FORMAL_SEMANTICS.md",
+    "docs/**/*.md",
+    "products/*/README.md",
+    "products/*/docs/*.md",
+    "packages/*/README.md",
+    "rust/crates/*/README.md",
+    "web/*/README.md",
+    ".github/RELEASE_TEMPLATE.md",
+)
+ARCHIVE_FRAGMENT = str(Path("docs") / "archive")
+ACTIVE_DOC_FORBIDDEN_SUBSTRINGS = (
+    "pip install blkbx-lab",
+    "pip install --pre blkbx-lab",
+    "published package name: `blkbx-lab`",
+    "- published package name: `blkbx-lab`",
+    "- package: `blkbx-lab`",
+    "package surface: `blkbx-lab`",
+    "install blkbx-lab",
+    "use `blkbx-lab` for the published package",
+    "Use `blkbx-lab` for the published package",
+    "ink_manifest.v1.json",
+    "ink_receipt.v1.json",
+    "receipt_comparison.v1.json",
+)
+UNSUPPORTED_COMMAND_RE = re.compile(r"\b(?:blkbx-lab|mechlab)\s+(?:export|ingest|replay|hook|scan|bundle)\b")
+MARKDOWN_LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 ABSOLUTE_PATH_MARKERS = ("/Volumes/", "/Users/")
 QWEN_APPENDIX_MARKER = "## Reproducibility Appendix"
 RELEASE_TEMPLATE_PATH = ".github/RELEASE_TEMPLATE.md"
@@ -47,11 +72,46 @@ def ensure_clean_worktree() -> None:
     _check(not result.stdout.strip(), "git worktree is not clean")
 
 
-def ensure_public_release_terms() -> None:
-    for path in PUBLIC_RELEASE_SURFACES:
+def _active_doc_surfaces() -> list[Path]:
+    seen: set[Path] = set()
+    surfaces: list[Path] = []
+    for pattern in ACTIVE_DOC_GLOBS:
+        for path in sorted(ROOT.glob(pattern)):
+            if not path.is_file():
+                continue
+            if ARCHIVE_FRAGMENT in str(path.relative_to(ROOT)):
+                continue
+            if path in seen:
+                continue
+            seen.add(path)
+            surfaces.append(path)
+    return surfaces
+
+
+def ensure_active_doc_terms() -> None:
+    for path in _active_doc_surfaces():
         text = path.read_text(encoding="utf-8")
-        for token in FORBIDDEN_RELEASE_TERMS:
+        for token in LEGACY_RELEASE_TERMS:
             _check(token not in text, f"{token!r} found in {path.relative_to(ROOT)}")
+        for token in ACTIVE_DOC_FORBIDDEN_SUBSTRINGS:
+            _check(token not in text, f"{token!r} found in active doc {path.relative_to(ROOT)}")
+        _check(
+            UNSUPPORTED_COMMAND_RE.search(text) is None,
+            f"unsupported CLI verb found in active doc {path.relative_to(ROOT)}",
+        )
+
+
+def ensure_active_doc_links_resolve() -> None:
+    for path in _active_doc_surfaces():
+        text = path.read_text(encoding="utf-8")
+        for raw_target in MARKDOWN_LINK_RE.findall(text):
+            target = raw_target.strip().strip("<>").split("#", maxsplit=1)[0]
+            if not target:
+                continue
+            if "://" in target or target.startswith(("mailto:", "/")):
+                continue
+            resolved = (path.parent / target).resolve()
+            _check(resolved.exists(), f"broken relative link {raw_target!r} in {path.relative_to(ROOT)}")
 
 
 def ensure_qwen_report_scopes_absolute_paths() -> None:
@@ -94,7 +154,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if not args.skip_clean_worktree:
         ensure_clean_worktree()
-    ensure_public_release_terms()
+    ensure_active_doc_terms()
+    ensure_active_doc_links_resolve()
     ensure_qwen_report_scopes_absolute_paths()
     ensure_host_ready_assets()
     ensure_release_workflow_uses_authored_notes()

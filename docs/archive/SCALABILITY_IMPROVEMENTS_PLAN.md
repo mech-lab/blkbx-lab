@@ -1,5 +1,7 @@
 # Rust Core Scalability Improvements Plan
 
+> Archived on July 17, 2026. Historical planning note, not active source-of-truth documentation.
+
 ## Executive Summary
 This document outlines a comprehensive plan to improve the scalability of the inkreceipts-core Rust crate. The plan addresses memory optimization, hashing performance, policy evaluation scaling, data structure improvements, and concurrency enhancements.
 

@@ -2,16 +2,19 @@
 
 ## Supported Versions
 
-Only the latest alpha release is currently supported with security updates.
+Only the latest public alpha release is currently supported with security updates.
 
 ## Reporting a Vulnerability
 
-Please report security vulnerabilities privately to the maintainers. Do not open a public issue.
+Report security issues privately to the maintainers. Do not open a public issue for an undisclosed vulnerability.
+
+## Response Expectations
+
+- We will acknowledge receipt within 48 hours.
+- We will follow up with next steps or mitigation guidance as soon as triage completes.
 
 ## Current Signing Model
 
-BLKBX Lab currently uses a built-in demo signing key (`dev-signature`) for generated Ink Receipts. That key exists to make local verification and tamper detection easy to inspect during development. It is not a production trust model.
+The bundled demo path is designed for local inspection and testing. Production-style signing depends on operator-managed signer configuration, trust registries, and revocation data rather than the shipped demo defaults.
 
-## Production Use
-
-Do not use the built-in demo key for production workflows. A future release will add support for real signing-key management so teams can provide their own secure keys for receipt issuance.
+For implementation-level hardening notes, see [the technical hardening document](docs/security-hardening.md).

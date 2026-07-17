@@ -27,6 +27,7 @@ This hub tracks the shipped BLKBX Lab documentation surface as of July 17, 2026.
 - [Developer architecture](developer-architecture.md)
 - [Product architecture](product-architecture.md)
 - [Receipt domain model](receipt-domain-model.md)
+- [Formal semantics draft](../FORMAL_SEMANTICS.md)
 
 ## Verification and Security
 
@@ -41,6 +42,7 @@ This hub tracks the shipped BLKBX Lab documentation surface as of July 17, 2026.
 - [Contributing guide](../CONTRIBUTING.md)
 - [Release operator guide](../RELEASING.md)
 - [Release readiness checklist](release-readiness.md)
+- [Brand architecture](brand-architecture.md)
 - [Brand system](brand/README.md)
 
 ## Migration and Compatibility

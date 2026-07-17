@@ -1,57 +1,29 @@
 # Independent Verification
 
-INK `1.0.0` ships a native Rust verification path for current public receipt artifacts.
+BLKBX Lab’s current verification story is local, inspectable, and native.
 
-The verifier surface is:
+## Current Verification Surfaces
 
-- `ink-cli` for direct file-based checks
-- `ink-tui` for the zero-JS interactive terminal verifier
-- `ink-receipt-v2` as the shared Rust compatibility layer for `ink.receipt.v2`
+- `blkbx-lab verify` for the primary Python-hosted public flow
+- `ink` for kernel-facing native verification commands
+- `ink-tui` for a zero-JS terminal verification workflow
 
-The verifier consumes local files only:
+## Current Policy Surfaces
+
+The current public verification path operates over:
 
 - `ink_receipt.v2.json`
 - optional `ink_manifest.v2.json`
-- optional `controls.supplied.json`
-- optional `trust-registry.json`
-- optional `revocations.json`
-- optional `verify-policy.json`
+- optional controls payloads
+- optional trust registry, revocation list, and verification policy files
 
-The verifier does not call any BLKBX-hosted API, does not require an account, and does not require a browser. In-repo Rails and TypeScript scaffolds do not change that trust boundary.
+## Trust Boundary
 
-## Current policy surfaces
+- The shipped trust root is native Rust verification, not browser JavaScript.
+- `web/rails` and `web/verify` are scaffolds and do not redefine the verification boundary.
+- Verification is designed to work without network access during the check itself.
 
-- `ink.verify-policy.v1` defines verification requirements such as:
-  - require canonical TLV v2
-  - allow or reject verify-only encodings
-  - require a trusted issuer
-  - require revocation checks
-  - require manifest, evidence, or controls summary matches when those files are supplied
-- `ink.verification-report.v1` is the stable JSON output shape returned by the shared verifier
+## Strict and Compatibility Verification
 
-## Strict vs compatibility verification
-
-The customer-facing zero-JS surfaces default to `BANK_STRICT_POLICY`.
-
-That policy:
-
-- requires `INK-CORE-TLV-V2`
-- rejects verify-only legacy encodings
-- requires a trusted issuer
-- does not allow network access
-
-`ink-host` keeps a compatibility policy for the existing Python and local issuance flow so previously issued compatibility receipts can still be checked through the installed host surface.
-
-## Shared implementation boundary
-
-`ink-receipt-v2` owns current public receipt verification semantics:
-
-- JSON parsing for `ink.receipt.v2`
-- transcript encoding dispatch
-- signature verification
-- trust-registry checks
-- revocation-list checks
-- manifest and controls summary checks
-- projection into the neutral Rust kernel
-
-`ink-host`, `ink-cli`, and `ink-tui` all call that shared layer instead of maintaining separate receipt verification logic.
+- New docs and examples should target the current `v2` artifact set.
+- Compatibility aliases and selector normalization are part of the migration surface, not the primary verification story.

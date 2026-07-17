@@ -2,7 +2,7 @@
 
 ## Scope
 
-This document records the current public `blkbx-lab` Qwen3.5 validation surface as of July 16, 2026.
+This document records the current public Qwen3.5 validation surface as of July 16, 2026.
 
 Canonical public commands:
 
@@ -26,9 +26,9 @@ Status:
 
 The shipped public path uses the installed `qwen35` adapter and the Qwen3.5 claims demo:
 
-- package surface: `blkbx-lab`
-- Python namespace: `blkbx_lab`
-- demo name: `qwen35-claims`
+- install package: `mechlab-sdk`
+- primary Python namespace: `blkbx_lab`
+- demo selector: `qwen35-claims`
 - receipt signer: local demo signer backend by default, with config-backed file signing also supported
 - gate outcome for the bundled low-risk teaching demo: `pass`
 
@@ -64,7 +64,7 @@ assert bl.verify(tampered.receipt_path).verification["valid"] is False
 ## Current Limits
 
 - The public contract does not document hook-coverage analysis.
-- The public contract does not document replay packs or MAIR-backed public artifacts.
+- The public contract does not document replay packs or real-model public artifacts.
 - The public contract does not document a real-model replay workflow through `family` and `model` flags.
 - The public adapter registry currently ships with `qwen35`.
 

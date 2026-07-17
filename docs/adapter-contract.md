@@ -1,39 +1,48 @@
 # Adapter Contract
 
-BLKBX Lab adapters provide action metadata and model identity to the public trace and demo flows.
-
-## ModelAdapter Protocol
-
-```python
-class ModelAdapter(Protocol):
-    def model_info(self) -> dict[str, Any]: ...
-    def architecture_profile(self) -> dict[str, Any]: ...
-    def propose_action(self, task: str, context: list[dict[str, Any]]) -> dict[str, Any]: ...
-```
-
-## Minimum Model Metadata
-
-```json
-{
-  "model_id": "Qwen/Qwen3.5-2B",
-  "provider": "qwen",
-  "runtime": "transformers",
-  "architecture_family": "gated_deltanet_hybrid",
-  "architecture_profile": {
-    "rhythm": "3:1",
-    "tract": "gated_deltanet",
-    "bridge": "gated_attention"
-  }
-}
-```
+This page describes the shipped public adapter behavior behind `blkbx-lab trace` and `blkbx_lab.trace()`.
 
 ## Installed Public Adapter
 
+The current installed adapter registry exposes one public adapter:
+
 - `qwen35`
 
-## Current Scope
+The public teaching path is a bundled deterministic demo rather than a live provider integration.
 
-- Registered adapter names remain canonical for the public surface.
-- Shipped Qwen selectors `qwen35`, `qwen3.5`, `qwen3.5-2b`, and `Qwen/Qwen3.5-2B` resolve to the installed `qwen35` adapter.
-- Unsupported `family` or `model` values fail with a clear supported-adapters error.
-- Additional runtimes should not be documented as supported until they are registered under `python/blkbx_lab/adapters/` and exercised by the public contract tests.
+## Compatibility Selectors
+
+These selectors normalize to the shipped `qwen35` adapter:
+
+- `qwen35`
+- `qwen35-claims`
+- `qwen3.5`
+- `Qwen/Qwen3.5-2B`
+
+## Trace Inputs
+
+The public trace flow accepts:
+
+- prompt text
+- optional output directory
+- optional trace id
+- adapter selector within the supported compatibility set
+
+Unsupported `adapter`, `family`, `model`, `backend`, or `profile` values fail loudly.
+
+## Trace Outputs
+
+The shipped deterministic demo writes:
+
+- `prompt.txt`
+- `action.json`
+- `runtime.json`
+- `demo_mapping.json`
+- `model_waist.json`
+- `ink_manifest.v2.json`
+
+The follow-on receipt flow writes `ink_receipt.v2.json`.
+
+## Documentation Boundary
+
+Do not document additional runtimes, providers, or adapter protocols as supported public surface until they are registered in code and covered by the public-contract tests.

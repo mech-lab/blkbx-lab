@@ -1,57 +1,21 @@
-# Security Policy
+# Technical Security Hardening Note
 
-## Supported Versions
+This page covers implementation-level hardening guidance for the current shipped BLKBX Lab surface. It complements the public vulnerability policy in [`../SECURITY.md`](../SECURITY.md).
 
-We provide security updates for the following versions of the project:
+## Current Hardening Posture
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.0.0   | :white_check_mark: |
-| < 1.0.0 | :x:                |
+- Rust trust-waist crates are intended to stay safe-Rust-first.
+- Verification is designed for local, inspectable, offline operation.
+- The host layer supports operator-managed signer configuration, trust registries, and revocation lists.
 
-## Reporting a Vulnerability
+## Build and Dependency Controls
 
-Please report security vulnerabilities by emailing security@blkbxlab.com.
-We will acknowledge receipt of your report within 48 hours and provide a
-detailed response within 7 days.
+- use the pinned Rust toolchain from [`../rust-toolchain.toml`](../rust-toolchain.toml)
+- keep dependency policy in [`../deny.toml`](../deny.toml)
+- validate release candidates with [`../scripts/check_release_readiness.py`](../scripts/check_release_readiness.py) and [`../scripts/check_local_release.py`](../scripts/check_local_release.py)
 
-## Hardening Measures
+## Documentation Boundary
 
-### Dependency Management
-- All dependencies are regularly audited using `cargo audit`.
-- We use `cargo deny` to enforce license and security policies.
-- Dependencies are updated to the latest secure versions.
-
-### Code Security
-- The codebase forbids unsafe code (`#![forbid(unsafe_code)]`).
-- We use property-based testing (proptest) for cryptographic functions.
-- Fuzz testing is integrated into the CI pipeline for critical entry points.
-- Comprehensive unit and integration tests cover error handling and edge cases.
-
-### Cryptographic Security
-- We use the `ed25519-dalek` library for cryptographic signatures.
-- All cryptographic operations are reviewed for side-channel resistance.
-- Keys are managed through signer config, trust registry, and revocation files under the configured host directory.
-
-### Error Handling and Logging
-- Errors are defined as an enum with exhaustive variants.
-- Error handling is tested to prevent information leakage.
-- Logging is designed to avoid sensitive data exposure.
-
-### Continuous Integration
-- CI pipeline includes:
-  - `cargo build` for compilation
-  - `cargo test` for unit and integration tests
-  - `cargo clippy` for linting
-  - `cargo deny` for license and security checks
-  - `cargo fuzz` for fuzz testing
-- The pipeline runs on every push and pull request.
-
-### Release Process
-- Before each release, we run a full security audit.
-- We update the changelog with security fixes.
-- We ensure all dependencies are up-to-date and free of known vulnerabilities.
-
-## Contact
-
-For security-related inquiries, please contact security@blkbxlab.com.
+- Root [`../SECURITY.md`](../SECURITY.md) is the public reporting policy.
+- This document is for technical implementation notes.
+- Historical hardening plans now live under [`archive/`](archive/README.md).

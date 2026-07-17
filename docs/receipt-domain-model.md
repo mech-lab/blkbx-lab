@@ -1,60 +1,39 @@
 # Receipt Domain Model
 
-All product slices in this repo use the same conceptual receipt envelope even when they speak different market language.
+BLKBX Lab keeps one shared receipt envelope and layers domain-specific framing above it.
 
-## Shared Envelope
+## Shared Artifact Set
 
-Every receipt-shaped object carries:
+The shipped public artifact set is:
 
-- `schema`
-- `receipt_id`
-- `action_id`
-- `issued_at`
-- `domain_context`
-- `event_trail`
-- `human_review`
-- `integrity`
+- `ink_manifest.v2.json`
+- `ink_receipt.v2.json`
+- `receipt_comparison.v2.json`
 
-## Shared Integrity Stub
+## Shared Evidence Inputs
 
-This pass does not add heavy cryptography. The integrity block is a clean stub with:
+The primary trace path emits a common evidence shape:
 
-- `digest`: deterministic SHA-256 of canonical JSON
-- `signature_algorithm`: `stub-v1`
-- `signature`: `null`
-- `core_binding`: `null`
+- `action.json`: action proposal and scenario outcome
+- `runtime.json`: execution topology and replay posture
+- `demo_mapping.json`: deterministic demo scenario mapping
+- `model_waist.json`: normalized model identity, invocation, observation, and runtime metadata
 
-That gives each product a stable adapter boundary for later binding into shared INK Receipts core packages.
+Those inputs are summarized and hashed into `ink_manifest.v2.json`.
 
-## Domain Context Split
+## Receipt Layer
 
-The envelope stays the same, but the institutional question changes by slice.
+`ink_receipt.v2.json` carries the signed gate decision over the manifest and policy evaluation path. Verification reports then evaluate:
 
-### MAND8
+- structural validity
+- trust and signer state
+- revocation status when configured
+- policy acceptance
 
-MAND8 receipt context centers on:
+## Product Overlays
 
-- exposure units
-- underwriting actions
-- delegated authority and binder logic
-- risk controls
-- policy conditions
-- incidents
-- overrides
+- `BLKBXS` frames the shared receipt layer as bank-verifiable evidence.
+- `MAND8` frames it as insurance and delegated-authority evidence.
+- `DUE` frames it as legal defensibility evidence.
 
-In the UK-first MAND8 story, the Authority Receipt is evidence that an AI-assisted action stayed within the delegated authority frame London market operators already use.
-
-### DUE
-
-DUE receipt context centers on:
-
-- matter context
-- legal action
-- authority checks
-- privilege decisions
-- disclosure events
-- dispute readiness
-
-## Bundle Objects
-
-Bundles are separate export objects that package one or more receipts for a decision-making audience. They remain JSON-serializable and tamper-evident through the same stub integrity pattern.
+The domain overlays change semantics and audiences, not the underlying artifact contract.

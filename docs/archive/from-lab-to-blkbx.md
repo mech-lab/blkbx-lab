@@ -1,5 +1,7 @@
 # From BLKBX Lab to BLKBX Commercial
 
+> Archived on July 17, 2026. Historical future-state note, not active source-of-truth documentation.
+
 BLKBX Lab is the open-source foundation for accountable AI agents. It provides the tools to generate local, verifiable Ink Receipts for agent actions.
 
 ## The Bridge

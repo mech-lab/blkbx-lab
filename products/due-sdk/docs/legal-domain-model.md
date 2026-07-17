@@ -1,4 +1,4 @@
-# Legal Domain Model
+# DUE Legal Domain Model
 
 DUE keeps the shared receipt envelope but frames it through legal reliance and defensibility.
 
@@ -11,16 +11,16 @@ DUE keeps the shared receipt envelope but frames it through legal reliance and d
 - Disclosure Receipt
 - Dispute Readiness Bundle
 
-## Reliance Model
+## Reliance Questions
 
-DUE is for situations where an institution needs to answer:
+DUE is designed for situations where a team needs to answer:
 
 - what the AI-assisted action was
 - what matter it belonged to
 - who had authority to rely on it
 - whether privilege boundaries were preserved
 - whether disclosure scope was controlled
-- whether a human reviewed it before legal reliance
+- whether human review happened before legal reliance
 
 ## Primary Audiences
 

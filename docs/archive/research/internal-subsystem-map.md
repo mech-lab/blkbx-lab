@@ -1,5 +1,7 @@
 # Internal Subsystem Map
 
+> Archived on July 17, 2026. Historical research note, not active source-of-truth documentation.
+
 ## `internal/trace`
 
 Role:

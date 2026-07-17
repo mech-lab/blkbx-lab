@@ -1,8 +1,14 @@
-# API Surface
+# MAND8 API Surface
+
+The shipped stable `mand8` import rides through `mechlab-sdk`. This source slice mirrors that surface for local development.
+
+## Imports
 
 ```python
 from mand8 import bundle, control, exposure, incident, override, receipt, schema
 ```
+
+## Core Constructors
 
 ```python
 receipt.create(
