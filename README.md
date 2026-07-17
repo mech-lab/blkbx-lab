@@ -60,66 +60,36 @@ The verifier is.
 
 ## Codebase Size
 
-Do not hand-wave the size of this repo. Generate it.
+Hard-written tracked-file snapshot:
 
-Preferred:
+| Language | LOC | Where |
+| --- | ---: | --- |
+| Rust | 10,169 | `rust/crates/*` - 10 crates |
+| Ruby | 4,898 | `web/rails/*` - Rails multi-tenant backend |
+| Python | 8,561 | `python/*` + `products/*-sdk` + `tests/*` |
+| JSON | 4,269 | schemas, test vectors, bundles, policy files |
+| Markdown | 3,097 | docs, per-crate and per-product READMEs |
+| TypeScript | 383 | `packages/ink-ts-verify` |
+| TOML | 384 | Cargo manifests, `pyproject.toml` |
+| YAML | 385 | CI and misc config |
+| CSS | 174 | `web/verify` static page |
+| JavaScript | 25 | `web/verify/verify.js` |
+| HTML | 29 | `web/verify/index.html` |
+| **Total tracked** | **~34,979** | everything `git ls-files` sees |
 
-```bash
-tokei .
-```
+These numbers are here on purpose. The repo is not small, and the shape matters.
 
-Alternative:
+---
 
-```bash
-cloc .
-```
+## What the Whole System Is Trying to Do
 
-Add the generated output here before release-facing use:
+One idea, three go-to-market wrappers around it:
 
-| Language | Files | Lines | Code | Comments | Blanks | What it means |
-| --- | ---: | ---: | ---: | ---: | ---: | --- |
-| Python | TODO | TODO | TODO | TODO | TODO | SDK, CLI, product facades, demo orchestration |
-| Rust | TODO | TODO | TODO | TODO | TODO | trust waist, native verification, PyO3 bridge, CLI/TUI/WASM surfaces |
-| Ruby | TODO | TODO | TODO | TODO | TODO | Rails portal scaffold, if present in this checkout |
-| TypeScript | TODO | TODO | TODO | TODO | TODO | verifier/browser scaffold, if present in this checkout |
-| Markdown | TODO | TODO | TODO | TODO | TODO | docs, specs, architecture, release surface |
-| JSON / TOML / YAML | TODO | TODO | TODO | TODO | TODO | schemas, policies, package/workspace config |
-| Total | TODO | TODO | TODO | TODO | TODO | full repo footprint |
+> A product emits a signed, canonical receipt - a small cryptographic claim that says "this specific evidence was produced by this issuer, under this schema, at this point in its lifecycle." Anyone holding the receipt, the evidence it points to, a trust registry, and a policy file can verify it themselves, offline, without asking the issuer's API or dashboard anything.
 
-Blunt rule:
+`ink-core` and `ink-host` are the shared engine that make a receipt real: hash it, sign it, verify it, and check trust and revocation. `blkbx_lab`, `mand8`, and `due` are three different business vocabularies built on that same engine - AI-agent action receipts, insurance underwriting and risk receipts, and legal-matter defensibility receipts.
 
-> Do not estimate LOC from GitHub language percentages. Run `tokei` or `cloc`.
-
-Suggested helper:
-
-```bash
-mkdir -p scripts
-cat > scripts/codebase-size.sh <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-
-echo "== tokei =="
-tokei .
-
-echo
-echo "== tracked file extension summary =="
-git ls-files \
-  | awk '
-      {
-        n=split($0,a,".");
-        if (n > 1) ext=a[n]; else ext="[no extension]";
-        count[ext]++
-      }
-      END {
-        for (ext in count) print count[ext], ext
-      }
-    ' \
-  | sort -nr
-EOF
-
-chmod +x scripts/codebase-size.sh
-./scripts/codebase-size.sh
-```
+`web/rails` is a hosted multi-tenant backend meant to serve all three brands from one deployment. `web/verify` and `packages/ink-ts-verify` are the receiving-party verification surfaces or scaffolds: the piece a bank, insurer, or legal team should be able to run without trusting any hosted BLKBX interface.
 
 ---
 
@@ -396,6 +366,33 @@ It must not be required for verification.
 
 ---
 
+## Rust, Python, Rails, and TS at a Glance
+
+### Rust
+
+`rust/crates/` is the trust waist:
+
+- `ink-core` is the `no_std`, `unsafe`-forbidden kernel
+- `ink-host` handles file I/O, trust registries, revocations, and signing dispatch
+- `ink-receipt-v2` defines the portable evidence-bundle verifier surface
+- `ink-cli` and `ink-tui` are real native verification entrypoints
+- `ink-wasm` is the browser-facing verifier target, but it is not the primary trust path
+- `ink-py` is the PyO3 bridge into Python
+
+### Python
+
+`python/blkbx_lab` is the public SDK and CLI surface. `python/due` and `python/mand8` are thin shims over the real product logic in `products/due-sdk` and `products/mand8-sdk`.
+
+### Rails
+
+`web/rails` is the hosted multi-tenant backend for future commercial workflow and account surfaces. It is real application code, but it is not the verifier and it does not redefine the trust boundary.
+
+### TypeScript and Browser
+
+`packages/ink-ts-verify` is an early-stage TypeScript verifier primitive. `web/verify` is currently a local structure-check surface, not a full cryptographic browser verifier.
+
+---
+
 ## Product Slices
 
 ### BLKBXS
@@ -631,7 +628,17 @@ Current limits should stay visible:
 - TypeScript/browser verifier work is scaffold-level unless proven otherwise by the current checkout
 - product packages ride in the same `mechlab-sdk` wheel
 - compatibility names exist and should not be confused with the primary public surface
-- LOC tables must be generated from the repo, not estimated
+- the hard-written LOC snapshot should be refreshed when the repo shape changes materially
+
+---
+
+## Known Gaps
+
+- No cross-language conformance suite yet proves Rust, Python, and TypeScript produce byte-identical results from shared vectors.
+- Browser verification is not real yet. Native verification through `ink`, `ink-cli`, and `ink-tui` is.
+- Python packaging is still one wheel bundling multiple packages, so `due` and `mand8` remain flat top-level import names.
+- The Rails backend has meaningful tests, but it should not be treated as equally trusted with the Rust kernel just because it exists in the same repo.
+- No independent external security review of the signing and canonicalization scheme has happened yet.
 
 ---
 
