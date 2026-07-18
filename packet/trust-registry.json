@@ -1,0 +1,40 @@
+{
+  "schema": "ink.trust-registry.v2",
+  "registry_version": "1.0.0",
+  "published_at": "2026-07-18T16:30:00Z",
+  "trust_authorities": [
+    {
+      "key_id": "ed25519:a177619f1daf30c6189dee490148fc097f630749637c5c23cbf18944edf571a6",
+      "algorithm": "ed25519",
+      "public_key": "Uniq4_0hX3tnRUCTIhofu5X-xuCOLPzK0buIWaoVYQk",
+      "issuer_name": "BLKBX Local Dev",
+      "org_name": "BLKBX Lab",
+      "status": "active",
+      "usage": "receipt_signing",
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_until": "2027-01-01T00:00:00Z"
+    }
+  ],
+  "issuers": [
+    {
+      "key_id": "ed25519:a177619f1daf30c6189dee490148fc097f630749637c5c23cbf18944edf571a6",
+      "algorithm": "ed25519",
+      "public_key": "Uniq4_0hX3tnRUCTIhofu5X-xuCOLPzK0buIWaoVYQk",
+      "issuer_name": "BLKBX Local Dev",
+      "org_name": "BLKBX Lab",
+      "usage": "receipt_signing",
+      "state": "active",
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_until": "2027-01-01T00:00:00Z"
+    }
+  ],
+  "signing": {
+    "key_id": "ed25519:a177619f1daf30c6189dee490148fc097f630749637c5c23cbf18944edf571a6",
+    "algorithm": "ed25519",
+    "transcript_encoding": "INK-CORE-TLV-V2",
+    "payload_hash": {
+      "algorithm": "sha-256",
+      "digest": "1581227d30d975e532139eb26cae93c232a11fab824b8776c6ac7511c1a53dff"
+    }
+  }
+}

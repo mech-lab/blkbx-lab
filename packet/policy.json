@@ -1,0 +1,12 @@
+{
+  "schema": "ink.verify-policy.v1",
+  "policy_id": "BANK_STRICT_POLICY",
+  "require_canonical_tlv_v2": true,
+  "allow_verify_only_formats": false,
+  "require_trusted_issuer": true,
+  "require_revocation_check": false,
+  "require_manifest_hash_match_when_manifest_present": true,
+  "require_evidence_summary_match_when_manifest_present": true,
+  "require_controls_summary_match_when_controls_present": true,
+  "allow_network": false
+}

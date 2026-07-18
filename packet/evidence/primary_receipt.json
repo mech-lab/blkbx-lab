@@ -1,0 +1,108 @@
+{
+  "schema": "mand8.risk_receipt.v1",
+  "receipt_id": "rcpt_a0955ea2304b",
+  "action_id": "act_14ba0124e72b",
+  "case_id": "case_mand8_lloyds_incident_003",
+  "issued_at": "2026-07-17T11:00:00Z",
+  "domain_context": {
+    "case_id": "case_mand8_lloyds_incident_003",
+    "exposure_unit_id": "uk-cyber-eu-3234",
+    "policy_ref": "B3234UK2026",
+    "risk_class": "cyber",
+    "insured_value": 2800000.0,
+    "currency": "GBP",
+    "territory": "UK",
+    "market_segment": "lloyds_delegated_authority",
+    "binder_ref": "B3234UK2026",
+    "managing_agent": "Lime Street Managing Agency Ltd",
+    "coverholder": "North Dock Coverholder Ltd",
+    "policy_conditions": [],
+    "exclusions": [],
+    "regulators": [
+      "FCA",
+      "PRA"
+    ],
+    "authority_receipt_id": "arcpt_incident_003",
+    "authority_status": "within_authority",
+    "lloyds_binding_ref": "B3234UK2026",
+    "last_control_id": "ctl-monthly-anomaly-monitor",
+    "last_control_status": "pass",
+    "last_incident_id": "inc-3234-01",
+    "last_incident_severity": "medium",
+    "last_claims_impact": "monitor_for_renewal"
+  },
+  "event_trail": [
+    {
+      "event_type": "underwriting_action_emitted",
+      "payload": {
+        "action": "ai_underwriting_action",
+        "exposure_unit_id": "uk-cyber-eu-3234",
+        "policy_ref": "B3234UK2026",
+        "case_id": "case_mand8_lloyds_incident_003"
+      }
+    },
+    {
+      "event_type": "authority_receipt_recorded",
+      "payload": {
+        "schema": "mand8.authority_receipt.v1",
+        "receipt_id": "arcpt_incident_003",
+        "case_id": "case_mand8_lloyds_incident_003",
+        "authority_id": "auth-lma-binder-3234",
+        "construct": "delegated_authority",
+        "status": "within_authority",
+        "lloyds_binding_ref": "B3234UK2026",
+        "managing_agent": "Lime Street Managing Agency Ltd",
+        "coverholder": "North Dock Coverholder Ltd"
+      }
+    },
+    {
+      "event_type": "control_check_recorded",
+      "payload": {
+        "control_id": "ctl-monthly-anomaly-monitor",
+        "control_name": "Monthly anomaly monitoring",
+        "status": "pass",
+        "control_type": "risk_control",
+        "evidence_ref": "ev-monthly-anomaly-monitor-2026-07",
+        "details": {},
+        "case_id": "case_mand8_lloyds_incident_003"
+      }
+    },
+    {
+      "event_type": "incident_recorded",
+      "payload": {
+        "incident_id": "inc-3234-01",
+        "incident_type": "drift_alert",
+        "severity": "medium",
+        "description": "Model drift alert triggered during post-bind monitoring.",
+        "claims_impact": "monitor_for_renewal",
+        "resolution": {
+          "outcome": "monitoring_intensified",
+          "next_review_at": "2026-08-01"
+        },
+        "case_id": "case_mand8_lloyds_incident_003"
+      }
+    },
+    {
+      "event_type": "human_review_recorded",
+      "payload": {
+        "reviewer": "portfolio.actuary@mand8.example",
+        "notes": "Incident accepted into renewal monitoring pack.",
+        "status": "reviewed",
+        "reviewed_at": "2026-07-17T11:04:00Z",
+        "case_id": "case_mand8_lloyds_incident_003"
+      }
+    }
+  ],
+  "human_review": {
+    "reviewer": "portfolio.actuary@mand8.example",
+    "notes": "Incident accepted into renewal monitoring pack.",
+    "status": "reviewed",
+    "reviewed_at": "2026-07-17T11:04:00Z"
+  },
+  "integrity": {
+    "digest": "sha256:c011e82099bcb1b96a65d43e5cbe3608aa87e64e5119d69188d34e40d954ceb2",
+    "signature_algorithm": "stub-v1",
+    "signature": null,
+    "core_binding": null
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "ink.revocations.v2",
+  "list_version": "1.0.0",
+  "published_at": "2026-07-18T16:30:00Z",
+  "revoked_keys": [],
+  "signing": {
+    "key_id": "ed25519:a177619f1daf30c6189dee490148fc097f630749637c5c23cbf18944edf571a6",
+    "algorithm": "ed25519",
+    "transcript_encoding": "INK-REVOCATION-JSON-V2",
+    "payload_hash": {
+      "algorithm": "sha-256",
+      "digest": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
+}
