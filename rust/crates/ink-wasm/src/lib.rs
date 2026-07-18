@@ -2,8 +2,11 @@
 
 use ink_core::bounded::{IssuerId, PublicKeyId};
 use ink_core::canon;
+use ink_receipt_v2::{VerificationCheck, VerificationReportJson};
 use ink_verify::TrustedIssuerKey;
 use ink_verify::{ReceiptVerificationReport, VerificationPolicy};
+use serde::Deserialize;
+use serde_json::Value;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
@@ -21,6 +24,68 @@ fn error_json(code: &str) -> String {
         "{{\"structural_valid\":false,\"status\":\"error\",\"code\":\"{}\"}}",
         code
     )
+}
+
+#[derive(Debug, Deserialize)]
+struct ArtifactInput {
+    receipt: Option<Value>,
+    manifest: Option<Value>,
+    verification_policy: Option<Value>,
+    trust_registry: Option<Value>,
+    revocations: Option<Value>,
+}
+
+fn invalid_artifact_report(code: &str, message: &str) -> VerificationReportJson {
+    VerificationReportJson {
+        schema: "ink.verification-report.v1".to_string(),
+        status: "invalid".to_string(),
+        code: code.to_string(),
+        summary_status: "fail".to_string(),
+        summary_text: message.to_string(),
+        transcript_encoding: "unknown".to_string(),
+        receipt_profile: "unknown".to_string(),
+        issuer: "unknown".to_string(),
+        key_id: "unknown".to_string(),
+        payload_digest_alg: "unknown".to_string(),
+        payload_digest_hex: "unavailable".to_string(),
+        signature_valid: false,
+        trusted_issuer: false,
+        revocation_checked: false,
+        revocation_ok: false,
+        policy_accepted: false,
+        verification_engine: "Rust ink-wasm".to_string(),
+        network_required: false,
+        scope: "receipt-only".to_string(),
+        checks: vec![VerificationCheck {
+            id: "artifacts.input".to_string(),
+            status: "fail".to_string(),
+            reason_code: code.to_string(),
+        }],
+    }
+}
+
+fn render_artifact_report(report: &VerificationReportJson) -> String {
+    serde_json::to_string_pretty(report).unwrap_or_else(|err| {
+        format!(
+            "{{\"schema\":\"ink.verification-report.v1\",\"status\":\"invalid\",\"code\":\"SERIALIZATION_ERROR\",\"summary_status\":\"fail\",\"summary_text\":\"failed to serialize verification report: {err}\",\"transcript_encoding\":\"unknown\",\"receipt_profile\":\"unknown\",\"issuer\":\"unknown\",\"key_id\":\"unknown\",\"payload_digest_alg\":\"unknown\",\"payload_digest_hex\":\"unavailable\",\"signature_valid\":false,\"trusted_issuer\":false,\"revocation_checked\":false,\"revocation_ok\":false,\"policy_accepted\":false,\"verification_engine\":\"Rust ink-wasm\",\"network_required\":false,\"scope\":\"receipt-only\",\"checks\":[{{\"id\":\"artifacts.output\",\"status\":\"fail\",\"reason_code\":\"SERIALIZATION_ERROR\"}}]}}"
+        )
+    })
+}
+
+fn serialize_value(value: &Value, label: &str) -> Result<Vec<u8>, VerificationReportJson> {
+    serde_json::to_vec(value).map_err(|err| {
+        invalid_artifact_report(
+            "ARTIFACT_SERIALIZATION_ERROR",
+            &format!("Failed to serialize {label}: {err}"),
+        )
+    })
+}
+
+fn serialize_optional_value(
+    value: Option<&Value>,
+    label: &str,
+) -> Result<Option<Vec<u8>>, VerificationReportJson> {
+    value.map(|entry| serialize_value(entry, label)).transpose()
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -170,11 +235,100 @@ pub fn replay_receipt(receipt_bytes: &[u8], _evidence_bytes: &[u8]) -> String {
     }
 }
 
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub fn verify_artifacts(input_json: &str) -> String {
+    let input: ArtifactInput = match serde_json::from_str(input_json) {
+        Ok(value) => value,
+        Err(err) => {
+            return render_artifact_report(&invalid_artifact_report(
+                "INVALID_INPUT_JSON",
+                &format!("Artifact payload must be valid JSON: {err}"),
+            ));
+        }
+    };
+
+    let Some(receipt) = input.receipt else {
+        return render_artifact_report(&invalid_artifact_report(
+            "RECEIPT_NOT_SUPPLIED",
+            "Verification requires a portable ink.receipt.v2 artifact.",
+        ));
+    };
+
+    let receipt_json = match serialize_value(&receipt, "receipt") {
+        Ok(bytes) => bytes,
+        Err(report) => return render_artifact_report(&report),
+    };
+    let manifest_json = match serialize_optional_value(input.manifest.as_ref(), "manifest") {
+        Ok(bytes) => bytes,
+        Err(report) => return render_artifact_report(&report),
+    };
+    let trust_registry_json =
+        match serialize_optional_value(input.trust_registry.as_ref(), "trust registry") {
+            Ok(bytes) => bytes,
+            Err(report) => return render_artifact_report(&report),
+        };
+    let revocations_json = match serialize_optional_value(input.revocations.as_ref(), "revocations")
+    {
+        Ok(bytes) => bytes,
+        Err(report) => return render_artifact_report(&report),
+    };
+    let verification_policy_json =
+        match serialize_optional_value(input.verification_policy.as_ref(), "verification policy") {
+            Ok(bytes) => bytes,
+            Err(report) => return render_artifact_report(&report),
+        };
+
+    let result = ink_receipt_v2::verify_receipt(
+        &receipt_json,
+        manifest_json.as_deref(),
+        None,
+        trust_registry_json.as_deref(),
+        revocations_json.as_deref(),
+        verification_policy_json.as_deref(),
+        None,
+    );
+
+    match result {
+        Ok(report) => render_artifact_report(&report),
+        Err(err) => render_artifact_report(&invalid_artifact_report(
+            "VERIFY_ARTIFACTS_FAILED",
+            &format!("Artifact verification failed: {err}"),
+        )),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use ink_vectors::{kernel_decode_vectors, kernel_verification_vectors};
-    use serde_json::Value;
+    use serde_json::{json, Value};
+    use std::fs;
+    use std::path::Path;
+
+    #[derive(Debug, Deserialize)]
+    struct VectorFile {
+        vectors: Vec<SharedVector>,
+    }
+
+    #[derive(Debug, Deserialize, Clone)]
+    struct SharedVector {
+        name: String,
+        receipt: Value,
+        manifest: Option<Value>,
+        trust_registry: Option<Value>,
+        verify_policy: Option<Value>,
+        expect_status: String,
+        expect_code: String,
+    }
+
+    fn public_vectors() -> Vec<SharedVector> {
+        let path =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../test-vectors/ink-vectors.json");
+        let payload = fs::read(path).unwrap();
+        serde_json::from_slice::<VectorFile>(&payload)
+            .unwrap()
+            .vectors
+    }
 
     #[test]
     fn wasm_receipt_verification_matches_native_statuses() {
@@ -226,5 +380,69 @@ mod tests {
                 vector.name
             );
         }
+    }
+
+    #[test]
+    fn verify_artifacts_matches_public_vector_statuses() {
+        for vector in public_vectors() {
+            let report: VerificationReportJson = serde_json::from_str(&verify_artifacts(
+                &json!({
+                    "receipt": vector.receipt,
+                    "manifest": vector.manifest,
+                    "trust_registry": vector.trust_registry,
+                    "verification_policy": vector.verify_policy,
+                })
+                .to_string(),
+            ))
+            .unwrap();
+            assert_eq!(report.status, vector.expect_status, "{}", vector.name);
+            assert_eq!(report.code, vector.expect_code, "{}", vector.name);
+            assert_eq!(
+                report.summary_status,
+                if report.status != "valid" {
+                    "fail"
+                } else if report
+                    .checks
+                    .iter()
+                    .any(|check| check.status == "not_performed")
+                {
+                    "warning"
+                } else {
+                    "pass"
+                },
+                "{}",
+                vector.name
+            );
+        }
+    }
+
+    #[test]
+    fn verify_artifacts_reports_warning_when_optional_inputs_are_missing() {
+        let vector = public_vectors()
+            .into_iter()
+            .find(|entry| entry.name == "valid_tlv_v2_trusted_manifest")
+            .unwrap();
+        let report: VerificationReportJson = serde_json::from_str(&verify_artifacts(
+            &json!({
+                "receipt": vector.receipt,
+                "trust_registry": vector.trust_registry,
+            })
+            .to_string(),
+        ))
+        .unwrap();
+
+        assert_eq!(report.status, "valid");
+        assert_eq!(report.code, "VALID_RECEIPT");
+        assert_eq!(report.summary_status, "warning");
+    }
+
+    #[test]
+    fn verify_artifacts_returns_invalid_input_report_when_receipt_is_missing() {
+        let report: VerificationReportJson =
+            serde_json::from_str(&verify_artifacts("{\"manifest\":{}}")).unwrap();
+
+        assert_eq!(report.status, "invalid");
+        assert_eq!(report.code, "RECEIPT_NOT_SUPPLIED");
+        assert_eq!(report.summary_status, "fail");
     }
 }

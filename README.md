@@ -60,22 +60,22 @@ The verifier is.
 
 ## Codebase Size
 
-Hard-written tracked-file snapshot:
+Hard-written tracked-file snapshot as of Saturday, July 18, 2026:
 
 | Language | LOC | Where |
 | --- | ---: | --- |
-| Rust | 10,169 | `rust/crates/*` - 10 crates |
-| Ruby | 4,898 | `web/rails/*` - Rails multi-tenant backend |
-| Python | 8,561 | `python/*` + `products/*-sdk` + `tests/*` |
-| JSON | 4,269 | schemas, test vectors, bundles, policy files |
-| Markdown | 3,097 | docs, per-crate and per-product READMEs |
+| Rust | 10,411 | `rust/crates/*` - 10 crates |
+| Ruby | 4,934 | `web/rails/*` - Rails multi-tenant backend |
+| Python | 8,662 | `python/*` + `products/*-sdk` + `tests/*` |
+| JSON | 4,284 | schemas, test vectors, bundles, policy files |
+| Markdown | 3,477 | docs, per-crate and per-product READMEs |
 | TypeScript | 383 | `packages/ink-ts-verify` |
-| TOML | 384 | Cargo manifests, `pyproject.toml` |
-| YAML | 385 | CI and misc config |
-| CSS | 174 | `web/verify` static page |
-| JavaScript | 25 | `web/verify/verify.js` |
-| HTML | 29 | `web/verify/index.html` |
-| **Total tracked** | **~34,979** | everything `git ls-files` sees |
+| TOML | 387 | Cargo manifests, `pyproject.toml` |
+| YAML | 386 | CI and misc config |
+| CSS | 445 | `web/verify` static page |
+| JavaScript | 174 | `web/verify/*.js` |
+| HTML | 106 | `web/verify/*.html` |
+| **Total tracked** | **33,649** | everything `git ls-files` sees |
 
 These numbers are here on purpose. The repo is not small, and the shape matters.
 
@@ -389,7 +389,7 @@ It must not be required for verification.
 
 ### TypeScript and Browser
 
-`packages/ink-ts-verify` is an early-stage TypeScript verifier primitive. `web/verify` is currently a local structure-check surface, not a full cryptographic browser verifier.
+`packages/ink-ts-verify` is an early-stage TypeScript verifier primitive. `web/verify` is a Rust-backed browser verifier surface over `ink-wasm`, but it remains outside the trust root and only works on real portable INK artifacts.
 
 ---
 
@@ -416,6 +416,14 @@ Core claim:
 MAND8 is not just "BLKBXS for insurance."
 
 MAND8 is the insurability slice.
+
+The public MAND8 Python surface includes `mand8.authority.record()` alongside exposure, control, override, incident, bundle, and schema helpers.
+
+The Lloyd's Labs demo path is documented in [docs/mand8-lloyds-labs-demo.md](docs/mand8-lloyds-labs-demo.md) and uses fixed Friday, July 17, 2026 scenario data:
+
+- `lloyds_cyber_happy_path`
+- `lloyds_human_review_edge_case`
+- `lloyds_incident_to_renewal`
 
 ### DUE
 
@@ -625,7 +633,7 @@ Current limits should stay visible:
 - public adapter support is still centered on deterministic `qwen35`
 - production signing is not the default public path
 - Rails is scaffold/future portal work, not verifier infrastructure
-- TypeScript/browser verifier work is scaffold-level unless proven otherwise by the current checkout
+- seeded MAND8 Lloyd's demo workspaces from Friday, July 17, 2026 do not yet persist portable `ink.receipt.v2` companions for browser handoff
 - product packages ride in the same `mechlab-sdk` wheel
 - compatibility names exist and should not be confused with the primary public surface
 - the hard-written LOC snapshot should be refreshed when the repo shape changes materially
@@ -635,7 +643,7 @@ Current limits should stay visible:
 ## Known Gaps
 
 - No cross-language conformance suite yet proves Rust, Python, and TypeScript produce byte-identical results from shared vectors.
-- Browser verification is not real yet. Native verification through `ink`, `ink-cli`, and `ink-tui` is.
+- Browser verification is real through `web/verify` and `ink-wasm`, but native verification through `ink`, `ink-cli`, and `ink-tui` remains the trust root.
 - Python packaging is still one wheel bundling multiple packages, so `due` and `mand8` remain flat top-level import names.
 - The Rails backend has meaningful tests, but it should not be treated as equally trusted with the Rust kernel just because it exists in the same repo.
 - No independent external security review of the signing and canonicalization scheme has happened yet.

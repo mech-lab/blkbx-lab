@@ -30,10 +30,11 @@ module Mand8
             "latest_verification_status"
           ),
           "receipt_summaries" => snapshot.fetch("receipts"),
-          "verifier_handoff" => {
-            "verify_path" => "/verify?workspace_id=#{workspace.id}&case_id=#{case_ids.first}&bundle_id=#{bundle.id}",
-            "product" => "mand8"
-          }
+          "verifier_handoff" => VerifierHandoff.payload(
+            workspace: workspace,
+            case_id: case_ids.first,
+            bundle_id: bundle.id
+          )
         )
       bundle.update!(
         manifest: updated_manifest,

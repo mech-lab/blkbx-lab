@@ -6,6 +6,7 @@ use std::path::{Component, Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use base64ct::{Base64UrlUnpadded, Encoding};
+use chrono::{SecondsFormat, TimeZone, Utc};
 use dirs::config_dir;
 use ed25519_dalek::{Signer, SigningKey};
 use ink_core::bounded::{DomainTag, IssuerId, SchemaAuthority, SchemaId};
@@ -37,6 +38,7 @@ use ink_core::types::{
 use ink_core::{Digest as KernelDigest, ReceiptEnvelope};
 use ink_verify::verify_ed25519_message_hash_bytes;
 use rand::RngCore;
+use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256, Sha512};
@@ -63,6 +65,8 @@ pub enum HostError {
     Io(#[from] std::io::Error),
     #[error("json error: {0}")]
     Json(#[from] serde_json::Error),
+    #[error("http error: {0}")]
+    Http(#[from] reqwest::Error),
     #[error("core error: {0:?}")]
     Core(ink_core::error::Error),
     #[error("invalid input: {0}")]
@@ -127,9 +131,9 @@ pub struct ManifestArtifactSpec {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct DigestJson {
-    algorithm: String,
-    digest: String,
+pub struct DigestJson {
+    pub algorithm: String,
+    pub digest: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -422,6 +426,38 @@ struct TrustedIssuerJson {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+struct TrustRegistryV2Json {
+    schema: String,
+    registry_version: String,
+    published_at: String,
+    #[serde(default)]
+    trust_authorities: Vec<TrustAuthorityJson>,
+    issuers: Vec<TrustedIssuerV2Json>,
+    signing: SigningJson,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct TrustAuthorityJson {
+    key_id: String,
+    algorithm: String,
+    public_key: String,
+    state: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct TrustedIssuerV2Json {
+    key_id: String,
+    algorithm: String,
+    public_key: String,
+    issuer_name: String,
+    org_name: String,
+    usage: String,
+    state: String,
+    valid_from: String,
+    valid_until: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct SignerConfigJson {
     schema: String,
     backend: String,
@@ -432,11 +468,34 @@ struct SignerConfigJson {
     trust_registry_path: String,
     revocation_list_path: String,
     receipt_encoding: String,
+    #[serde(default)]
+    signer_base_url: Option<String>,
+    #[serde(default)]
+    auth_mode: Option<String>,
+    #[serde(default)]
+    auth_audience: Option<String>,
+    #[serde(default)]
+    request_timeout_ms: Option<u64>,
+    #[serde(default)]
+    trust_registry_url: Option<String>,
+    #[serde(default)]
+    revocations_url: Option<String>,
+    #[serde(default)]
+    pinned_trust_authority_public_key: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct RevocationListJson {
     schema: String,
+    revoked_keys: Vec<RevokedKeyJson>,
+    signing: SigningJson,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct RevocationListV2Json {
+    schema: String,
+    list_version: String,
+    published_at: String,
     revoked_keys: Vec<RevokedKeyJson>,
     signing: SigningJson,
 }
@@ -480,6 +539,51 @@ struct Bundle {
 struct PolicyBundle {
     file: PolicyFile,
     compiled: CompiledPolicy<'static>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct HostedReceiptIssueRequest {
+    pub receipt_id: Option<String>,
+    pub action_id: String,
+    pub workflow_kind: String,
+    pub schema_key: String,
+    pub schema_version: String,
+    pub body_json: Value,
+    pub domain_metadata: Value,
+    pub decision: Option<String>,
+    pub issued_at: Option<i64>,
+    pub policy_id: Option<String>,
+    pub policy_version: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct HostedReceiptIssueResponse {
+    pub receipt: Value,
+    pub manifest_hash: DigestJson,
+    pub key_id: String,
+    pub trust_registry_version: Option<String>,
+    pub revocation_version: Option<String>,
+    pub signer_request_id: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct RemoteSignRequest {
+    key_id: String,
+    issuer_name: String,
+    algorithm: String,
+    transcript_encoding: String,
+    payload_hash: DigestJson,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct RemoteSignResponse {
+    signature: String,
+    #[serde(default)]
+    signer_request_id: Option<String>,
+    #[serde(default)]
+    trust_registry_version: Option<String>,
+    #[serde(default)]
+    revocation_version: Option<String>,
 }
 
 pub fn create_manifest(
@@ -683,8 +787,8 @@ pub fn gate(
         },
     };
     let digest = receipt_digest_for_encoding(&receipt, &payload, &issuer.receipt_encoding)?;
-    let signing_key = SigningKey::from_bytes(&issuer.secret_key);
-    let signature = Ed25519Signature(signing_key.sign(&digest.0).to_bytes());
+    let sign_result = issuer.sign_digest(&digest)?;
+    let signature = Ed25519Signature(sign_result.signature);
     let mut receipt = receipt;
     receipt.signing.payload_hash = digest_json(&digest);
     receipt.signing.signature = Base64UrlUnpadded::encode_string(&signature.0);
@@ -707,6 +811,9 @@ pub fn gate(
             "policy_id": receipt.policy.id,
             "policy_version": receipt.policy.version,
         },
+        "signer_request_id": sign_result.signer_request_id,
+        "trust_registry_version": sign_result.trust_registry_version,
+        "revocation_version": sign_result.revocation_version,
         "verification": verification["verification"].clone(),
         "report": format!(
             "Gate decision for {}: {}\nReason codes: {}\nReceipt ID: {}\nManifest: {}\nReceipt: {}",
@@ -718,6 +825,187 @@ pub fn gate(
             out_path.display(),
         )
     }))
+}
+
+pub fn issue_hosted_receipt(
+    request: &HostedReceiptIssueRequest,
+) -> Result<HostedReceiptIssueResponse, HostError> {
+    let issuer = ensure_local_issuer()?;
+    if issuer.requires_demo_consent() {
+        return Err(HostError::Trust(
+            "hosted issuance requires a non-demo signer backend".to_string(),
+        ));
+    }
+    ensure_issueable_receipt_encoding(&issuer.receipt_encoding)?;
+
+    let issued_at_seconds = request
+        .issued_at
+        .unwrap_or_else(|| now_timestamp().unix_seconds);
+    let issued_at = TimestampUtc::new(issued_at_seconds, 0)?;
+    let issued_at_iso = Utc
+        .timestamp_opt(issued_at_seconds, 0)
+        .single()
+        .unwrap_or_else(Utc::now)
+        .to_rfc3339_opts(SecondsFormat::Secs, true);
+
+    let body_json = request.body_json.clone();
+    let domain_metadata = request.domain_metadata.clone();
+    let body_bytes = canonicalize_legacy(&body_json);
+    let metadata_bytes = canonicalize_legacy(&domain_metadata);
+    let policy_id = request
+        .policy_id
+        .clone()
+        .unwrap_or_else(|| "HOSTED_WORKFLOW_POLICY".to_string());
+    let policy_version = request
+        .policy_version
+        .clone()
+        .unwrap_or_else(|| "1.0.0".to_string());
+    let manifest = ManifestJson {
+        schema: "ink.manifest.v2".to_string(),
+        action_id: request.action_id.clone(),
+        created_at: issued_at_iso,
+        artifacts: vec![
+            ManifestArtifactJson {
+                artifact_type: "workflow_body_json".to_string(),
+                path: "workflow-body.json".to_string(),
+                media_type: "application/json".to_string(),
+                size_bytes: body_bytes.len() as u64,
+                hash: digest_json(&sha256(&body_bytes)),
+                schema: Some(SchemaJson {
+                    id: request.schema_key.clone(),
+                    version: request.schema_version.clone(),
+                }),
+            },
+            ManifestArtifactJson {
+                artifact_type: "domain_metadata_json".to_string(),
+                path: "domain-metadata.json".to_string(),
+                media_type: "application/json".to_string(),
+                size_bytes: metadata_bytes.len() as u64,
+                hash: digest_json(&sha256(&metadata_bytes)),
+                schema: None,
+            },
+        ],
+    };
+    let manifest_hash = hash_manifest(&manifest)?;
+    let evidence_summary_hash = hash_evidence_summary(&manifest)?;
+    let controls_summary_hash = hash_controls_summary(&[]);
+    let receipt_id = request.receipt_id.clone().unwrap_or_else(|| {
+        format!(
+            "urn:ink:receipt:hosted:{}:{}",
+            issued_at_seconds,
+            hex::encode(&sha256(&body_bytes).0[..6])
+        )
+    });
+    let model_json = hosted_model_json(request, &body_bytes, &metadata_bytes);
+    let model = normalize_model(&model_json)?;
+    let risk_class = domain_metadata
+        .get("risk_class")
+        .and_then(Value::as_str)
+        .unwrap_or("medium");
+    let facts = PolicyFacts {
+        risk_class: risk_class_from_str(risk_class)?,
+        requires_human_review: domain_metadata
+            .get("requires_human_review")
+            .and_then(Value::as_bool)
+            .unwrap_or(false),
+        binding_effect_present: false,
+        provider_fallbacks_allowed: false,
+        plugin_trust_level: PluginTrustFact::FirstPartyReference,
+        runtime_kind: RuntimeKind::HostedModelGateway,
+        replay_strength: ReplayStrength::DeclaredOnly,
+        model_class: ModelClass::HostedApi,
+    };
+    let mut reason_slots = [ReasonCodeSlot { bytes: b"" }; limits::MAX_REASONS];
+    reason_slots[0] = ReasonCodeSlot {
+        bytes: b"HOSTED_WORKFLOW_ISSUED",
+    };
+    let decision = policy_decision_from_str(request.decision.as_deref().unwrap_or("warn"))?;
+    let evaluation = EvaluationOut {
+        decision,
+        reasons: ReasonWriter {
+            buf: &mut reason_slots,
+            len: 1,
+        },
+    };
+    let payload = build_receipt_payload(
+        ReceiptInput {
+            receipt_id: leak_receipt_id(receipt_id)?,
+            action_id: leak_action_id(request.action_id.clone())?,
+            issued_at,
+            issuer: IssuerClaim {
+                name: leak_bounded::<{ limits::MAX_ISSUER_NAME_LEN }>(issuer.issuer_name.clone())?,
+                key_id: leak_key_id(issuer.key_id.clone())?,
+                public_key: Ed25519PublicKey(issuer.public_key),
+            },
+            manifest_hash,
+            policy: PolicyBinding {
+                policy_id: leak_bounded::<{ limits::MAX_POLICY_ID_LEN }>(policy_id.clone())?,
+                policy_version: leak_bounded::<{ limits::MAX_POLICY_VERSION_LEN }>(
+                    policy_version.clone(),
+                )?,
+                policy_hash: sha256(
+                    format!(
+                        "{}:{}:{}:{}",
+                        policy_id, policy_version, request.workflow_kind, request.schema_key
+                    )
+                    .as_bytes(),
+                ),
+            },
+            model,
+            facts,
+            evidence_summary_hash,
+            controls_summary_hash,
+        },
+        &evaluation,
+    )?;
+    let mut receipt = ReceiptJson {
+        schema: "ink.receipt.v2".to_string(),
+        receipt_id: payload.receipt_id.as_str()?.to_string(),
+        receipt_profile: RECEIPT_PROFILE.to_string(),
+        action_id: payload.action_id.as_str()?.to_string(),
+        issued_at: payload.issued_at.unix_seconds,
+        issuer: IssuerJson {
+            name: payload.issuer.name.as_str()?.to_string(),
+            key_id: payload.issuer.key_id.as_str()?.to_string(),
+            public_key: Base64UrlUnpadded::encode_string(&payload.issuer.public_key.0),
+        },
+        manifest_hash: digest_json(&payload.manifest_hash),
+        policy: PolicyBindingJson {
+            id: payload.policy.policy_id.as_str()?.to_string(),
+            version: payload.policy.policy_version.as_str()?.to_string(),
+            hash: digest_json(&payload.policy.policy_hash),
+        },
+        runtime: model_json.runtime.clone(),
+        model: model_json.clone(),
+        facts: facts_json(facts),
+        decision: public_decision(payload.decision).to_string(),
+        reason_codes: reason_strings(payload.reasons),
+        evidence_summary_hash: digest_json(&payload.evidence_summary_hash),
+        controls_summary_hash: digest_json(&payload.controls_summary_hash),
+        signing: SigningJson {
+            transcript_encoding: issuer.receipt_encoding.clone(),
+            payload_hash: DigestJson {
+                algorithm: "sha-256".to_string(),
+                digest: String::new(),
+            },
+            algorithm: "Ed25519".to_string(),
+            key_id: payload.issuer.key_id.as_str()?.to_string(),
+            signature: String::new(),
+        },
+    };
+    let digest = receipt_digest_for_encoding(&receipt, &payload, &issuer.receipt_encoding)?;
+    let sign_result = issuer.sign_digest(&digest)?;
+    receipt.signing.payload_hash = digest_json(&digest);
+    receipt.signing.signature = Base64UrlUnpadded::encode_string(&sign_result.signature);
+
+    Ok(HostedReceiptIssueResponse {
+        receipt: serde_json::to_value(&receipt)?,
+        manifest_hash: digest_json(&manifest_hash),
+        key_id: receipt.signing.key_id,
+        trust_registry_version: sign_result.trust_registry_version,
+        revocation_version: sign_result.revocation_version,
+        signer_request_id: sign_result.signer_request_id,
+    })
 }
 
 pub fn verify(receipt_path: &Path, manifest_path: Option<&Path>) -> Result<Value, HostError> {
@@ -927,11 +1215,19 @@ pub fn doctor(initialize_local_issuer: bool) -> Result<Value, HostError> {
         }
         demo_ready = issuer.requires_demo_consent()
             && receipt_encoding_allows_issuance(&issuer.receipt_encoding);
-        real_replay_ready = issuer.backend == "file_ed25519"
+        real_replay_ready = matches!(issuer.backend.as_str(), "file_ed25519" | "remote_kms_v1")
             && receipt_encoding_allows_issuance(&issuer.receipt_encoding);
     } else if let Ok(config) = load_signer_config() {
-        let trust_registry_exists = config_root()?.join(&config.trust_registry_path).exists();
-        let revocation_list_exists = config_root()?.join(&config.revocation_list_path).exists();
+        let trust_registry_exists = if config.backend == "remote_kms_v1" {
+            config.trust_registry_url.is_some()
+        } else {
+            config_root()?.join(&config.trust_registry_path).exists()
+        };
+        let revocation_list_exists = if config.backend == "remote_kms_v1" {
+            config.revocations_url.is_some()
+        } else {
+            config_root()?.join(&config.revocation_list_path).exists()
+        };
         checks.push(json!({"name": "local_issuer", "status": "ok"}));
         checks.push(json!({"name": "signer_backend", "status": config.backend}));
         checks.push(receipt_encoding_check(&config.receipt_encoding));
@@ -942,7 +1238,7 @@ pub fn doctor(initialize_local_issuer: bool) -> Result<Value, HostError> {
         }
         demo_ready = config.backend == "demo_file"
             && receipt_encoding_allows_issuance(&config.receipt_encoding);
-        real_replay_ready = config.backend == "file_ed25519"
+        real_replay_ready = matches!(config.backend.as_str(), "file_ed25519" | "remote_kms_v1")
             && trust_registry_exists
             && revocation_list_exists
             && receipt_encoding_allows_issuance(&config.receipt_encoding);
@@ -953,7 +1249,7 @@ pub fn doctor(initialize_local_issuer: bool) -> Result<Value, HostError> {
                 .to_string(),
         );
     }
-    notes.push("demo_file requires explicit --demo-signer; file_ed25519 can issue receipts without demo consent once configured".to_string());
+    notes.push("demo_file requires explicit --demo-signer; file_ed25519 and remote_kms_v1 can issue receipts without demo consent once configured".to_string());
     Ok(json!({
         "status": "ready",
         "checks": checks,
@@ -1524,14 +1820,13 @@ fn sign_comparison_packet(
     let _ = write_tlv(&mut sink, 4, &[u8::from(out.action_match)]);
     let _ = write_tlv(&mut sink, 5, &[u8::from(out.manifest_match)]);
     let digest = sink.finalize();
-    let signing_key = SigningKey::from_bytes(&issuer.secret_key);
-    let signature = signing_key.sign(&digest.0);
+    let sign_result = issuer.sign_digest(&digest)?;
     Ok(SigningJson {
         transcript_encoding: "INK-COMPARISON-CORE-V1".to_string(),
         payload_hash: digest_json(&digest),
         algorithm: "Ed25519".to_string(),
         key_id: issuer.key_id.clone(),
-        signature: Base64UrlUnpadded::encode_string(&signature.to_bytes()),
+        signature: Base64UrlUnpadded::encode_string(&sign_result.signature),
     })
 }
 
@@ -1652,6 +1947,13 @@ fn default_signer_config(key_id: &str) -> SignerConfigJson {
         trust_registry_path: TRUST_REGISTRY_FILE.to_string(),
         revocation_list_path: REVOCATION_LIST_FILE.to_string(),
         receipt_encoding: RECEIPT_ENCODING_TLV_V2.to_string(),
+        signer_base_url: None,
+        auth_mode: None,
+        auth_audience: None,
+        request_timeout_ms: None,
+        trust_registry_url: None,
+        revocations_url: None,
+        pinned_trust_authority_public_key: None,
     }
 }
 
@@ -1684,6 +1986,9 @@ fn load_issuer_from_config(
     root: &Path,
     config: &SignerConfigJson,
 ) -> Result<LocalIssuer, HostError> {
+    if config.backend == "remote_kms_v1" {
+        return load_remote_issuer_from_config(config);
+    }
     let secret_path = resolve_config_path(root, &config.secret_key_path);
     let public_path = resolve_config_path(root, &config.public_key_path);
     let secret_key = decode_fixed::<32>(&fs::read_to_string(&secret_path)?)?;
@@ -1698,12 +2003,73 @@ fn load_issuer_from_config(
     ensure_registry_entry(root, config, &public_key)?;
     ensure_signed_revocation_list(root, config, &secret_key, &public_key, &config.key_id)?;
     Ok(LocalIssuer {
-        secret_key,
         public_key,
         key_id: config.key_id.clone(),
         issuer_name: config.issuer_name.clone(),
         backend: config.backend.clone(),
         receipt_encoding: config.receipt_encoding.clone(),
+        signer_backend: SignerBackend::LocalEd25519 {
+            secret_key,
+            requires_demo_consent: config.backend == "demo_file",
+        },
+    })
+}
+
+fn load_remote_issuer_from_config(config: &SignerConfigJson) -> Result<LocalIssuer, HostError> {
+    let trust_registry_url = config.trust_registry_url.as_deref().ok_or_else(|| {
+        HostError::InvalidInput("remote_kms_v1 requires trust_registry_url".to_string())
+    })?;
+    let registry: TrustRegistryV2Json = Client::builder()
+        .timeout(std::time::Duration::from_millis(
+            config.request_timeout_ms.unwrap_or(5_000),
+        ))
+        .build()?
+        .get(trust_registry_url)
+        .send()?
+        .error_for_status()?
+        .json()?;
+    if registry.schema != "ink.trust-registry.v2" {
+        return Err(HostError::Trust(format!(
+            "remote trust registry must use ink.trust-registry.v2, got {}",
+            registry.schema
+        )));
+    }
+    if let Some(pinned) = config.pinned_trust_authority_public_key.as_deref() {
+        if !verify_trust_registry_signature_v2(&registry, pinned)? {
+            return Err(HostError::Trust(
+                "remote trust registry signature verification failed".to_string(),
+            ));
+        }
+    }
+    let issuer = registry
+        .issuers
+        .iter()
+        .find(|entry| {
+            entry.key_id == config.key_id
+                && entry.issuer_name == config.issuer_name
+                && entry.usage == "receipt_signing"
+                && matches!(entry.state.as_str(), "active" | "retired")
+        })
+        .ok_or_else(|| {
+            HostError::Trust(format!(
+                "remote trust registry missing receipt_signing issuer {}",
+                config.key_id
+            ))
+        })?;
+    Ok(LocalIssuer {
+        public_key: decode_fixed::<32>(&issuer.public_key)?,
+        key_id: config.key_id.clone(),
+        issuer_name: config.issuer_name.clone(),
+        backend: config.backend.clone(),
+        receipt_encoding: config.receipt_encoding.clone(),
+        signer_backend: SignerBackend::RemoteKmsV1(RemoteSignerBackend {
+            base_url: config.signer_base_url.clone().ok_or_else(|| {
+                HostError::InvalidInput("remote_kms_v1 requires signer_base_url".to_string())
+            })?,
+            auth_mode: config.auth_mode.clone(),
+            auth_audience: config.auth_audience.clone(),
+            request_timeout_ms: config.request_timeout_ms.unwrap_or(5_000),
+        }),
     })
 }
 
@@ -1898,6 +2264,38 @@ fn revocation_list_digest(list: &RevocationListJson) -> Result<Sha256Digest, Hos
     Ok(sha256(&canonicalize_legacy(&value)))
 }
 
+fn trust_registry_digest_v2(list: &TrustRegistryV2Json) -> Result<Sha256Digest, HostError> {
+    let mut value = serde_json::to_value(list)?;
+    if let Some(map) = value.as_object_mut() {
+        map.remove("signing");
+    }
+    Ok(sha256(&canonicalize_legacy(&value)))
+}
+
+fn verify_trust_registry_signature_v2(
+    registry: &TrustRegistryV2Json,
+    pinned_public_key: &str,
+) -> Result<bool, HostError> {
+    let digest = trust_registry_digest_v2(registry)?;
+    let expected_payload_hash = digest_json(&digest);
+    if registry.signing.payload_hash.algorithm != expected_payload_hash.algorithm
+        || registry.signing.payload_hash.digest != expected_payload_hash.digest
+    {
+        return Ok(false);
+    }
+    if registry.signing.algorithm != "Ed25519"
+        || registry.signing.transcript_encoding != "INK-TRUST-REGISTRY-JSON-V2"
+    {
+        return Ok(false);
+    }
+    Ok(verify_ed25519_message_hash_bytes(
+        &digest.0,
+        &decode_fixed::<64>(&registry.signing.signature)?,
+        &decode_fixed::<32>(pinned_public_key)?,
+    )
+    .unwrap_or(false))
+}
+
 fn receipt_digest_for_encoding(
     receipt: &ReceiptJson,
     payload: &ReceiptPayload<'_>,
@@ -1984,6 +2382,80 @@ fn hash_controls_summary(controls: &[ControlObservation]) -> Sha256Digest {
         let _ = write_tlv(&mut sink, 4, &control.actor_hash.0);
     }
     sink.finalize()
+}
+
+fn hosted_model_json(
+    request: &HostedReceiptIssueRequest,
+    body_bytes: &[u8],
+    metadata_bytes: &[u8],
+) -> ModelWaistJson {
+    let body_hash = digest_json(&sha256(body_bytes));
+    let metadata_hash = digest_json(&sha256(metadata_bytes));
+    let action_hash = digest_json(&sha256(request.action_id.as_bytes()));
+    let schema_hash = digest_json(&sha256(request.schema_key.as_bytes()));
+    let workflow_hash = digest_json(&sha256(request.workflow_kind.as_bytes()));
+    ModelWaistJson {
+        schema: "ink.model-waist.v1".to_string(),
+        identity: ModelIdentityJson {
+            model_class: "hosted_api".to_string(),
+            model_ref_hash: digest_json(&sha256(b"blkbx-lab:hosted-workflow")),
+            model_slug: "hosted-workflow".to_string(),
+            identity_evidence: IdentityEvidenceJson::Declared,
+        },
+        invocation: ModelInvocationJson {
+            action_hash,
+            messages_hash: body_hash.clone(),
+            system_prompt_hash: None,
+            tool_spec_hash: None,
+            response_schema_hash: Some(schema_hash.clone()),
+            parameters_hash: metadata_hash.clone(),
+            requested_output: RequestedOutputJson::JsonSchema { schema_hash },
+        },
+        observation: ModelObservationJson {
+            output_text_hash: None,
+            structured_output_hash: Some(body_hash),
+            provider_metadata_hash: Some(metadata_hash),
+            finish_reason: "stop".to_string(),
+            usage: TokenUsageJson {
+                input_tokens: None,
+                output_tokens: None,
+                total_tokens: None,
+            },
+        },
+        runtime: RuntimeJson {
+            runtime_kind: "hosted_model_gateway".to_string(),
+            execution_topology: "remote_gateway".to_string(),
+            replay_strength: "declared_only".to_string(),
+            determinism: RuntimeDeterminismJson {
+                deterministic: false,
+                seed_bound: false,
+            },
+            isolation: RuntimeIsolationJson {
+                process_isolated: true,
+            },
+            provider_routing: ProviderRoutingJson {
+                fallbacks_allowed: false,
+                provider_pinned: true,
+                data_collection_policy: "declared_deny".to_string(),
+            },
+        },
+        plugin: PluginJson {
+            plugin_id_hash: workflow_hash,
+            plugin_version_hash: digest_json(&sha256(request.schema_version.as_bytes())),
+            plugin_api_version: "v1".to_string(),
+            maintainer_class: "first_party_reference".to_string(),
+            normalization: NormalizationJson {
+                input_normalized: true,
+                output_normalized: true,
+                raw_request_preserved: true,
+                raw_response_preserved: false,
+                secrets_redacted: true,
+            },
+            plugin_manifest_hash: digest_json(&sha256(b"blkbx-lab:hosted-workflow-plugin")),
+            plugin_id_hint: request.workflow_kind.clone(),
+            trust_level: "first_party_reference".to_string(),
+        },
+    }
 }
 
 fn canonicalize_legacy(value: &Value) -> Vec<u8> {
@@ -2441,25 +2913,110 @@ fn media_type_from_str(value: &str) -> Result<MediaType, HostError> {
 }
 
 struct LocalIssuer {
-    secret_key: [u8; 32],
     public_key: [u8; 32],
     key_id: String,
     issuer_name: String,
     backend: String,
     receipt_encoding: String,
+    signer_backend: SignerBackend,
 }
 
-impl Drop for LocalIssuer {
-    fn drop(&mut self) {
-        // Zero out the secret key to prevent memory leakage
-        for byte in &mut self.secret_key {
-            *byte = 0;
-        }
-    }
+enum SignerBackend {
+    LocalEd25519 {
+        secret_key: [u8; 32],
+        requires_demo_consent: bool,
+    },
+    RemoteKmsV1(RemoteSignerBackend),
+}
+
+struct RemoteSignerBackend {
+    base_url: String,
+    auth_mode: Option<String>,
+    auth_audience: Option<String>,
+    request_timeout_ms: u64,
+}
+
+struct SignOperationResult {
+    signature: [u8; 64],
+    signer_request_id: Option<String>,
+    trust_registry_version: Option<String>,
+    revocation_version: Option<String>,
 }
 
 impl LocalIssuer {
     fn requires_demo_consent(&self) -> bool {
-        self.backend == "demo_file"
+        matches!(
+            self.signer_backend,
+            SignerBackend::LocalEd25519 {
+                requires_demo_consent: true,
+                ..
+            }
+        )
+    }
+
+    fn sign_digest(&self, digest: &Sha256Digest) -> Result<SignOperationResult, HostError> {
+        match &self.signer_backend {
+            SignerBackend::LocalEd25519 { secret_key, .. } => {
+                let signing_key = SigningKey::from_bytes(secret_key);
+                Ok(SignOperationResult {
+                    signature: signing_key.sign(&digest.0).to_bytes(),
+                    signer_request_id: None,
+                    trust_registry_version: None,
+                    revocation_version: None,
+                })
+            }
+            SignerBackend::RemoteKmsV1(remote) => remote.sign(
+                &self.key_id,
+                &self.issuer_name,
+                &self.receipt_encoding,
+                digest,
+            ),
+        }
+    }
+}
+
+impl Drop for SignerBackend {
+    fn drop(&mut self) {
+        if let SignerBackend::LocalEd25519 { secret_key, .. } = self {
+            for byte in secret_key {
+                *byte = 0;
+            }
+        }
+    }
+}
+
+impl RemoteSignerBackend {
+    fn sign(
+        &self,
+        key_id: &str,
+        issuer_name: &str,
+        receipt_encoding: &str,
+        digest: &Sha256Digest,
+    ) -> Result<SignOperationResult, HostError> {
+        let client = Client::builder()
+            .timeout(std::time::Duration::from_millis(self.request_timeout_ms))
+            .build()?;
+        let request = RemoteSignRequest {
+            key_id: key_id.to_string(),
+            issuer_name: issuer_name.to_string(),
+            algorithm: "Ed25519".to_string(),
+            transcript_encoding: receipt_encoding.to_string(),
+            payload_hash: digest_json(digest),
+        };
+        let mut builder = client.post(format!("{}/v1/signatures/ed25519", self.base_url));
+        if self.auth_mode.as_deref() == Some("bearer") {
+            if let Some(token) = self.auth_audience.as_ref() {
+                builder = builder.bearer_auth(token);
+            }
+        }
+        let response: RemoteSignResponse =
+            builder.json(&request).send()?.error_for_status()?.json()?;
+        let signature = decode_fixed::<64>(&response.signature)?;
+        Ok(SignOperationResult {
+            signature,
+            signer_request_id: response.signer_request_id,
+            trust_registry_version: response.trust_registry_version,
+            revocation_version: response.revocation_version,
+        })
     }
 }

@@ -47,10 +47,7 @@ module Mand8
             slug: definition.dig("workspace", "slug")
           }
         end,
-        verifier_handoff: {
-          verify_path: "/verify?workspace_id=#{@workspace.id}",
-          product: "mand8"
-        }
+        verifier_handoff: VerifierHandoff.payload(workspace: @workspace)
       }
     end
 
@@ -97,7 +94,7 @@ module Mand8
           }
         end,
         "bundle_ids" => bundles.map(&:id),
-        "verify_path" => "/verify?workspace_id=#{@workspace.id}&case_id=#{case_id}"
+        "verifier_handoff" => VerifierHandoff.payload(workspace: @workspace, case_id: case_id)
       }
     end
 

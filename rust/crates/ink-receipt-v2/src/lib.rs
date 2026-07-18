@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
 use base64ct::{Base64UrlUnpadded, Encoding};
+use chrono::{TimeZone, Utc};
 use ink_core::bounded::{DomainTag, IssuerId, SchemaAuthority, SchemaId};
 use ink_core::controls::{ControlObservation, ControlStatus, ControlType};
 use ink_core::digest::{sha256, write_tlv, Sha256Sink};
@@ -32,13 +33,17 @@ pub const RECEIPT_PROFILE: &str = "thin_waist_v2";
 pub const MANIFEST_SCHEMA_V2: &str = "ink.manifest.v2";
 pub const CONTROLS_SCHEMA_V1: &str = "ink.controls.v1";
 pub const TRUST_REGISTRY_SCHEMA_V1: &str = "ink.trust-registry.v1";
+pub const TRUST_REGISTRY_SCHEMA_V2: &str = "ink.trust-registry.v2";
 pub const REVOCATIONS_SCHEMA_V1: &str = "ink.revocations.v1";
+pub const REVOCATIONS_SCHEMA_V2: &str = "ink.revocations.v2";
 pub const VERIFY_POLICY_SCHEMA_V1: &str = "ink.verify-policy.v1";
 pub const VERIFICATION_REPORT_SCHEMA_V1: &str = "ink.verification-report.v1";
 pub const RECEIPT_ENCODING_TLV_V2: &str = "INK-CORE-TLV-V2";
 pub const RECEIPT_ENCODING_TLV_V1_LEGACY: &str = "INK-CORE-TRANSCRIPT-V1";
 pub const RECEIPT_ENCODING_JSON_CANONICAL_V1: &str = "INK-CORE-JSON-CANONICAL-V1";
 pub const REVOCATION_ENCODING_JSON_V1: &str = "INK-REVOCATION-JSON-V1";
+pub const TRUST_REGISTRY_ENCODING_JSON_V2: &str = "INK-TRUST-REGISTRY-JSON-V2";
+pub const REVOCATION_ENCODING_JSON_V2: &str = "INK-REVOCATION-JSON-V2";
 pub const BANK_STRICT_POLICY_ID: &str = "BANK_STRICT_POLICY";
 pub const HOST_COMPATIBILITY_POLICY_ID: &str = "HOST_COMPATIBILITY_POLICY";
 
@@ -300,8 +305,50 @@ pub struct TrustedIssuerJson {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct TrustRegistryV2Json {
+    pub schema: String,
+    pub registry_version: String,
+    pub published_at: String,
+    #[serde(default)]
+    pub trust_authorities: Vec<TrustAuthorityJson>,
+    pub issuers: Vec<TrustedIssuerV2Json>,
+    pub signing: SigningJson,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct TrustAuthorityJson {
+    pub key_id: String,
+    pub algorithm: String,
+    pub public_key: String,
+    pub state: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct TrustedIssuerV2Json {
+    pub key_id: String,
+    pub algorithm: String,
+    pub public_key: String,
+    pub issuer_name: String,
+    pub org_name: String,
+    pub usage: String,
+    pub state: String,
+    pub valid_from: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub valid_until: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct RevocationListJson {
     pub schema: String,
+    pub revoked_keys: Vec<RevokedKeyJson>,
+    pub signing: SigningJson,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RevocationListV2Json {
+    pub schema: String,
+    pub list_version: String,
+    pub published_at: String,
     pub revoked_keys: Vec<RevokedKeyJson>,
     pub signing: SigningJson,
 }
@@ -386,6 +433,8 @@ pub struct VerificationReportJson {
     pub schema: String,
     pub status: String,
     pub code: String,
+    pub summary_status: String,
+    pub summary_text: String,
     pub transcript_encoding: String,
     pub receipt_profile: String,
     pub issuer: String,
@@ -410,12 +459,41 @@ struct RevocationOutcome {
     code: &'static str,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum TrustRegistryDocument {
+    V1(TrustRegistryJson),
+    V2(TrustRegistryV2Json),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum RevocationDocument {
+    V1(RevocationListJson),
+    V2(RevocationListV2Json),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum TrustedIssuerMatch<'a> {
+    V1(&'a TrustedIssuerJson),
+    V2(&'a TrustedIssuerV2Json),
+}
+
 pub fn load_trust_registry(bytes: &[u8]) -> Result<TrustRegistryJson> {
     let registry: TrustRegistryJson = serde_json::from_slice(bytes)?;
     if registry.schema != TRUST_REGISTRY_SCHEMA_V1 {
         return Err(ReceiptV2Error::InvalidInput(format!(
             "expected {}",
             TRUST_REGISTRY_SCHEMA_V1
+        )));
+    }
+    Ok(registry)
+}
+
+pub fn load_trust_registry_v2(bytes: &[u8]) -> Result<TrustRegistryV2Json> {
+    let registry: TrustRegistryV2Json = serde_json::from_slice(bytes)?;
+    if registry.schema != TRUST_REGISTRY_SCHEMA_V2 {
+        return Err(ReceiptV2Error::InvalidInput(format!(
+            "expected {}",
+            TRUST_REGISTRY_SCHEMA_V2
         )));
     }
     Ok(registry)
@@ -430,6 +508,51 @@ pub fn load_revocation_list(bytes: &[u8]) -> Result<RevocationListJson> {
         )));
     }
     Ok(list)
+}
+
+pub fn load_revocation_list_v2(bytes: &[u8]) -> Result<RevocationListV2Json> {
+    let list: RevocationListV2Json = serde_json::from_slice(bytes)?;
+    if list.schema != REVOCATIONS_SCHEMA_V2 {
+        return Err(ReceiptV2Error::InvalidInput(format!(
+            "expected {}",
+            REVOCATIONS_SCHEMA_V2
+        )));
+    }
+    Ok(list)
+}
+
+fn load_trust_registry_document(bytes: &[u8]) -> Result<TrustRegistryDocument> {
+    let value: Value = serde_json::from_slice(bytes)?;
+    match value.get("schema").and_then(Value::as_str) {
+        Some(TRUST_REGISTRY_SCHEMA_V1) => {
+            Ok(TrustRegistryDocument::V1(serde_json::from_value(value)?))
+        }
+        Some(TRUST_REGISTRY_SCHEMA_V2) => {
+            Ok(TrustRegistryDocument::V2(serde_json::from_value(value)?))
+        }
+        Some(other) => Err(ReceiptV2Error::InvalidInput(format!(
+            "expected {} or {}, got {other}",
+            TRUST_REGISTRY_SCHEMA_V1, TRUST_REGISTRY_SCHEMA_V2
+        ))),
+        None => Err(ReceiptV2Error::InvalidInput(
+            "trust registry missing schema".to_string(),
+        )),
+    }
+}
+
+fn load_revocation_document(bytes: &[u8]) -> Result<RevocationDocument> {
+    let value: Value = serde_json::from_slice(bytes)?;
+    match value.get("schema").and_then(Value::as_str) {
+        Some(REVOCATIONS_SCHEMA_V1) => Ok(RevocationDocument::V1(serde_json::from_value(value)?)),
+        Some(REVOCATIONS_SCHEMA_V2) => Ok(RevocationDocument::V2(serde_json::from_value(value)?)),
+        Some(other) => Err(ReceiptV2Error::InvalidInput(format!(
+            "expected {} or {}, got {other}",
+            REVOCATIONS_SCHEMA_V1, REVOCATIONS_SCHEMA_V2
+        ))),
+        None => Err(ReceiptV2Error::InvalidInput(
+            "revocation list missing schema".to_string(),
+        )),
+    }
 }
 
 pub fn load_verify_policy(bytes: &[u8]) -> Result<VerifyPolicyJson> {
@@ -471,9 +594,13 @@ pub fn verify_receipt(
         .map(load_verify_policy)
         .transpose()?
         .unwrap_or_else(VerifyPolicyJson::bank_strict);
-    let registry = trust_registry_json.map(load_trust_registry).transpose()?;
-    let revocations = revocation_list_json.map(load_revocation_list).transpose()?;
-    verify_receipt_with_inputs(
+    let registry = trust_registry_json
+        .map(load_trust_registry_document)
+        .transpose()?;
+    let revocations = revocation_list_json
+        .map(load_revocation_document)
+        .transpose()?;
+    verify_receipt_with_documents(
         receipt_json,
         manifest_json,
         controls_json,
@@ -493,23 +620,25 @@ pub fn verify_receipt_with_registry(
     verify_policy: &VerifyPolicyJson,
     pinned_public_key: Option<&str>,
 ) -> Result<VerificationReportJson> {
-    verify_receipt_with_inputs(
+    let registry_doc = trust_registry.cloned().map(TrustRegistryDocument::V1);
+    let revocation_doc = revocation_list.cloned().map(RevocationDocument::V1);
+    verify_receipt_with_documents(
         receipt_json,
         manifest_json,
         controls_json,
-        trust_registry,
-        revocation_list,
+        registry_doc.as_ref(),
+        revocation_doc.as_ref(),
         verify_policy,
         pinned_public_key,
     )
 }
 
-fn verify_receipt_with_inputs(
+fn verify_receipt_with_documents(
     receipt_json: &[u8],
     manifest_json: Option<&[u8]>,
     controls_json: Option<&[u8]>,
-    trust_registry: Option<&TrustRegistryJson>,
-    revocation_list: Option<&RevocationListJson>,
+    trust_registry: Option<&TrustRegistryDocument>,
+    revocation_list: Option<&RevocationDocument>,
     verify_policy: &VerifyPolicyJson,
     pinned_public_key: Option<&str>,
 ) -> Result<VerificationReportJson> {
@@ -529,16 +658,12 @@ fn verify_receipt_with_inputs(
         == expected_payload_hash.algorithm
         && receipt.signing.payload_hash.digest == expected_payload_hash.digest;
 
-    let trusted_issuer_entry = trust_registry.and_then(|registry| {
-        registry.issuers.iter().find(|entry| {
-            entry.key_id == receipt.signing.key_id
-                && entry.issuer_name == receipt.issuer.name
-                && entry.status == "active"
-        })
-    });
+    let trusted_issuer_entry = trust_registry
+        .and_then(|registry| find_trusted_issuer(registry, &receipt))
+        .filter(|entry| trusted_issuer_is_currently_acceptable(entry, &receipt));
     let embedded_key = Ed25519PublicKey(decode_fixed::<32>(&receipt.issuer.public_key)?);
-    let verification_key = if let Some(entry) = trusted_issuer_entry {
-        Ed25519PublicKey(decode_fixed::<32>(&entry.public_key)?)
+    let verification_key = if let Some(ref entry) = trusted_issuer_entry {
+        Ed25519PublicKey(decode_fixed::<32>(trusted_issuer_public_key(&entry))?)
     } else if let Some(value) = pinned_public_key {
         Ed25519PublicKey(decode_fixed::<32>(value)?)
     } else {
@@ -597,6 +722,15 @@ fn verify_receipt_with_inputs(
             code: "ISSUER_KEY_REVOCATION_NOT_PERFORMED",
         },
     };
+    let trust_registry_signature_valid = trust_registry
+        .map(|registry| match registry {
+            TrustRegistryDocument::V1(_) => Ok(true),
+            TrustRegistryDocument::V2(_) => {
+                verify_trust_registry_signature(registry, pinned_public_key)
+            }
+        })
+        .transpose()?
+        .unwrap_or(true);
 
     let mut checks = Vec::new();
     checks.push(binary_check(
@@ -617,6 +751,16 @@ fn verify_receipt_with_inputs(
         "ISSUER_KEY_TRUSTED",
         "UNTRUSTED_ISSUER",
     ));
+    if let Some(registry) = trust_registry {
+        if matches!(registry, TrustRegistryDocument::V2(_)) {
+            checks.push(binary_check(
+                "trust_registry.signature",
+                trust_registry_signature_valid,
+                "TRUST_REGISTRY_SIGNATURE_VALID",
+                "TRUST_REGISTRY_SIGNATURE_INVALID",
+            ));
+        }
+    }
     checks.push(if revocation.checked {
         binary_check(
             "issuer.revocation",
@@ -708,6 +852,8 @@ fn verify_receipt_with_inputs(
         code = "INVALID_SIGNATURE";
     } else if !kernel_projection_valid {
         code = "KERNEL_PROJECTION_INVALID";
+    } else if !trust_registry_signature_valid {
+        code = "TRUST_REGISTRY_SIGNATURE_INVALID";
     } else if verify_policy.require_canonical_tlv_v2
         && receipt.signing.transcript_encoding != RECEIPT_ENCODING_TLV_V2
     {
@@ -736,6 +882,7 @@ fn verify_receipt_with_inputs(
     }
 
     let policy_accepted = code == "VALID_RECEIPT";
+    let (summary_status, summary_text) = verification_summary(code, &checks);
     Ok(VerificationReportJson {
         schema: VERIFICATION_REPORT_SCHEMA_V1.to_string(),
         status: if policy_accepted {
@@ -744,6 +891,8 @@ fn verify_receipt_with_inputs(
             "invalid".to_string()
         },
         code: code.to_string(),
+        summary_status,
+        summary_text,
         transcript_encoding: receipt.signing.transcript_encoding.clone(),
         receipt_profile: receipt.receipt_profile.clone(),
         issuer: receipt.issuer.name.clone(),
@@ -762,31 +911,144 @@ fn verify_receipt_with_inputs(
     })
 }
 
+fn find_trusted_issuer<'a>(
+    trust_registry: &'a TrustRegistryDocument,
+    receipt: &ReceiptJson,
+) -> Option<TrustedIssuerMatch<'a>> {
+    match trust_registry {
+        TrustRegistryDocument::V1(registry) => registry
+            .issuers
+            .iter()
+            .find(|entry| {
+                entry.key_id == receipt.signing.key_id
+                    && entry.issuer_name == receipt.issuer.name
+                    && entry.status == "active"
+            })
+            .map(TrustedIssuerMatch::V1),
+        TrustRegistryDocument::V2(registry) => registry
+            .issuers
+            .iter()
+            .find(|entry| {
+                entry.key_id == receipt.signing.key_id
+                    && entry.issuer_name == receipt.issuer.name
+                    && entry.usage == "receipt_signing"
+                    && matches!(entry.state.as_str(), "active" | "retired")
+                    && trusted_issuer_valid_for_receipt(entry, receipt.issued_at)
+            })
+            .map(TrustedIssuerMatch::V2),
+    }
+}
+
+fn trusted_issuer_public_key<'a>(entry: &'a TrustedIssuerMatch<'a>) -> &'a str {
+    match entry {
+        TrustedIssuerMatch::V1(value) => &value.public_key,
+        TrustedIssuerMatch::V2(value) => &value.public_key,
+    }
+}
+
+fn trusted_issuer_is_currently_acceptable(
+    entry: &TrustedIssuerMatch<'_>,
+    receipt: &ReceiptJson,
+) -> bool {
+    match entry {
+        TrustedIssuerMatch::V1(value) => value.status == "active",
+        TrustedIssuerMatch::V2(value) => {
+            value.usage == "receipt_signing"
+                && matches!(value.state.as_str(), "active" | "retired")
+                && trusted_issuer_valid_for_receipt(value, receipt.issued_at)
+        }
+    }
+}
+
+fn trusted_issuer_valid_for_receipt(entry: &TrustedIssuerV2Json, issued_at: i64) -> bool {
+    let Some(issued_at) = Utc.timestamp_opt(issued_at, 0).single() else {
+        return false;
+    };
+    let valid_from = chrono::DateTime::parse_from_rfc3339(&entry.valid_from)
+        .map(|value| value.with_timezone(&Utc))
+        .ok();
+    let valid_until = entry
+        .valid_until
+        .as_ref()
+        .and_then(|value| chrono::DateTime::parse_from_rfc3339(value).ok())
+        .map(|value| value.with_timezone(&Utc));
+    match (valid_from, valid_until) {
+        (Some(start), Some(end)) => issued_at >= start && issued_at <= end,
+        (Some(start), None) => issued_at >= start,
+        (None, Some(end)) => issued_at <= end,
+        (None, None) => true,
+    }
+}
+
+fn verify_trust_registry_signature(
+    trust_registry: &TrustRegistryDocument,
+    pinned_public_key: Option<&str>,
+) -> Result<bool> {
+    let TrustRegistryDocument::V2(registry) = trust_registry else {
+        return Ok(true);
+    };
+    let Some(signer_key) = resolve_trust_authority_key(
+        &registry.trust_authorities,
+        &registry.signing.key_id,
+        pinned_public_key,
+    )?
+    else {
+        return Ok(false);
+    };
+    verify_document_signature(
+        trust_registry_digest_v2(registry)?,
+        &registry.signing,
+        &signer_key,
+        TRUST_REGISTRY_ENCODING_JSON_V2,
+        "TRUST_REGISTRY_PAYLOAD_HASH_MISMATCH",
+        "TRUST_REGISTRY_INVALID_SIGNATURE",
+    )
+}
+
 fn verify_revocations(
-    list: &RevocationListJson,
-    trust_registry: Option<&TrustRegistryJson>,
+    list: &RevocationDocument,
+    trust_registry: Option<&TrustRegistryDocument>,
     pinned_public_key: Option<&str>,
     receipt: &ReceiptJson,
 ) -> Result<RevocationOutcome> {
-    let trusted_signer_entry = trust_registry.and_then(|registry| {
-        registry
+    match list {
+        RevocationDocument::V1(list) => {
+            verify_revocations_v1(list, trust_registry, pinned_public_key, receipt)
+        }
+        RevocationDocument::V2(list) => {
+            verify_revocations_v2(list, trust_registry, pinned_public_key, receipt)
+        }
+    }
+}
+
+fn verify_revocations_v1(
+    list: &RevocationListJson,
+    trust_registry: Option<&TrustRegistryDocument>,
+    pinned_public_key: Option<&str>,
+    receipt: &ReceiptJson,
+) -> Result<RevocationOutcome> {
+    let trusted_signer_entry = match trust_registry {
+        Some(TrustRegistryDocument::V1(registry)) => registry
             .issuers
             .iter()
             .find(|entry| entry.key_id == list.signing.key_id && entry.status == "active")
-    });
+            .map(|entry| entry.public_key.as_str()),
+        Some(TrustRegistryDocument::V2(registry)) => registry
+            .issuers
+            .iter()
+            .find(|entry| {
+                entry.key_id == list.signing.key_id
+                    && entry.usage == "trust_publication"
+                    && entry.state == "active"
+            })
+            .map(|entry| entry.public_key.as_str()),
+        None => None,
+    };
 
-    let signer_key = if let Some(entry) = trusted_signer_entry {
-        Ed25519PublicKey(decode_fixed::<32>(&entry.public_key)?)
+    let signer_key = if let Some(value) = trusted_signer_entry {
+        Ed25519PublicKey(decode_fixed::<32>(value)?)
     } else if let Some(value) = pinned_public_key {
-        if list.signing.key_id == receipt.signing.key_id {
-            Ed25519PublicKey(decode_fixed::<32>(value)?)
-        } else {
-            return Ok(RevocationOutcome {
-                checked: true,
-                ok: false,
-                code: "UNTRUSTED_REVOCATION_LIST_SIGNER",
-            });
-        }
+        Ed25519PublicKey(decode_fixed::<32>(value)?)
     } else if list.signing.key_id == receipt.signing.key_id {
         Ed25519PublicKey(decode_fixed::<32>(&receipt.issuer.public_key)?)
     } else {
@@ -846,6 +1108,119 @@ fn verify_revocations(
     })
 }
 
+fn verify_revocations_v2(
+    list: &RevocationListV2Json,
+    trust_registry: Option<&TrustRegistryDocument>,
+    pinned_public_key: Option<&str>,
+    receipt: &ReceiptJson,
+) -> Result<RevocationOutcome> {
+    let trust_authorities = match trust_registry {
+        Some(TrustRegistryDocument::V2(registry)) => registry.trust_authorities.as_slice(),
+        _ => &[],
+    };
+    let Some(signer_key) =
+        resolve_trust_authority_key(trust_authorities, &list.signing.key_id, pinned_public_key)?
+    else {
+        return Ok(RevocationOutcome {
+            checked: true,
+            ok: false,
+            code: "UNTRUSTED_REVOCATION_LIST_SIGNER",
+        });
+    };
+
+    let digest = revocation_list_digest_v2(list)?;
+    let expected_payload_hash = digest_json(&digest);
+    if list.signing.payload_hash.algorithm != expected_payload_hash.algorithm
+        || list.signing.payload_hash.digest != expected_payload_hash.digest
+    {
+        return Ok(RevocationOutcome {
+            checked: true,
+            ok: false,
+            code: "REVOCATION_LIST_PAYLOAD_HASH_MISMATCH",
+        });
+    }
+    if list.signing.algorithm != "Ed25519"
+        || list.signing.transcript_encoding != REVOCATION_ENCODING_JSON_V2
+    {
+        return Ok(RevocationOutcome {
+            checked: true,
+            ok: false,
+            code: "REVOCATION_LIST_UNSUPPORTED_SIGNATURE_ALGORITHM",
+        });
+    }
+    let signature_valid = verify_ed25519_message_hash_bytes(
+        &digest.0,
+        &decode_fixed::<64>(&list.signing.signature)?,
+        &signer_key.0,
+    )
+    .unwrap_or(false);
+    if !signature_valid {
+        return Ok(RevocationOutcome {
+            checked: true,
+            ok: false,
+            code: "REVOCATION_LIST_INVALID_SIGNATURE",
+        });
+    }
+    if list
+        .revoked_keys
+        .iter()
+        .any(|entry| entry.key_id == receipt.signing.key_id)
+    {
+        return Ok(RevocationOutcome {
+            checked: true,
+            ok: false,
+            code: "REVOKED_ISSUER_KEY",
+        });
+    }
+    Ok(RevocationOutcome {
+        checked: true,
+        ok: true,
+        code: "ISSUER_KEY_NOT_REVOKED",
+    })
+}
+
+fn resolve_trust_authority_key(
+    trust_authorities: &[TrustAuthorityJson],
+    signer_key_id: &str,
+    pinned_public_key: Option<&str>,
+) -> Result<Option<Ed25519PublicKey>> {
+    if let Some(value) = pinned_public_key {
+        return Ok(Some(Ed25519PublicKey(decode_fixed::<32>(value)?)));
+    }
+    trust_authorities
+        .iter()
+        .find(|entry| entry.key_id == signer_key_id && entry.state == "active")
+        .map(|entry| decode_fixed::<32>(&entry.public_key).map(Ed25519PublicKey))
+        .transpose()
+        .map_err(Into::into)
+}
+
+fn verify_document_signature(
+    digest: Sha256Digest,
+    signing: &SigningJson,
+    signer_key: &Ed25519PublicKey,
+    expected_encoding: &str,
+    _payload_mismatch_code: &'static str,
+    _invalid_signature_code: &'static str,
+) -> Result<bool> {
+    let expected_payload_hash = digest_json(&digest);
+    if signing.payload_hash.algorithm != expected_payload_hash.algorithm
+        || signing.payload_hash.digest != expected_payload_hash.digest
+    {
+        return Ok(false);
+    }
+    if signing.algorithm != "Ed25519" || signing.transcript_encoding != expected_encoding {
+        return Ok(false);
+    }
+    let signature_valid = verify_ed25519_message_hash_bytes(
+        &digest.0,
+        &decode_fixed::<64>(&signing.signature)?,
+        &signer_key.0,
+    )
+    .unwrap_or(false);
+    Ok(signature_valid)
+}
+
 fn binary_check(id: &str, valid: bool, pass_code: &str, fail_code: &str) -> VerificationCheck {
     VerificationCheck {
         id: id.to_string(),
@@ -860,6 +1235,25 @@ fn binary_check(id: &str, valid: bool, pass_code: &str, fail_code: &str) -> Veri
             fail_code.to_string()
         },
     }
+}
+
+fn verification_summary(code: &str, checks: &[VerificationCheck]) -> (String, String) {
+    if code != "VALID_RECEIPT" {
+        return (
+            "fail".to_string(),
+            format!("Verification failed with code {code}."),
+        );
+    }
+    if checks.iter().any(|check| check.status == "not_performed") {
+        return (
+            "warning".to_string(),
+            "Verification passed, but one or more optional checks were not performed.".to_string(),
+        );
+    }
+    (
+        "pass".to_string(),
+        "Verification passed under the supplied policy.".to_string(),
+    )
 }
 
 fn normalize_model(json_model: &ModelWaistJson) -> Result<ModelWaist<'static>> {
@@ -1141,6 +1535,22 @@ fn kernel_projection_claim_hash(
 }
 
 fn revocation_list_digest(list: &RevocationListJson) -> Result<Sha256Digest> {
+    let mut value = serde_json::to_value(list)?;
+    if let Some(map) = value.as_object_mut() {
+        map.remove("signing");
+    }
+    Ok(sha256(&canonicalize_legacy(&value)))
+}
+
+fn trust_registry_digest_v2(list: &TrustRegistryV2Json) -> Result<Sha256Digest> {
+    let mut value = serde_json::to_value(list)?;
+    if let Some(map) = value.as_object_mut() {
+        map.remove("signing");
+    }
+    Ok(sha256(&canonicalize_legacy(&value)))
+}
+
+fn revocation_list_digest_v2(list: &RevocationListV2Json) -> Result<Sha256Digest> {
     let mut value = serde_json::to_value(list)?;
     if let Some(map) = value.as_object_mut() {
         map.remove("signing");

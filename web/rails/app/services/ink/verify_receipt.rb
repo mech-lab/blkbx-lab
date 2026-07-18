@@ -15,7 +15,7 @@ module Ink
     end
 
     def call
-      command = ENV.fetch("INK_VERIFY_COMMAND", "cargo run --quiet -p ink-cli -- verify-receipt")
+      command = ENV.fetch("INK_VERIFY_COMMAND", "cargo run --quiet -p ink-cli -- receipt")
       report_json, status, error_message = run_command(command)
 
       VerificationRun.create!(
@@ -38,7 +38,7 @@ module Ink
     def run_command(base_command)
       receipt_file = Tempfile.new(["receipt", ".json"])
       policy_file = Tempfile.new(["policy", ".json"])
-      receipt_file.write(JSON.pretty_generate(@receipt.body_json))
+      receipt_file.write(JSON.pretty_generate(@receipt.portable_receipt || @receipt.body_json))
       policy_file.write(JSON.pretty_generate(@verification_policy.policy_json))
       receipt_file.flush
       policy_file.flush

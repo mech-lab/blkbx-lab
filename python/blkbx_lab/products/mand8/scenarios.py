@@ -308,13 +308,14 @@ def _scenario_incident_to_renewal() -> dict[str, Any]:
 
 SCENARIO_BUILDERS = {
     "lloyds_cyber_happy_path": _scenario_happy_path,
+    "lloyds_human_review_edge_case": _scenario_human_review_edge,
     "lloyds_human_review_edge": _scenario_human_review_edge,
     "lloyds_incident_to_renewal": _scenario_incident_to_renewal,
 }
 
 
 def available_scenarios() -> list[str]:
-    return sorted(SCENARIO_BUILDERS)
+    return sorted(name for name in SCENARIO_BUILDERS if name != "lloyds_human_review_edge")
 
 
 def build_scenario(name: str) -> dict[str, Any]:

@@ -18,6 +18,10 @@ class Receipt < ApplicationRecord
   scope :for_workspace, ->(ws) { where(workspace: ws) }
   scope :by_schema, ->(key, version) { where(schema_key: key, schema_version: version) }
 
+  def portable_receipt
+    portable_receipt_json.presence || (body_json if body_json["schema"] == "ink.receipt.v2")
+  end
+
   def domain_specific?
     workflow_kind.present?
   end

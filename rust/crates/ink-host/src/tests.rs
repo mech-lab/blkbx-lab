@@ -11,12 +11,13 @@ use serde::Deserialize;
 use serde_json::json;
 
 use super::{
-    create_manifest, doctor, gate, key_id_for_public, load_signer_config,
+    create_manifest, doctor, gate, issue_hosted_receipt, key_id_for_public, load_signer_config,
     receipt_digest_for_encoding, receipt_payload_from_json, revocation_list_digest, verify,
-    HostError, LegacyTrustPolicyJson, LegacyTrustedKeyJson, ReceiptJson, RevocationListJson,
-    RevokedKeyJson, SignerConfigJson, TrustRegistryJson, ACTIVE_PUBLIC_FILE, ACTIVE_SECRET_FILE,
-    LEGACY_TRUST_POLICY_FILE, RECEIPT_ENCODING_JSON_CANONICAL_V1, RECEIPT_ENCODING_TLV_V1_LEGACY,
-    RECEIPT_ENCODING_TLV_V2, REVOCATION_LIST_FILE, SIGNER_CONFIG_FILE, TRUST_REGISTRY_FILE,
+    HostError, HostedReceiptIssueRequest, LegacyTrustPolicyJson, LegacyTrustedKeyJson, ReceiptJson,
+    RevocationListJson, RevokedKeyJson, SignerConfigJson, TrustRegistryJson, ACTIVE_PUBLIC_FILE,
+    ACTIVE_SECRET_FILE, LEGACY_TRUST_POLICY_FILE, RECEIPT_ENCODING_JSON_CANONICAL_V1,
+    RECEIPT_ENCODING_TLV_V1_LEGACY, RECEIPT_ENCODING_TLV_V2, REVOCATION_LIST_FILE,
+    SIGNER_CONFIG_FILE, TRUST_REGISTRY_FILE,
 };
 use crate::digest_json;
 use ink_core::digest::sha256;
@@ -573,6 +574,52 @@ fn doctor_migrates_legacy_trust_policy_into_current_config() {
         .issuers
         .iter()
         .any(|entry| entry.key_id == key_id && entry.issuer_name == "Legacy Issuer"));
+
+    let _ = fs::remove_dir_all(&root);
+}
+
+#[test]
+fn hosted_issue_receipt_emits_portable_v2_receipt_with_file_signer() {
+    let _guard = ENV_LOCK.lock().unwrap();
+    let root = unique_temp_dir("inkreceipts-hosted-issue");
+    let config_root = root.join("config");
+    env::set_var("INKRECEIPTS_CONFIG_DIR", &config_root);
+    fs::create_dir_all(&root).unwrap();
+    doctor(true).unwrap();
+
+    let signer_path = config_root.join(SIGNER_CONFIG_FILE);
+    let mut signer: SignerConfigJson =
+        serde_json::from_str(&fs::read_to_string(&signer_path).unwrap()).unwrap();
+    signer.backend = "file_ed25519".to_string();
+    fs::write(&signer_path, serde_json::to_vec_pretty(&signer).unwrap()).unwrap();
+
+    let response = issue_hosted_receipt(&HostedReceiptIssueRequest {
+        receipt_id: Some("urn:ink:receipt:test-hosted".to_string()),
+        action_id: "urn:ink:action:test-hosted".to_string(),
+        workflow_kind: "mand8_insurability".to_string(),
+        schema_key: "mand8.risk_receipt.v1".to_string(),
+        schema_version: "1.0.0".to_string(),
+        body_json: json!({
+          "schema": "mand8.risk_receipt.v1",
+          "decision": "bind_with_controls"
+        }),
+        domain_metadata: json!({
+          "risk_class": "medium",
+          "requires_human_review": false
+        }),
+        decision: Some("warn".to_string()),
+        issued_at: Some(1_784_736_000),
+        policy_id: None,
+        policy_version: None,
+    })
+    .unwrap();
+
+    let receipt = response.receipt;
+    assert_eq!(receipt["schema"], "ink.receipt.v2");
+    assert_eq!(receipt["signing"]["key_id"], json!(signer.key_id));
+    assert_eq!(response.key_id, signer.key_id);
+    assert_eq!(response.manifest_hash.algorithm, "sha-256");
+    assert!(receipt["signing"]["signature"].as_str().unwrap().len() > 10);
 
     let _ = fs::remove_dir_all(&root);
 }

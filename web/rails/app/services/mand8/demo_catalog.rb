@@ -111,7 +111,7 @@ module Mand8
           }
         }
       },
-      "lloyds_human_review_edge" => {
+      "lloyds_human_review_edge_case" => {
         "workspace" => {
           "name" => "Lloyd's Human Review Edge Case",
           "slug" => "mand8-lloyds-human-review-edge"
@@ -302,12 +302,16 @@ module Mand8
       }
     }.freeze
 
+    ALIASES = {
+      "lloyds_human_review_edge" => "lloyds_human_review_edge_case"
+    }.freeze
+
     def self.available_scenarios
       SCENARIOS.keys.sort
     end
 
     def self.fetch(name)
-      scenario = SCENARIOS[name]
+      scenario = SCENARIOS[ALIASES.fetch(name, name)]
       raise ArgumentError, "Unknown MAND8 demo scenario: #{name}" unless scenario
 
       scenario.deep_dup

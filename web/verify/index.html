@@ -3,25 +3,102 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>INK Receipts Verifier</title>
+    <title>INK Browser Verifier</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <main class="shell">
       <section class="hero">
         <p class="eyebrow">Independent Verification</p>
-        <h1>Verify receipts locally, outside the Rails platform.</h1>
+        <h1>Verify portable INK artifacts locally in the browser.</h1>
         <p class="lede">
-          This static verifier is the trust boundary companion to the shared commercial platform.
-          BLKBXS, MAND8, and DUE can package evidence, but verification still belongs to INK tooling.
+          This page is a WASM wrapper over the shared Rust verifier. MAND8 and Rails can package
+          workflow context and handoff metadata, but the trust claim still belongs to the native verifier.
         </p>
+        <div class="hero-actions">
+          <label class="artifact-url">
+            <span>Artifact URL</span>
+            <input id="artifact-url" type="url" placeholder="/api/v1/mand8/verifier_artifacts?workspace_id=123">
+          </label>
+          <button id="load-artifacts" type="button">Load Handoff</button>
+          <button id="verify-button" type="button">Verify Artifacts</button>
+          <button id="clear-button" type="button">Clear</button>
+        </div>
       </section>
 
-      <section class="panel">
-        <label for="receipt-input">Receipt JSON</label>
-        <textarea id="receipt-input" placeholder='Paste an `ink_receipt.v2.json` artifact here'></textarea>
-        <button id="verify-button" type="button">Validate Structure</button>
-        <pre id="verify-output">Awaiting local verification input.</pre>
+      <section class="grid">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Verification Inputs</h2>
+            <p>Paste portable `ink.receipt.v2` artifacts directly, or load a Rails handoff URL when one exists.</p>
+          </div>
+          <div class="field-grid">
+            <label>
+              <span>Receipt</span>
+              <textarea id="receipt-input" placeholder='{"schema":"ink.receipt.v2", ...}'></textarea>
+            </label>
+            <label>
+              <span>Manifest</span>
+              <textarea id="manifest-input" placeholder='{"schema":"ink.manifest.v2", ...}'></textarea>
+            </label>
+            <label>
+              <span>Verification Policy</span>
+              <textarea id="policy-input" placeholder='{"schema":"ink.verify-policy.v1", ...}'></textarea>
+            </label>
+            <label>
+              <span>Trust Registry</span>
+              <textarea id="registry-input" placeholder='{"schema":"ink.trust-registry.v1", ...}'></textarea>
+            </label>
+            <label>
+              <span>Revocations</span>
+              <textarea id="revocations-input" placeholder='{"schema":"ink.revocations.v1", ...}'></textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="stack">
+          <section class="panel summary-panel">
+            <div class="panel-head">
+              <h2>Summary</h2>
+              <p>The status badge and summary text come directly from the Rust report.</p>
+            </div>
+            <div class="summary-card" id="summary-card" data-status="idle">
+              <div class="summary-row">
+                <span class="badge" id="summary-status">Idle</span>
+                <span class="code" id="summary-code">Awaiting verification input.</span>
+              </div>
+              <p class="summary-text" id="summary-text">
+                Load a verifier handoff or paste a portable receipt to run verification locally.
+              </p>
+              <dl class="meta-list">
+                <div>
+                  <dt>Scope</dt>
+                  <dd id="summary-scope">n/a</dd>
+                </div>
+                <div>
+                  <dt>Engine</dt>
+                  <dd id="summary-engine">Rust ink-wasm</dd>
+                </div>
+              </dl>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Handoff Context</h2>
+              <p>Workspace and case metadata from Rails. This is presentation context, not the trust root.</p>
+            </div>
+            <pre id="context-output">No handoff context loaded.</pre>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Verification Report</h2>
+              <p>Raw `ink.verification-report.v1` output from the shared Rust verifier.</p>
+            </div>
+            <pre id="report-output">Awaiting local verification input.</pre>
+          </section>
+        </section>
       </section>
     </main>
     <script type="module" src="verify.js"></script>

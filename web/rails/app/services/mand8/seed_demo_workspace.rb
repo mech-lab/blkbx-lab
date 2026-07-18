@@ -117,9 +117,15 @@ module Mand8
       @workspace.verification_policies.find_or_create_by!(organization: @organization, name: "MAND8 Demo Verification Policy") do |policy|
         policy.policy_json = {
           "schema" => "ink.verify-policy.v1",
-          "name" => "MAND8 demo strict policy",
+          "policy_id" => "MAND8_DEMO_POLICY",
+          "require_canonical_tlv_v2" => true,
+          "allow_verify_only_formats" => false,
           "require_trusted_issuer" => false,
-          "network_required" => false
+          "require_revocation_check" => false,
+          "require_manifest_hash_match_when_manifest_present" => true,
+          "require_evidence_summary_match_when_manifest_present" => true,
+          "require_controls_summary_match_when_controls_present" => true,
+          "allow_network" => false
         }
         policy.active = true
       end

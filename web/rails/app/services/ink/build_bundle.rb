@@ -50,7 +50,9 @@ module Ink
         bundle_type: @bundle_type,
         title: @title,
         receipt_ids: @receipts.map(&:id),
-        verification_policy_ids: @receipts.flat_map { |receipt| receipt.verification_runs.select(:verification_policy_id).pluck(:verification_policy_id) }.uniq
+        verification_policy_ids: @receipts.flat_map { |receipt| receipt.verification_runs.select(:verification_policy_id).pluck(:verification_policy_id) }.uniq,
+        trust_registry_versions: @receipts.filter_map(&:trust_registry_version).uniq,
+        revocation_versions: @receipts.filter_map(&:revocation_version).uniq
       }
       manifest_json = JSON.generate(manifest)
 

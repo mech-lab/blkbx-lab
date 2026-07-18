@@ -1,6 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "MAND8 Risk Receipt",
+  "description": "Stable domain contract for MAND8 risk receipts. This schema is frozen and should not be modified.",
+  "version": "1.0.0",
+  "status": "stable",
   "type": "object",
   "required": [
     "schema",

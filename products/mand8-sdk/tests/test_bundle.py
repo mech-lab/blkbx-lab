@@ -54,6 +54,11 @@ def test_underwriting_and_renewal_bundle_exports() -> None:
 def test_seeded_scenarios_provide_three_demo_workspaces() -> None:
     seeded = scenarios.seeded_workspaces()
 
+    assert scenarios.available_scenarios() == [
+        "lloyds_cyber_happy_path",
+        "lloyds_human_review_edge_case",
+        "lloyds_incident_to_renewal",
+    ]
     assert [item["scenario"] for item in seeded] == [
         "happy_path",
         "human_review_edge",
@@ -61,6 +66,14 @@ def test_seeded_scenarios_provide_three_demo_workspaces() -> None:
     ]
     assert seeded[0]["bundle"]["coverage_summary"]["authority_receipt_count"] == 1
     assert seeded[2]["bundle"]["coverage_summary"]["incident_receipt_count"] == 1
+
+
+def test_human_review_alias_remains_loader_compatible() -> None:
+    canonical = scenarios.build_scenario("lloyds_human_review_edge_case")
+    compatibility = scenarios.build_scenario("lloyds_human_review_edge")
+
+    assert canonical["bundle"]["case_id"] == compatibility["bundle"]["case_id"]
+    assert canonical["workspace"]["slug"] == compatibility["workspace"]["slug"]
 
 
 def test_example_bundle_validates() -> None:

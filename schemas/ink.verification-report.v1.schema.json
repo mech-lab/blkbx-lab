@@ -8,6 +8,8 @@
     "schema",
     "status",
     "code",
+    "summary_status",
+    "summary_text",
     "transcript_encoding",
     "receipt_profile",
     "issuer",
@@ -32,6 +34,13 @@
       "enum": ["valid", "invalid"]
     },
     "code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary_status": {
+      "enum": ["pass", "warning", "fail"]
+    },
+    "summary_text": {
       "type": "string",
       "minLength": 1
     },

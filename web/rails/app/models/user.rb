@@ -8,6 +8,8 @@ class User < ApplicationRecord
   has_many :workspaces, through: :organizations
   has_many :reviewers, dependent: :nullify
   has_many :approvals, dependent: :nullify
+  has_many :requested_key_ceremonies, class_name: "KeyCeremony", foreign_key: :requested_by_id, dependent: :nullify
+  has_many :key_ceremony_approvals, dependent: :nullify
   has_many :audit_events, dependent: :nullify
   has_many :session_handoffs, dependent: :destroy
 

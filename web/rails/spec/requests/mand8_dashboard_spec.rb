@@ -24,5 +24,11 @@ RSpec.describe "MAND8 dashboard", type: :request do
     expect(parsed.dig("cases", 0, "incident_count")).to eq(1)
     expect(parsed.dig("cases", 0, "latest_verification_status")).to eq("warning")
     expect(parsed.dig("verifier_handoff", "product")).to eq("mand8")
+    expect(parsed.dig("verifier_handoff", "available")).to eq(false)
+    expect(parsed.dig("verifier_handoff", "reason_code")).to eq("PORTABLE_RECEIPT_MISSING")
+    expect(parsed.dig("verifier_handoff", "artifact_url")).to be_nil
+    expect(parsed.dig("cases", 0, "verifier_handoff", "available")).to eq(false)
+    expect(parsed.dig("cases", 0, "verifier_handoff", "reason_code")).to eq("PORTABLE_RECEIPT_MISSING")
+    expect(parsed.dig("cases", 0, "verifier_handoff", "verify_path")).to be_nil
   end
 end

@@ -17,6 +17,21 @@ Rails.application.routes.draw do
       resources :verifications, only: [:create]
       resources :evidence_bundles, only: [:create, :show, :index]
       resources :trust_registries, only: [:create, :show, :index]
+      resources :signing_keys, only: [:create, :show, :index]
+      resources :key_ceremonies, only: [:create, :show, :index] do
+        member do
+          post :approve
+          post :activate
+          post :retire
+          post :revoke
+          post :publish
+        end
+      end
+      resources :trust_publications, only: [:show, :index] do
+        collection do
+          get :current
+        end
+      end
       resources :api_credentials, only: [:create, :show, :index, :destroy]
 
       resources :organizations, only: [:show, :index, :create, :update] do
@@ -37,6 +52,7 @@ Rails.application.routes.draw do
 
       namespace :mand8 do
         resource :dashboard, only: :show
+        resource :verifier_artifacts, only: :show
         resources :insurability_receipts, only: [:create, :show, :index]
         resources :authority_receipts, only: [:create, :show, :index]
         resources :incident_receipts, only: [:create, :show, :index]
@@ -64,7 +80,9 @@ Rails.application.routes.draw do
 
   get "pricing", to: "pages#pricing"
   get "docs", to: "pages#docs"
-  get "verify", to: "pages#verify"
+  get "verify", to: redirect("/verify/index.html")
+  get "verify/index.html", to: "verify#show"
+  get "verify/*path", to: "verify#asset"
   get "status", to: "pages#status"
   resources :shared_bundles, only: :show do
     resources :download_events, only: :create

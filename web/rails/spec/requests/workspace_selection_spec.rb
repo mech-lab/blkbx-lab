@@ -30,5 +30,8 @@ RSpec.describe "Workspace selection and seeding", type: :request do
     expect(selected.fetch("selected")).to eq(true)
     expect(selected.dig("selection", "workspace_id")).to eq(workspace.id)
     expect(selected.dig("mand8", "summary", "case_count")).to eq(1)
+    expect(selected.dig("mand8", "verifier_handoff", "available")).to eq(false)
+    expect(selected.dig("mand8", "verifier_handoff", "reason_code")).to eq("PORTABLE_RECEIPT_MISSING")
+    expect(selected.dig("mand8", "verifier_handoff", "artifact_url")).to be_nil
   end
 end

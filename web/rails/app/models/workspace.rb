@@ -7,6 +7,8 @@ class Workspace < ApplicationRecord
   has_many :sdk_installations, dependent: :destroy
   has_many :issuers, dependent: :destroy
   has_many :signing_keys, dependent: :destroy
+  has_many :key_ceremonies, dependent: :destroy
+  has_many :trust_publications, dependent: :destroy
   has_many :trust_registries, dependent: :destroy
   has_many :receipts, dependent: :destroy
   has_many :payload_artifacts, dependent: :destroy
