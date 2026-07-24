@@ -1,2 +1,1 @@
 """Packaged BLKBXS demo fixtures."""
-

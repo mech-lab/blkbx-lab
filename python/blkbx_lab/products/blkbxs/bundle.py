@@ -81,4 +81,3 @@ def _verifier_report_summary(verifier_report: dict[str, Any] | None) -> dict[str
 
 
 __all__ = ["BUNDLE_SCHEMA_ID", "export_ubr_graph"]
-

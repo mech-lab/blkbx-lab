@@ -34,4 +34,3 @@ def validate(payload: dict[str, Any], schema_name: str | None = None) -> bool:
 
 
 __all__ = ["SCHEMA_FILES", "load_schema", "validate"]
-
