@@ -37,3 +37,5 @@ Those inputs are summarized and hashed into `ink_manifest.v2.json`.
 - `DUE` frames it as legal defensibility evidence.
 
 The domain overlays change semantics and audiences, not the underlying artifact contract.
+
+BLKBXS UBR is a concrete example of that split. The Universal Banking Receipt body records banking event state and graph links, while the linked `ink.receipt.v2` portable receipt remains the signed trust record.

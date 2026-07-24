@@ -42,10 +42,25 @@ print(bl.verify(result.receipt_path).report)
 - Stable product imports: `blkbxs`, `mand8`, `due`
 - Public artifacts: `ink_manifest.v2.json`, `ink_receipt.v2.json`, `receipt_comparison.v2.json`
 
+## Product Facade Example
+
+```python
+import blkbxs
+
+demo = blkbxs.scenarios.smb_loan_demo()
+validation = blkbxs.ubr.validate_graph(
+    demo["receipts"],
+    evidence_manifest=demo["evidence_manifest"],
+    verifier_report=demo["verifier_report"],
+)
+print(validation["valid"])
+```
+
 ## Current Scope
 
 - The shipped adapter registry exposes the bundled `qwen35` deterministic demo.
 - `blkbxs`, `mand8`, and `due` ride in the same root wheel.
+- BLKBXS currently includes UBR schema, graph, bundle, and demo scenario helpers.
 - `report()` supports `release-summary` and `comparison-summary` for current public artifacts.
 - `blkbx_lab.research` and `blkbx_lab.experimental` remain opt-in extras.
 

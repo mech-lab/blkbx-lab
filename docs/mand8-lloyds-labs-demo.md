@@ -2,11 +2,20 @@
 
 This runbook is fixed to Friday, July 17, 2026 demo data.
 
-## Canonical Scenarios
+## Canonical External Scenario
+
+The external v1 proof flow is:
+
+- `lloyds_incident_to_renewal`
+
+This is the procurement-readiness path for a UK insurer/MGA or Lloyd's-adjacent reviewer. It must end with reviewer-ready renewal evidence and, when hosted issuance is configured, a portable `ink.receipt.v2` verifier handoff.
+
+## Local Regression Scenarios
+
+These scenarios remain deterministic for local demos and regression coverage:
 
 - `lloyds_cyber_happy_path`
 - `lloyds_human_review_edge_case`
-- `lloyds_incident_to_renewal`
 
 These scenarios stay deterministic so screenshots, receipt IDs, bundle titles, and underwriter copy remain repeatable for the Lloyd's Labs demo.
 
@@ -31,17 +40,17 @@ Prerequisites:
 - PostgreSQL for the Rails app
 - Rust toolchain plus `ink-cli`
 
-Run the happy path:
+Run the canonical external path:
+
+```bash
+scripts/mand8_lloyds_demo_smoke.sh
+```
+
+Run local regression paths explicitly:
 
 ```bash
 scripts/mand8_lloyds_demo_smoke.sh lloyds_cyber_happy_path
-```
-
-Run the two edge paths:
-
-```bash
 scripts/mand8_lloyds_demo_smoke.sh lloyds_human_review_edge_case
-scripts/mand8_lloyds_demo_smoke.sh lloyds_incident_to_renewal
 ```
 
 The wrapper:
@@ -54,16 +63,12 @@ The wrapper:
 
 ## Expected MAND8 Handoff State
 
-On the fixed Friday, July 17, 2026 seeded MAND8 scenarios, browser verifier handoff is expected to be unavailable.
+The verifier handoff state depends on hosted issuer configuration:
 
-Check `artifacts/mand8-lloyds-demo-smoke/mand8/summary.json` and confirm:
+- With `INK_ISSUER_SERVICE_URL` configured, the seeded primary MAND8 risk receipt is issued with a mandatory portable `ink.receipt.v2` companion and an issuer-produced `ink.manifest.v2`; workspace, case, and bundle handoff must be available.
+- Without hosted issuer configuration, local seeded workspaces remain handoff-unavailable and report `reason_code: "PORTABLE_RECEIPT_MISSING"`.
 
-- `workspace_verifier_handoff.available` is `false`
-- `case_verifier_handoff.available` is `false`
-- `bundle_verifier_handoff.available` is `false`
-- each unavailable handoff reports `reason_code: "PORTABLE_RECEIPT_MISSING"`
-
-This is the truthful `v1` behavior. The seeded Lloyd's demo workspaces do not yet persist a native `ink.receipt.v2` companion for each `mand8.*` product receipt.
+Check `artifacts/mand8-lloyds-demo-smoke/mand8/summary.json` for `expected_verifier_handoff_available`, `workspace_verifier_handoff`, `case_verifier_handoff`, and `bundle_verifier_handoff`.
 
 ## Browser Parity Check
 
@@ -79,6 +84,8 @@ The browser page:
 - calls the Rust `verify_artifacts` WASM export
 - renders a pass, warning, or fail summary from the Rust report
 - shows the raw `ink.verification-report.v1` JSON beside any optional handoff context
+
+When hosted issuer configuration is enabled, open the `verify_path` recorded in the MAND8 summary to load the real reviewer packet directly.
 
 ## Trust Boundary
 

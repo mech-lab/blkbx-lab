@@ -1,6 +1,6 @@
 # Docs Hub
 
-This hub tracks the shipped BLKBX Lab documentation surface as of July 17, 2026. It is organized by audience so onboarding, reference, operator guidance, and historical material stay separate.
+This hub tracks the shipped BLKBX Lab documentation surface as of July 22, 2026. It is organized by audience so onboarding, reference, operator guidance, and historical material stay separate.
 
 ## Getting Started
 
@@ -18,7 +18,8 @@ This hub tracks the shipped BLKBX Lab documentation surface as of July 17, 2026.
 ## Product Slices
 
 - [Product architecture](product-architecture.md)
-- [BLKBXS bank-verifiable receipts](bank-verifiable-receipts.md)
+- [BLKBXS UBR bank-verifiable receipts](bank-verifiable-receipts.md)
+- [MAND8 procurement readiness](mand8-procurement-readiness.md)
 - [MAND8 source-slice README](../products/mand8-sdk/README.md)
 - [DUE source-slice README](../products/due-sdk/README.md)
 
@@ -32,6 +33,8 @@ This hub tracks the shipped BLKBX Lab documentation surface as of July 17, 2026.
 ## Verification and Security
 
 - [Independent verification](independent-verification.md)
+- [BLKBXS UBR bank-verifiable receipts](bank-verifiable-receipts.md)
+- [ProofMail hosted workflow](proofmail-hosted-workflow.md)
 - [Technical security hardening note](security-hardening.md)
 - [Public vulnerability policy](../SECURITY.md)
 - [Reproducibility guide](../REPRODUCIBILITY.md)

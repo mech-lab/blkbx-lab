@@ -1,11 +1,13 @@
 # MAND8 Investor/Buyer Room Overlays
 
+The room overlays are indexes over the shared evidence core in [MAND8 procurement readiness](mand8-procurement-readiness.md). They must not fork independent copies of the receipt, verifier, signer, or Lloyd's workflow evidence.
+
 ## 1. Shared Core Corpus
 - MAND8 risk_receipt.v1 schema (frozen domain contract)
 - ink.receipt.v2 schema (trust-waist contract)
 - Trust registry and revocation list specifications
 - Verification policy framework (bank_strict, host_compatibility)
-- ProofMail workflow documentation
+- [ProofMail hosted workflow](proofmail-hosted-workflow.md)
 - Lloyd's Labs demo scenario (lloyds_incident_to_renewal)
 
 ## 2. Investor Overlay

@@ -1,7 +1,11 @@
 # BLKBX Lab
 
 <p align="center">
-  <strong>Model-agnostic INK Receipts with a Rust trust waist and Python product surface.</strong>
+  <strong>Open-source Ink Receipt gates for accountable AI agents.</strong>
+</p>
+
+<p align="center">
+  Black Box Labs builds model-agnostic INK Receipts with a Rust trust waist and Python product surface.
 </p>
 
 <p align="center">
@@ -397,13 +401,30 @@ It must not be required for verification.
 
 ### BLKBXS
 
-Banking-facing receipt infrastructure.
+Banking-facing receipt infrastructure and event evidence.
 
 Core claim:
 
 > A bank can independently verify a vendor-produced AI receipt.
 
 BLKBXS is for fintech, banktech, and AI vendors selling into regulated financial institutions.
+
+The current BLKBXS UBR path models a small-business loan workflow as eight Universal Banking Receipt events:
+
+- consent
+- KYB
+- documents
+- cashflow analysis
+- AI recommendation
+- human review
+- loan decision
+- conditional approval notice
+
+In the Python package, `blkbxs.scenarios.smb_loan_demo()` loads the committed fixture generated from the UBR demo bundle and orders the graph topologically. Rails imports that packaged fixture through `Blkbxs::DemoCatalog`; it does not hand-author a second copy of the scenario.
+
+The UBR JSON is the banking-domain view stored in receipt `body_json`. The trust record is the linked portable `ink.receipt.v2` issued by the hosted INK issuer. `POST /api/v1/blkbxs/ubr_receipts` requires `INK_ISSUER_SERVICE_URL`; if the issuer is missing, fails, or returns no portable receipt, the transaction rolls back and no unsigned UBR receipt is persisted.
+
+The active BLKBXS UBR contract is documented in [docs/bank-verifiable-receipts.md](docs/bank-verifiable-receipts.md).
 
 ### MAND8
 
@@ -419,11 +440,16 @@ MAND8 is the insurability slice.
 
 The public MAND8 Python surface includes `mand8.authority.record()` alongside exposure, control, override, incident, bundle, and schema helpers.
 
-The Lloyd's Labs demo path is documented in [docs/mand8-lloyds-labs-demo.md](docs/mand8-lloyds-labs-demo.md) and uses fixed Friday, July 17, 2026 scenario data:
+The Lloyd's Labs demo path is documented in [docs/mand8-lloyds-labs-demo.md](docs/mand8-lloyds-labs-demo.md) and uses fixed Friday, July 17, 2026 scenario data.
+
+The external v1 proof flow is:
+
+- `lloyds_incident_to_renewal`
+
+The local deterministic regression scenarios remain:
 
 - `lloyds_cyber_happy_path`
 - `lloyds_human_review_edge_case`
-- `lloyds_incident_to_renewal`
 
 ### DUE
 
@@ -438,6 +464,8 @@ DUE is the legal defensibility slice.
 ---
 
 ## Current Adapter Reality
+
+`qwen35` is the installed deterministic demo. Receipt gates are the standard.
 
 The public adapter registry currently supports:
 
@@ -494,6 +522,10 @@ blkbx-lab/
   python/
     blkbx_lab/                  primary SDK, CLI, adapters, artifacts, evidence, policies
     blkbxs/                     banking facade
+      scenarios.py              UBR demo fixture loader
+      ubr.py                    UBR event helper
+      graph.py                  UBR graph validation
+      bundle.py                 UBR bundle export
     mand8/                      insurance facade
     due/                        legal facade
     mech_lab/                   compatibility namespace
@@ -632,8 +664,9 @@ Current limits should stay visible:
 
 - public adapter support is still centered on deterministic `qwen35`
 - production signing is not the default public path
+- BLKBXS UBR Rails create requests are the exception: they require hosted `ink.receipt.v2` issuance and fail closed when signing is unavailable
 - Rails is scaffold/future portal work, not verifier infrastructure
-- seeded MAND8 Lloyd's demo workspaces from Friday, July 17, 2026 do not yet persist portable `ink.receipt.v2` companions for browser handoff
+- seeded MAND8 Lloyd's demo workspaces require hosted issuer configuration before they expose portable `ink.receipt.v2` verifier handoffs
 - product packages ride in the same `mechlab-sdk` wheel
 - compatibility names exist and should not be confused with the primary public surface
 - the hard-written LOC snapshot should be refreshed when the repo shape changes materially

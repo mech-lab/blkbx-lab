@@ -30,13 +30,23 @@ The current public verification path operates over:
 - New docs and examples should target the current `v2` artifact set.
 - Compatibility aliases and selector normalization are part of the migration surface, not the primary verification story.
 
+## BLKBXS UBR Handoff
+
+BLKBXS UBR reviewer handoffs expose the portable INK receipt set for each banking event in the selected graph. The terminal UBR event's linked `ink.receipt.v2` is returned as the primary receipt, and the receipt graph carries the companion portable receipt for every event.
+
+The UBR-native demo verifier report and synthetic Ed25519 proof labels are evidence labels only. Independent acceptance is based on the linked `ink.receipt.v2` artifacts and the native INK verifier.
+
+Rails refuses UBR verifier artifacts when any selected UBR event lacks a portable receipt.
+
 ## Lloyd's Labs Demo
 
 The MAND8 Lloyd's Labs runbook is documented in [mand8-lloyds-labs-demo.md](mand8-lloyds-labs-demo.md).
 
 For the fixed Friday, July 17, 2026 demo data:
 
-- seeded MAND8 workspaces do not expose Rails artifact handoff URLs unless they truly carry a portable `ink.receipt.v2` companion
+- the external v1 MAND8 proof flow is `lloyds_incident_to_renewal`
+- seeded MAND8 workspaces expose Rails artifact handoff URLs only when they truly carry a portable `ink.receipt.v2` companion
+- hosted issuer configuration makes the primary MAND8 risk receipt carry that companion plus the issuer-produced `ink.manifest.v2`
 - the browser verifier still accepts real Rails artifact handoff URLs at `/verify/index.html?artifact_url=...`
 - the page renders pass, warning, or fail from the Rust `ink.verification-report.v1` output
-- the native parity command is `ink receipt --receipt ... --manifest ... --trust-registry ... --policy ...`
+- the native parity command is `ink receipt --receipt ... --manifest ... --trust-registry ... --revocation-list ... --policy ...`

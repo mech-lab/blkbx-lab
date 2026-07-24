@@ -1,5 +1,7 @@
 # MAND8 Insurer/MGA Procurement Overlay
 
+This is the primary buyer overlay for the [MAND8 procurement-readiness](mand8-procurement-readiness.md) phase. It is built from the shared evidence core and the canonical `lloyds_incident_to_renewal` reviewer packet.
+
 ## 1. Evidence Requirements
 - Primary evidence: Portable verifier packets (ink.receipt.v2) with bundled MAND8 bundles
 - Required metadata: Risk class, insured value, policy conditions, binder references

@@ -10,6 +10,8 @@ mechlab-sdk install
         +-- python/blkbx_lab/       primary CLI parser, Python API, public result objects
         |
         +-- python/blkbxs/          banking-facing facade from the same wheel
+        |   +-- schema/ubr/graph/
+        |       bundle/scenarios    BLKBXS UBR helpers and generated fixture access
         +-- python/mand8/           insurance-facing facade from the same wheel
         +-- python/due/             legal-facing facade from the same wheel
         |
@@ -46,3 +48,7 @@ BLKBXS, MAND8, and DUE sit above the shared receipt runtime:
 - `DUE`: legal defensibility evidence
 
 Those layers add domain framing and bundle semantics without changing the shared trust waist.
+
+BLKBXS UBR adds a banking event graph on top of the shared receipt runtime. Python exposes schema loading, event creation, graph validation, bundle export, and the generated SMB loan fixture through `blkbxs`. Rails exposes UBR receipt creation, graph bundling, dashboards, and verifier artifacts under `/api/v1/blkbxs/*`.
+
+For UBR, the domain JSON stays in `body_json`. The authoritative cryptographic artifact is the linked `ink.receipt.v2` portable receipt. Rails UBR creation requires hosted issuer configuration and rolls back on unsigned output.

@@ -1,5 +1,7 @@
 # MAND8 Bank Diligence/Security Overlay
 
+This is a secondary diligence overlay for the [MAND8 procurement-readiness](mand8-procurement-readiness.md) phase. It reuses the same verifier packet, trust registry, revocation, and Lloyd's incident-to-renewal evidence core as the insurer/MGA package.
+
 ## 1. Security Requirements
 - Compliance with financial regulations (e.g., GDPR, PCI-DSS, NYDFS 500)
 - Data protection measures for sensitive risk data (encryption at rest and in transit)

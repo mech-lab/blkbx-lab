@@ -32,6 +32,23 @@ Compatibility aliases are documented separately in the [migration notes](migrati
 - Receipt -> `ink_receipt.v2.json`
 - Comparison Packet -> `receipt_comparison.v2.json`
 
+## BLKBXS Python Facade
+
+`blkbxs` rides in the same `mechlab-sdk` wheel and exposes the current UBR helpers:
+
+- `blkbxs.scenarios.smb_loan_demo()`
+- `blkbxs.ubr.create_event(...)`
+- `blkbxs.ubr.validate_graph(receipts, evidence_manifest=None, verifier_report=None)`
+- `blkbxs.bundle.export_ubr_graph(receipts, evidence_manifest, verifier_report=None, audience="bank_credit_review")`
+
+The committed SMB loan fixture is packaged under `blkbx_lab.products.blkbxs.fixtures` and is the source Rails imports for demo catalog data.
+
+## Rails BLKBXS UBR Scaffold
+
+The Rails scaffold exposes UBR endpoints under `/api/v1/blkbxs`: `ubr_receipts`, `ubr_bundles`, `dashboard`, and `verifier_artifacts`.
+
+`POST /api/v1/blkbxs/ubr_receipts` requires hosted `ink.receipt.v2` issuance. Missing issuer configuration, issuer failure, or an issuer response without `portable_receipt_json` returns `422` and persists no unsigned UBR receipt.
+
 ## Canonical Quickstart
 
 ```bash

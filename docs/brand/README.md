@@ -5,7 +5,7 @@ This directory is the release-facing brand source of truth for BLKBX Lab.
 Core truth:
 
 - short tagline: `Open-source Ink Receipt gates for accountable AI agents.`
-- product line: ``qwen35` is the installed deterministic demo. Receipt gates are the standard.`
+- product line: `qwen35` is the installed deterministic demo. Receipt gates are the standard.
 - technical strapline: `Signed actions · Verifiable receipts · Local policy gates`
 - voice: precise, direct, earned, grounded
 

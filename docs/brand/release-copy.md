@@ -8,7 +8,7 @@ Short tagline:
 
 Product line:
 
-``qwen35` is the installed deterministic demo. Receipt gates are the standard.`
+`qwen35` is the installed deterministic demo. Receipt gates are the standard.
 
 Technical strapline:
 

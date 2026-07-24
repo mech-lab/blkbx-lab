@@ -23,9 +23,11 @@ Each product should speak in the language of the institution that needs to rely 
 ### BLKBXS
 
 - banking controls
+- Universal Banking Receipt event graphs
 - oversight
 - exception handling
 - operational evidence
+- verifier handoff for bank credit review
 
 ### MAND8
 
