@@ -1,0 +1,57 @@
+<div class="page-head">
+  <div>
+    <h1>BLKBXS Sprint Console</h1>
+    <div class="subtle"><%= Current.workspace&.name %> - 60-90 Day BLKBXS Evidence Sprint</div>
+  </div>
+  <% if @active_case %>
+    <span class="badge ok"><%= @active_case.status.humanize %></span>
+  <% end %>
+</div>
+
+<% if @active_case %>
+  <section class="grid">
+    <div class="panel">
+      <div class="label">Open objections</div>
+      <div class="metric"><%= @graph_summary["open_objection_count"] %></div>
+    </div>
+    <div class="panel">
+      <div class="label">Receipt graph</div>
+      <div class="metric"><%= @graph_summary["receipt_count"] %>/8</div>
+    </div>
+    <div class="panel">
+      <div class="label">Packet readiness</div>
+      <div class="metric"><%= @graph_summary["packet_readiness_score"] %>%</div>
+    </div>
+    <div class="panel">
+      <div class="label">Verifier result</div>
+      <div class="metric"><%= @graph_summary["latest_verification_status"] || "not run" %></div>
+    </div>
+  </section>
+
+  <section class="split" style="margin-top: 14px;">
+    <div class="panel">
+      <h2>Active case</h2>
+      <table>
+        <tr><th>Case</th><td><%= link_to @active_case.case_number, blkbxs_sprint_loan_case_path(@active_case) %></td></tr>
+        <tr><th>Borrower</th><td><%= @active_case.borrower_name %></td></tr>
+        <tr><th>Requested amount</th><td><%= number_to_currency(@active_case.requested_amount, precision: 0) %></td></tr>
+        <tr><th>Reviewer</th><td><%= @active_case.bank_reviewer_name %></td></tr>
+      </table>
+    </div>
+    <div class="panel">
+      <h2>Decision summary</h2>
+      <% decision = @graph_summary["decision_summary"] || {} %>
+      <table>
+        <tr><th>Status</th><td><%= decision["status"] || "pending" %></td></tr>
+        <tr><th>Amount</th><td><%= decision["amount"] || @active_case.requested_amount %></td></tr>
+        <tr><th>Term</th><td><%= decision["term_months"] || "pending" %></td></tr>
+        <tr><th>APR</th><td><%= decision["apr"] || "pending" %></td></tr>
+      </table>
+    </div>
+  </section>
+<% else %>
+  <div class="panel">
+    <h2>No sprint case seeded</h2>
+    <div class="subtle">Create the canonical BLKBXS SMB $250k case through the BLKBXS loan case API or workspace demo seed.</div>
+  </div>
+<% end %>

@@ -1,0 +1,31 @@
+<div class="page-head">
+  <div>
+    <h1>Evidence Timeline</h1>
+    <div class="subtle"><%= @loan_case.case_number %> - chronological sprint evidence events</div>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Order</th>
+      <th>Event</th>
+      <th>Actor</th>
+      <th>Occurred</th>
+      <th>Receipt</th>
+      <th>Hash</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @events.each do |event| %>
+      <tr>
+        <td><%= event.event_order %></td>
+        <td><%= event.event_type %><br><code><%= event.external_id %></code></td>
+        <td><%= event.actor_type %><br><code><%= event.actor_identifier %></code></td>
+        <td><%= event.occurred_at.to_fs(:db) %></td>
+        <td><span class="badge <%= event.signed? ? "ok" : "danger" %>"><%= event.signed? ? "signed" : "missing" %></span></td>
+        <td><code><%= event.canonical_hash %></code></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

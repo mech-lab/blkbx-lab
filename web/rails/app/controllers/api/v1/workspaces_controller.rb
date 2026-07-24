@@ -43,11 +43,10 @@ module Api
 
       def seed_demo
         authorize @workspace, :update?
-        return render json: { error: "workspace product mismatch" }, status: :unprocessable_entity unless @workspace.product_type == "mand8"
-
-        scenario = params[:scenario].presence || @workspace.metadata["demo_scenario"] || ::Mand8::DemoCatalog::CANONICAL_EXTERNAL_SCENARIO
-        result = ::Mand8::SeedDemoWorkspace.call(workspace: @workspace, scenario: scenario, actor: current_user)
+        result = seed_workspace_demo!(@workspace)
         render_record(@workspace.reload, extra: workspace_extra(@workspace).merge(seed_result: result))
+      rescue ArgumentError => error
+        render json: { error: error.message }, status: :unprocessable_entity
       end
 
       private
@@ -80,12 +79,30 @@ module Api
       end
 
       def seed_workspace_if_requested!(workspace)
-        return unless workspace.product_type == "mand8"
-
         scenario = workspace.metadata["demo_scenario"].presence || workspace.metadata["seed_demo_scenario"].presence
         return if scenario.blank?
 
-        ::Mand8::SeedDemoWorkspace.call(workspace: workspace, scenario: scenario, actor: current_user)
+        seed_workspace_demo!(workspace, scenario: scenario)
+      end
+
+      def seed_workspace_demo!(workspace, scenario: nil)
+        case workspace.product_type
+        when "mand8"
+          resolved = scenario.presence || params[:scenario].presence || workspace.metadata["demo_scenario"] || ::Mand8::DemoCatalog::CANONICAL_EXTERNAL_SCENARIO
+          ::Mand8::SeedDemoWorkspace.call(workspace: workspace, scenario: resolved, actor: current_user)
+        when "blkbxs"
+          resolved = scenario.presence || params[:scenario].presence || workspace.metadata["demo_scenario"] || ::Blkbxs::DemoCatalog::CANONICAL_EXTERNAL_SCENARIO
+          raise ArgumentError, "Unknown BLKBXS demo scenario: #{resolved}" unless resolved == ::Blkbxs::DemoCatalog::CANONICAL_EXTERNAL_SCENARIO
+
+          ::Blkbxs::Sprint::SeedSmb250kCase.call(
+            organization: workspace.organization,
+            workspace: workspace,
+            actor: current_user,
+            issue_events: ActiveModel::Type::Boolean.new.cast(params[:seed_events])
+          )
+        else
+          raise ArgumentError, "workspace product mismatch"
+        end
       end
 
       def require_user!

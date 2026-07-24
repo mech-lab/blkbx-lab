@@ -36,6 +36,8 @@ class Organization < ApplicationRecord
   has_many :workflow_exceptions, dependent: :destroy
   has_many :remediations, dependent: :destroy
   has_many :audit_events, dependent: :destroy
+  has_many :blkbxs_sprint_engagements, class_name: "Blkbxs::SprintEngagement", dependent: :destroy
+  has_many :blkbxs_loan_cases, class_name: "Blkbxs::LoanCase", dependent: :destroy
   has_one :billing_account, dependent: :destroy
 
   validates :name, :slug, presence: true

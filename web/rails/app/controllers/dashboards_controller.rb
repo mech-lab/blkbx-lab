@@ -24,6 +24,8 @@ class DashboardsController < AuthenticatedController
 
     if Current.workspace&.product_type == "mand8"
       payload[:mand8] = Mand8::WorkspaceSnapshot.call(Current.workspace)
+    elsif Current.workspace&.product_type == "blkbxs"
+      payload[:blkbxs] = Blkbxs::WorkspaceSnapshot.call(Current.workspace)
     end
 
     render json: payload

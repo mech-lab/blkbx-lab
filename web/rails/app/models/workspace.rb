@@ -34,6 +34,8 @@ class Workspace < ApplicationRecord
   has_many :remediations, dependent: :destroy
   has_many :audit_events, dependent: :destroy
   has_many :usage_events, dependent: :destroy
+  has_many :blkbxs_sprint_engagements, class_name: "Blkbxs::SprintEngagement", dependent: :destroy
+  has_many :blkbxs_loan_cases, class_name: "Blkbxs::LoanCase", dependent: :destroy
 
   enum product_type: {
     ink: "ink",

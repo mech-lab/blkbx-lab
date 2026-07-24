@@ -10,6 +10,7 @@ class Receipt < ApplicationRecord
   has_many :claims, dependent: :nullify
   has_many :decisions, dependent: :nullify
   has_many :workflow_exceptions, dependent: :nullify
+  has_many :blkbxs_evidence_events, class_name: "Blkbxs::EvidenceEvent", dependent: :nullify
 
   validates :organization, :workspace, :schema_key, :schema_version, presence: true
   validates :external_id, uniqueness: { scope: :organization_id }, allow_blank: true

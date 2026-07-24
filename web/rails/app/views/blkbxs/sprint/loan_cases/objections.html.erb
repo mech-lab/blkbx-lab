@@ -1,0 +1,29 @@
+<div class="page-head">
+  <div>
+    <h1>Reviewer Objection Center</h1>
+    <div class="subtle"><%= @loan_case.case_number %> - bank function objections and responses</div>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Function</th>
+      <th>Severity</th>
+      <th>Status</th>
+      <th>Objection</th>
+      <th>Response</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @objections.each do |objection| %>
+      <tr>
+        <td><%= objection.function %></td>
+        <td><%= objection.severity %></td>
+        <td><span class="badge <%= objection.status == "open" ? "warn" : "ok" %>"><%= objection.status %></span></td>
+        <td><%= objection.objection %></td>
+        <td><%= objection.response %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

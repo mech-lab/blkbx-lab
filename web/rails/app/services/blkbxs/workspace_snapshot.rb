@@ -29,10 +29,12 @@ module Blkbxs
         summary: {
           graph_count: graphs.length,
           receipt_count: graphs.sum { |item| item["receipt_count"] },
+          sprint_loan_case_count: @workspace.blkbxs_loan_cases.count,
           review_request_count: @workspace.review_requests.count,
           latest_verification_status: @workspace.verification_runs.recent.first&.status
         },
         graphs: graphs,
+        sprint_console: sprint_console,
         demo_scenarios: DemoCatalog.available_scenarios,
         verifier_handoff: VerifierHandoff.payload(workspace: @workspace)
       }
@@ -77,6 +79,21 @@ module Blkbxs
 
     def receipts_for_process(business_process_id)
       @workspace.receipts.where(schema_key: UBR_SCHEMA).select { |receipt| self.class.business_process_id_for_receipt(receipt) == business_process_id }
+    end
+
+    def sprint_console
+      @workspace.blkbxs_loan_cases.recent.map do |loan_case|
+        {
+          "id" => loan_case.id,
+          "case_number" => loan_case.case_number,
+          "status" => loan_case.status,
+          "scenario_type" => loan_case.scenario_type,
+          "borrower_name" => loan_case.borrower_name,
+          "requested_amount" => loan_case.requested_amount,
+          "packet_readiness_score" => loan_case.packet_readiness_score,
+          "open_objection_count" => loan_case.reviewer_objections.open.count
+        }
+      end
     end
   end
 end

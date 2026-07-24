@@ -1,0 +1,29 @@
+<div class="page-head">
+  <div>
+    <h1>Loan Cases</h1>
+    <div class="subtle">Canonical SMB $250,000 conditional approval sprint cases.</div>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Case</th>
+      <th>Borrower</th>
+      <th>Status</th>
+      <th>Requested</th>
+      <th>Updated</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @loan_cases.each do |loan_case| %>
+      <tr>
+        <td><%= link_to loan_case.case_number, blkbxs_sprint_loan_case_path(loan_case) %></td>
+        <td><%= loan_case.borrower_name %></td>
+        <td><span class="badge"><%= loan_case.status.humanize %></span></td>
+        <td><%= number_to_currency(loan_case.requested_amount, precision: 0) %></td>
+        <td><%= loan_case.updated_at.to_fs(:db) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

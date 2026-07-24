@@ -41,10 +41,24 @@ BLKBXS UBR receipt creation is fail-closed. `POST /api/v1/blkbxs/ubr_receipts` m
 
 The Rails demo catalog reads `python/blkbx_lab/products/blkbxs/fixtures/smb_loan_demo.json`, the committed fixture produced by the Python BLKBXS scenario pipeline. Keep the UBR-native demo verifier report and synthetic proof labels as domain evidence only; independent acceptance depends on the linked `ink.receipt.v2` artifacts.
 
+## BLKBXS Sprint Console
+
+The Sprint Console lives inside this Rails app at `/blkbxs/sprint`. It is scoped to one flow: AI-assisted SMB `$250,000` conditional approval with independently verifiable evidence artifacts.
+
+Nested sprint APIs use `LoanCase` as the case container and `EvidenceEvent` as the primitive workflow event:
+
+- `POST /api/v1/blkbxs/loan_cases` creates the canonical `BLKBXS-SMB-250K-001` case.
+- `POST /api/v1/blkbxs/loan_cases/:loan_case_id/evidence_events` creates an evidence event and must link a real `ink.receipt.v2` portable receipt.
+- `POST /api/v1/blkbxs/loan_cases/:loan_case_id/evidence_bundles` builds the UBR receipt graph bundle.
+- `POST /api/v1/blkbxs/loan_cases/:loan_case_id/verification_runs` runs the existing native INK verifier service boundary.
+- `POST /api/v1/blkbxs/loan_cases/:loan_case_id/exports` writes a local ZIP packet under `tmp/blkbxs_exports`.
+
+Use `seed_events=true` when creating a loan case or calling the workspace demo seed to project all eight generated fixture events. That path requires `INK_ISSUER_SERVICE_URL` or a test stub for the hosted issuer; it rolls back the case projection if any event cannot receive a portable receipt.
+
 Targeted checks:
 
 ```bash
-bundle exec rspec spec/requests/blkbxs_ubr_workflows_spec.rb spec/services/schema_catalog_spec.rb spec/services/product_catalog_spec.rb spec/requests/shared_bundles_verifier_handoff_spec.rb
+bundle exec rspec spec/requests/blkbxs_sprint_console_spec.rb spec/requests/blkbxs_ubr_workflows_spec.rb spec/services/schema_catalog_spec.rb spec/services/product_catalog_spec.rb spec/requests/shared_bundles_verifier_handoff_spec.rb
 ```
 
 ## Lloyd's Labs Demo Smoke

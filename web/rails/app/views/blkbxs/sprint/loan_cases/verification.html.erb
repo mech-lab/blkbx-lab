@@ -1,0 +1,59 @@
+<div class="page-head">
+  <div>
+    <h1>Verification Console</h1>
+    <div class="subtle"><%= @loan_case.case_number %> - local verifier status and graph findings</div>
+  </div>
+</div>
+
+<section class="grid">
+  <div class="panel">
+    <div class="label">Graph valid</div>
+    <div class="metric"><%= @graph_summary.dig("graph_validation", "valid") %></div>
+  </div>
+  <div class="panel">
+    <div class="label">Signed receipts</div>
+    <div class="metric"><%= @graph_summary["signed_receipt_count"] %></div>
+  </div>
+  <div class="panel">
+    <div class="label">Evidence available</div>
+    <div class="metric"><%= @graph_summary.dig("evidence_summary", "available_to_verifier") || 0 %></div>
+  </div>
+  <div class="panel">
+    <div class="label">Committed only</div>
+    <div class="metric"><%= @graph_summary.dig("evidence_summary", "committed_only") || 0 %></div>
+  </div>
+</section>
+
+<section class="split" style="margin-top: 14px;">
+  <div class="panel">
+    <h2>Verifier runs</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Status</th><th>Verified</th><th>Error</th></tr></thead>
+      <tbody>
+        <% @verification_runs.each do |run| %>
+          <tr>
+            <td><%= run.id %></td>
+            <td><span class="badge <%= run.passed? ? "ok" : "warn" %>"><%= run.status %></span></td>
+            <td><%= run.verified_at&.to_fs(:db) %></td>
+            <td><%= run.error_message %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <div class="panel">
+    <h2>Exceptions</h2>
+    <table>
+      <thead><tr><th>Severity</th><th>Title</th><th>Description</th></tr></thead>
+      <tbody>
+        <% @exceptions.each do |item| %>
+          <tr>
+            <td><%= item["severity"] %></td>
+            <td><%= item["title"] %></td>
+            <td><%= item["description"] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</section>

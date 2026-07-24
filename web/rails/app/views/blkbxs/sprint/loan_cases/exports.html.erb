@@ -1,0 +1,41 @@
+<div class="page-head">
+  <div>
+    <h1>Export Room</h1>
+    <div class="subtle"><%= @loan_case.case_number %> - bankability packet assembly</div>
+  </div>
+</div>
+
+<section class="split">
+  <div class="panel">
+    <h2>Evidence bundles</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Status</th><th>Type</th><th>Hash</th></tr></thead>
+      <tbody>
+        <% @bundles.each do |bundle| %>
+          <tr>
+            <td><%= bundle.id %></td>
+            <td><span class="badge ok"><%= bundle.status %></span></td>
+            <td><%= bundle.bundle_type %></td>
+            <td><code><%= bundle.sha256 %></code></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <div class="panel">
+    <h2>Export packages</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Status</th><th>Path</th><th>Hash</th></tr></thead>
+      <tbody>
+        <% @export_packages.each do |package| %>
+          <tr>
+            <td><%= package.id %></td>
+            <td><span class="badge ok"><%= package.status %></span></td>
+            <td><code><%= package.file_path %></code></td>
+            <td><code><%= package.sha256 %></code></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</section>

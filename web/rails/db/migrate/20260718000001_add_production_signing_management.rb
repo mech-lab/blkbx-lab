@@ -1,4 +1,4 @@
-class AddProductionSigningManagement < ActiveRecord::Migration[7.2]
+class AddProductionSigningManagement < ActiveRecord::Migration[7.1]
   def change
     change_table :receipts, bulk: true do |t|
       t.jsonb :portable_receipt_json, null: false, default: {}

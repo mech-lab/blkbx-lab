@@ -1,0 +1,36 @@
+<div class="page-head">
+  <div>
+    <h1>Receipt Graph</h1>
+    <div class="subtle"><%= @loan_case.case_number %> - UBR parent links and portable receipt availability</div>
+  </div>
+  <span class="badge <%= @graph_summary.dig("graph_validation", "valid") ? "ok" : "danger" %>">
+    <%= @graph_summary.dig("graph_validation", "valid") ? "valid" : "invalid" %>
+  </span>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>UBR receipt</th>
+      <th>Operation</th>
+      <th>Parents</th>
+      <th>Portable receipt</th>
+      <th>Previous event hash</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @events.each do |event| %>
+      <tr>
+        <td><code><%= event.external_id %></code></td>
+        <td><%= event.event_type %></td>
+        <td>
+          <% Array(event.payload.dig("links", "parent_receipts")).each do |parent_id| %>
+            <code><%= parent_id %></code><br>
+          <% end %>
+        </td>
+        <td><span class="badge <%= event.signed? ? "ok" : "danger" %>"><%= event.signed? ? "available" : "missing" %></span></td>
+        <td><code><%= event.previous_event_hash || "root" %></code></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

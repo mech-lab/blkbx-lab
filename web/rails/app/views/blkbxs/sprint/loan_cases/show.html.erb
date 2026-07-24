@@ -1,0 +1,46 @@
+<div class="page-head">
+  <div>
+    <h1><%= @loan_case.case_number %></h1>
+    <div class="subtle"><%= @loan_case.borrower_name %> - <%= number_to_currency(@loan_case.requested_amount, precision: 0) %> conditional approval flow</div>
+  </div>
+  <span class="badge ok"><%= @loan_case.status.humanize %></span>
+</div>
+
+<section class="split">
+  <div class="panel">
+    <h2>Case profile</h2>
+    <table>
+      <tr><th>Scenario</th><td><%= @loan_case.scenario_type %></td></tr>
+      <tr><th>Use of funds</th><td><%= @loan_case.metadata["use_of_funds"] %></td></tr>
+      <tr><th>AI assisted</th><td><%= @loan_case.metadata["ai_assisted"] %></td></tr>
+      <tr><th>Human review required</th><td><%= @loan_case.metadata["human_review_required"] %></td></tr>
+      <tr><th>Fixture source</th><td><code><%= @loan_case.metadata["canonical_fixture_id"] %></code></td></tr>
+    </table>
+  </div>
+  <div class="panel">
+    <h2>Workflow state</h2>
+    <table>
+      <tr><th>Receipts</th><td><%= @graph_summary["signed_receipt_count"] %> signed / <%= @graph_summary["receipt_count"] %> total</td></tr>
+      <tr><th>Graph valid</th><td><%= @graph_summary.dig("graph_validation", "valid") %></td></tr>
+      <tr><th>Open objections</th><td><%= @graph_summary["open_objection_count"] %></td></tr>
+      <tr><th>Readiness</th><td><%= @graph_summary["packet_readiness_score"] %>%</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="panel" style="margin-top: 14px;">
+  <h2>Claims boundary</h2>
+  <table>
+    <thead><tr><th>Claim</th><th>Status</th><th>Evidence</th><th>Limitation</th></tr></thead>
+    <tbody>
+      <% @claims.each do |claim| %>
+        <tr>
+          <td><%= claim["claim_text"] %></td>
+          <td><span class="badge <%= claim["claim_status"] == "supported" ? "ok" : "warn" %>"><%= claim["claim_status"] %></span></td>
+          <td><%= claim["evidence_reference"] || "none" %></td>
+          <td><%= claim["limitation"] %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</section>

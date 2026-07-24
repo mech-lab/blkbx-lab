@@ -46,6 +46,15 @@ Rails.application.routes.draw do
       namespace :blkbxs do
         resource :dashboard, only: :show
         resource :verifier_artifacts, only: :show
+        resources :loan_cases, only: [:index, :show, :create] do
+          scope module: :loan_cases do
+            resources :evidence_events, only: [:index, :create]
+            resources :ink_receipts, only: [:index]
+            resources :verification_runs, only: [:index, :show, :create]
+            resources :evidence_bundles, only: [:index, :show, :create]
+            resources :exports, only: [:create, :show]
+          end
+        end
         resources :control_receipts, only: [:create, :show, :index]
         resources :underwriting_decision_receipts, only: [:create, :show, :index]
         resources :ubr_receipts, only: [:create, :show, :index]
@@ -78,6 +87,22 @@ Rails.application.routes.draw do
   authenticated :user do
     root to: "dashboards#show", as: :authenticated_root
     resource :dashboard, only: :show
+  end
+
+  namespace :blkbxs do
+    namespace :sprint do
+      root to: "dashboards#show"
+      resource :dashboard, only: :show
+      resources :loan_cases, only: [:index, :show] do
+        member do
+          get :timeline
+          get :receipt_graph
+          get :verification
+          get :objections
+          get :exports
+        end
+      end
+    end
   end
 
   root to: "home#show"
