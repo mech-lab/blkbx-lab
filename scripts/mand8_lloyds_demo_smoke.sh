@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SCENARIO="${1:-lloyds_cyber_happy_path}"
+SCENARIO="${1:-lloyds_incident_to_renewal}"
 OUTPUT_DIR="${MAND8_SMOKE_OUTPUT_DIR:-$ROOT/artifacts/mand8-lloyds-demo-smoke}"
 MAND8_DIR="$OUTPUT_DIR/mand8"
 INK_VECTOR_DIR="$OUTPUT_DIR/ink-vector"
@@ -43,5 +43,5 @@ cargo run --quiet -p ink-cli -- receipt \
 
 printf 'MAND8 workflow summary written to %s\n' "$MAND8_DIR/summary.json"
 printf 'Native INK verifier report written to %s\n' "$INK_VECTOR_DIR/ink-verification-report.json"
-printf 'Seeded MAND8 verifier handoff is expected to remain unavailable in v1 cleanup.\n'
+printf 'Seeded MAND8 verifier handoff availability is recorded in %s\n' "$MAND8_DIR/summary.json"
 printf 'Use %s to paste the INK vector files into /verify/index.html for browser parity checks.\n' "$INK_VECTOR_DIR"

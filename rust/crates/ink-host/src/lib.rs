@@ -492,6 +492,7 @@ struct RevocationListJson {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[allow(dead_code)]
 struct RevocationListV2Json {
     schema: String,
     list_version: String,
@@ -559,6 +560,7 @@ pub struct HostedReceiptIssueRequest {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct HostedReceiptIssueResponse {
     pub receipt: Value,
+    pub manifest: Value,
     pub manifest_hash: DigestJson,
     pub key_id: String,
     pub trust_registry_version: Option<String>,
@@ -1000,6 +1002,7 @@ pub fn issue_hosted_receipt(
 
     Ok(HostedReceiptIssueResponse {
         receipt: serde_json::to_value(&receipt)?,
+        manifest: serde_json::to_value(&manifest)?,
         manifest_hash: digest_json(&manifest_hash),
         key_id: receipt.signing.key_id,
         trust_registry_version: sign_result.trust_registry_version,

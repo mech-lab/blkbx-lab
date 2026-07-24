@@ -23,13 +23,22 @@ module Mand8
       policy = selected_policy(portable_receipt)
       registry = selected_registry(policy, portable_receipt)
       revocations = selected_revocations(portable_receipt)
+      manifest = selected_manifest(bundle: bundle, portable_receipt: portable_receipt)
 
       {
         "receipt" => portable_receipt.portable_receipt,
-        "manifest" => selected_manifest(bundle: bundle, portable_receipt: portable_receipt),
+        "manifest" => manifest,
         "verification_policy" => valid_policy_json?(policy&.policy_json) ? policy.policy_json : nil,
         "trust_registry" => registry,
         "revocations" => revocations,
+        "reviewer_packet" => reviewer_packet_manifest(
+          manifest: manifest,
+          policy: policy,
+          registry: registry,
+          revocations: revocations,
+          bundle: bundle,
+          case_id: resolved_case_id
+        ),
         "context" => {
           "product" => "mand8",
           "workspace_id" => @workspace.id,
@@ -120,6 +129,45 @@ module Mand8
 
     def selected_revocations(portable_receipt)
       publication_json("revocations", portable_receipt.revocation_version)
+    end
+
+    def reviewer_packet_manifest(manifest:, policy:, registry:, revocations:, bundle:, case_id:)
+      {
+        "schema" => "mand8.reviewer_packet.v1",
+        "profile" => "mand8.procurement_reviewer_packet",
+        "case_id" => case_id,
+        "bundle_id" => bundle&.id,
+        "files" => {
+          "receipt" => "ink_receipt.v2.json",
+          "manifest" => manifest.present? ? "ink_manifest.v2.json" : nil,
+          "verification_policy" => valid_policy_json?(policy&.policy_json) ? "verify-policy.json" : nil,
+          "trust_registry" => registry.present? ? "trust-registry.json" : nil,
+          "revocations" => revocations.present? ? "revocations.json" : nil
+        }.compact,
+        "instructions" => [
+          "Verify locally with the native Rust verifier; do not rely on the hosted dashboard as the trust root.",
+          "Use the browser/WASM verifier only as a parity surface over the same packet artifacts.",
+          "Compare reviewer results against test-vectors/ink-vectors.json before accepting a release packet."
+        ],
+        "native_verify_command" => native_verify_command(
+          manifest: manifest,
+          policy: policy,
+          registry: registry,
+          revocations: revocations
+        ),
+        "vector_corpus" => "test-vectors/ink-vectors.json"
+      }
+    end
+
+    def native_verify_command(manifest:, policy:, registry:, revocations:)
+      [
+        "ink receipt",
+        "--receipt ink_receipt.v2.json",
+        ("--manifest ink_manifest.v2.json" if manifest.present?),
+        ("--policy verify-policy.json" if valid_policy_json?(policy&.policy_json)),
+        ("--trust-registry trust-registry.json" if registry.present?),
+        ("--revocation-list revocations.json" if revocations.present?)
+      ].compact.join(" ")
     end
 
     def resolve_case_id(receipt, bundle)

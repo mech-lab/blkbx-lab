@@ -38,6 +38,7 @@ module Ink
         revocation_version: parsed["revocation_version"],
         signer_request_id: parsed["signer_request_id"]
       )
+      persist_portable_manifest!(parsed["manifest"]) if portable_manifest?(parsed["manifest"])
       @receipt
     end
 
@@ -81,6 +82,63 @@ module Ink
         read_timeout: ENV.fetch("INK_ISSUER_SERVICE_TIMEOUT_SECONDS", 5).to_i,
         &block
       )
+    end
+
+    def persist_portable_manifest!(manifest)
+      bundle = EvidenceBundle.where(
+        organization: @receipt.organization,
+        workspace: @receipt.workspace,
+        bundle_type: "portable_companion",
+        title: portable_bundle_title
+      ).first_or_initialize
+
+      manifest_json = JSON.generate(manifest)
+      bundle.assign_attributes(
+        manifest: manifest,
+        status: "ready",
+        storage_key: StorageKeyBuilder.call(kind: :bundle, organization_id: @receipt.organization_id, record_id: @receipt.id, filename: "portable-verifier-packet.zip"),
+        sha256: Digest::SHA256.hexdigest(manifest_json)
+      )
+      bundle.save!
+
+      link_packet_artifact!(bundle, "portable_receipt", "ink_receipt.v2.json", @receipt.portable_receipt)
+      link_packet_artifact!(bundle, "portable_manifest", "ink_manifest.v2.json", manifest)
+    end
+
+    def link_packet_artifact!(bundle, artifact_kind, filename, payload)
+      payload_json = JSON.generate(payload)
+      artifact = EvidenceArtifact.where(
+        storage_key: StorageKeyBuilder.call(kind: :artifact, organization_id: @receipt.organization_id, record_id: @receipt.id, filename: filename)
+      ).first_or_initialize
+      artifact.assign_attributes(
+        organization: @receipt.organization,
+        workspace: @receipt.workspace,
+        receipt: @receipt,
+        artifact_kind: artifact_kind,
+        content_type: "application/json",
+        byte_size: payload_json.bytesize,
+        sha256: Digest::SHA256.hexdigest(payload_json),
+        metadata: {
+          "receipt_id" => @receipt.id,
+          "schema" => payload["schema"]
+        }.compact
+      )
+      artifact.save!
+
+      EvidenceBundleArtifact.find_or_create_by!(
+        organization: @receipt.organization,
+        workspace: @receipt.workspace,
+        evidence_bundle: bundle,
+        evidence_artifact: artifact
+      )
+    end
+
+    def portable_manifest?(document)
+      document.is_a?(Hash) && document["schema"] == "ink.manifest.v2"
+    end
+
+    def portable_bundle_title
+      "Portable verifier packet for #{@receipt.external_id.presence || @receipt.id}"
     end
   end
 end

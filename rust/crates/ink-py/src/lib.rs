@@ -21,6 +21,7 @@ fn map_host_error(err: HostError) -> PyErr {
     match err {
         HostError::Io(err) => PyOSError::new_err(err.to_string()),
         HostError::Json(err) => InkSchemaError::new_err(err.to_string()),
+        HostError::Http(err) => PyOSError::new_err(err.to_string()),
         HostError::Core(err) => InkVerificationError::new_err(format!("{err:?}")),
         HostError::InvalidInput(message) => InkEvidenceValidationError::new_err(message),
         HostError::UnsafePath(message) => InkUnsafePathError::new_err(message),

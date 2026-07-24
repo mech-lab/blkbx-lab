@@ -1,6 +1,6 @@
 require "pathname"
 
-scenario = ENV.fetch("MAND8_SMOKE_SCENARIO", "lloyds_cyber_happy_path")
+scenario = ENV.fetch("MAND8_SMOKE_SCENARIO", Mand8::DemoCatalog::CANONICAL_EXTERNAL_SCENARIO)
 output_dir = Pathname.new(
   ENV.fetch(
     "MAND8_SMOKE_OUTPUT_DIR",
@@ -40,10 +40,17 @@ case_summary = snapshot.fetch(:cases).find { |entry| entry["case_id"] == seed_re
 bundle = workspace.evidence_bundles.find(seed_result[:bundle_id])
 bundle_handoff = bundle.manifest["verifier_handoff"]
 workspace_handoff = snapshot.fetch(:verifier_handoff)
+expected_handoff_available = Ink::HostedIssueReceipt.enabled?
 
-raise "Expected seeded MAND8 workspace verifier handoff to be unavailable" unless workspace_handoff["available"] == false
-raise "Expected seeded MAND8 case verifier handoff to be unavailable" unless case_summary.dig("verifier_handoff", "available") == false
-raise "Expected seeded MAND8 bundle verifier handoff to be unavailable" unless bundle_handoff["available"] == false
+{
+  "workspace" => workspace_handoff,
+  "case" => case_summary.fetch("verifier_handoff"),
+  "bundle" => bundle_handoff
+}.each do |label, handoff|
+  next if handoff["available"] == expected_handoff_available
+
+  raise "Expected seeded MAND8 #{label} verifier handoff availability to be #{expected_handoff_available}"
+end
 
 summary = {
   date: "2026-07-17",
@@ -66,10 +73,17 @@ summary = {
     "renewal_ready",
     "review_request_statuses"
   ),
+  defensibility_annotation: case_summary.fetch("defensibility_annotation").slice(
+    "status",
+    "badge",
+    "completeness_score",
+    "defensibility_score",
+    "evidence_penalty"
+  ),
   workspace_verifier_handoff: workspace_handoff,
   case_verifier_handoff: case_summary.fetch("verifier_handoff"),
   bundle_verifier_handoff: bundle_handoff,
-  expected_verifier_handoff_available: false,
+  expected_verifier_handoff_available: expected_handoff_available,
   output_dir: output_dir.to_s
 }
 
@@ -82,7 +96,7 @@ puts JSON.pretty_generate(
     scenario: scenario,
     seed_result: seed_result,
     output_dir: output_dir.to_s,
-    expected_verifier_handoff_available: false,
+    expected_verifier_handoff_available: expected_handoff_available,
     case_verifier_handoff: case_summary.fetch("verifier_handoff")
   }
 )

@@ -30,6 +30,11 @@ RSpec.describe Ink::HostedIssueReceipt do
             schema: "ink.receipt.v2",
             receipt_id: "urn:ink:receipt:rails:#{receipt.id}"
           },
+          manifest: {
+            schema: "ink.manifest.v2",
+            action_id: "urn:ink:action:rails:#{receipt.id}",
+            artifacts: []
+          },
           key_id: "platform-key-1",
           trust_registry_version: "2026-07-18.1",
           revocation_version: "2026-07-18.2",
@@ -49,5 +54,9 @@ RSpec.describe Ink::HostedIssueReceipt do
     expect(receipt.trust_registry_version).to eq("2026-07-18.1")
     expect(receipt.revocation_version).to eq("2026-07-18.2")
     expect(receipt.signer_request_id).to eq("req-123")
+
+    packet = receipt.evidence_bundles.find_by!(bundle_type: "portable_companion")
+    expect(packet.manifest["schema"]).to eq("ink.manifest.v2")
+    expect(packet.evidence_artifacts.pluck(:artifact_kind)).to contain_exactly("portable_receipt", "portable_manifest")
   end
 end

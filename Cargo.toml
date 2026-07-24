@@ -8,6 +8,7 @@ members = [
   "rust/crates/ink-wasm",
   "rust/crates/ink-host",
   "rust/crates/ink-issuer-service",
+  "rust/crates/ink-proofmail",
   "rust/crates/ink-py",
   "rust/crates/ink-receipt-v2",
   "rust/crates/ink-tui",

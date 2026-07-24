@@ -160,9 +160,9 @@ pub trait EmailAdapter: Send + Sync {
     fn send(
         &self,
         to: &[String],
-        subject: &str,
-        body: &str,
-        attachments: &[EmailAttachment],
+        _subject: &str,
+        _body: &str,
+        _attachments: &[EmailAttachment],
     ) -> Result<EmailSendResult, EmailError>;
 
     /// Health check for the adapter
@@ -224,14 +224,21 @@ impl EmailAdapter for SmtpAdapter {
     fn send(
         &self,
         to: &[String],
-        subject: &str,
-        body: &str,
-        attachments: &[EmailAttachment],
+        _subject: &str,
+        _body: &str,
+        _attachments: &[EmailAttachment],
     ) -> Result<EmailSendResult, EmailError> {
         // TODO: Implement actual SMTP sending using lettre or similar
         // For now, return a stub result
         Ok(EmailSendResult {
-            message_id: format!("<{}-{}@proofmail.local>", uuid::Uuid::new_v4(), SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs()),
+            message_id: format!(
+                "<{}-{}@proofmail.local>",
+                uuid::Uuid::new_v4(),
+                SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs()
+            ),
             accepted_recipients: to.to_vec(),
             rejected_recipients: vec![],
         })
@@ -270,13 +277,20 @@ impl EmailAdapter for TransactionalEmailAdapter {
     fn send(
         &self,
         to: &[String],
-        subject: &str,
-        body: &str,
-        attachments: &[EmailAttachment],
+        _subject: &str,
+        _body: &str,
+        _attachments: &[EmailAttachment],
     ) -> Result<EmailSendResult, EmailError> {
         // TODO: Implement provider-specific API calls
         Ok(EmailSendResult {
-            message_id: format!("<{}-{}@proofmail.local>", uuid::Uuid::new_v4(), SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs()),
+            message_id: format!(
+                "<{}-{}@proofmail.local>",
+                uuid::Uuid::new_v4(),
+                SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs()
+            ),
             accepted_recipients: to.to_vec(),
             rejected_recipients: vec![],
         })
@@ -352,11 +366,25 @@ impl AuditStore for InMemoryAuditStore {
     }
 
     fn get_for_packet(&self, packet_id: &str) -> Result<Vec<DeliveryAuditEntry>, AuditError> {
-        Ok(self.entries.lock().unwrap().iter().filter(|e| e.packet_id == packet_id).cloned().collect())
+        Ok(self
+            .entries
+            .lock()
+            .unwrap()
+            .iter()
+            .filter(|e| e.packet_id == packet_id)
+            .cloned()
+            .collect())
     }
 
     fn get_for_recipient(&self, recipient_id: &str) -> Result<Vec<DeliveryAuditEntry>, AuditError> {
-        Ok(self.entries.lock().unwrap().iter().filter(|e| e.recipient_id == recipient_id).cloned().collect())
+        Ok(self
+            .entries
+            .lock()
+            .unwrap()
+            .iter()
+            .filter(|e| e.recipient_id == recipient_id)
+            .cloned()
+            .collect())
     }
 }
 
@@ -379,10 +407,16 @@ impl PacketStore for InMemoryPacketStore {
     fn store(&self, packet: &ProofMailPacket) -> Result<String, PacketError> {
         let packet_id = packet.manifest.packet_id.clone();
         let hash = compute_packet_hash(packet);
-        
-        self.packets.lock().unwrap().insert(packet_id.clone(), packet.clone());
-        self.hashes.lock().unwrap().insert(packet_id.clone(), hash.clone());
-        
+
+        self.packets
+            .lock()
+            .unwrap()
+            .insert(packet_id.clone(), packet.clone());
+        self.hashes
+            .lock()
+            .unwrap()
+            .insert(packet_id.clone(), hash.clone());
+
         Ok(packet_id)
     }
 
@@ -398,19 +432,21 @@ impl PacketStore for InMemoryPacketStore {
 /// Compute immutable hash of a ProofMail packet
 fn compute_packet_hash(packet: &ProofMailPacket) -> String {
     let mut hasher = Sha256::new();
-    
-    // Hash the manifest
-    let manifest_bytes = serde_json::to_vec(&packet.manifest).unwrap_or_default();
+
+    // The packet hash commits to every manifest field except the hash field itself.
+    let mut manifest = packet.manifest.clone();
+    manifest.integrity.hash.clear();
+    let manifest_bytes = serde_json::to_vec(&manifest).unwrap_or_default();
     hasher.update(&manifest_bytes);
-    
+
     // Hash the recipient manifest
     let recipient_bytes = serde_json::to_vec(&packet.recipient_manifest).unwrap_or_default();
     hasher.update(&recipient_bytes);
-    
+
     // Hash the receipt
     let receipt_bytes = serde_json::to_vec(&packet.receipt_json).unwrap_or_default();
     hasher.update(&receipt_bytes);
-    
+
     // Hash attachments in deterministic order
     let mut attachment_names: Vec<_> = packet.attachments.keys().collect();
     attachment_names.sort();
@@ -419,7 +455,7 @@ fn compute_packet_hash(packet: &ProofMailPacket) -> String {
             hasher.update(data);
         }
     }
-    
+
     format!("sha256:{}", hex::encode(hasher.finalize()))
 }
 
@@ -430,32 +466,48 @@ pub fn create_packet(
     recipients: Vec<Recipient>,
     attachments: HashMap<String, Vec<u8>>,
 ) -> ProofMailPacket {
-    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
-    let packet_id = format!("urn:proofmail:packet:{}:{}", now, uuid::Uuid::new_v4().simple());
-    
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
+    let packet_id = format!(
+        "urn:proofmail:packet:{}:{}",
+        now,
+        uuid::Uuid::new_v4().simple()
+    );
+
     // Compute receipt hash
     let receipt_bytes = serde_json::to_vec(&receipt_json).unwrap_or_default();
     let receipt_hash = format!("sha256:{}", hex::encode(Sha256::digest(&receipt_bytes)));
-    
+
     // Build attachment refs
+    let mut attachment_entries: Vec<_> = attachments.iter().collect();
+    attachment_entries.sort_by(|left, right| left.0.cmp(right.0));
+
     let mut attachment_refs = Vec::new();
-    for (name, data) in &attachments {
+    for (name, data) in attachment_entries {
         let hash = format!("sha256:{}", hex::encode(Sha256::digest(data)));
         attachment_refs.push(AttachmentRef {
-            name: name.clone(),
-            content_type: mime_guess::from_path(name).first_or_octet_stream().to_string(),
+            name: (*name).clone(),
+            content_type: mime_guess::from_path(name)
+                .first_or_octet_stream()
+                .to_string(),
             size_bytes: data.len() as u64,
             sha256: hash,
         });
     }
-    
+
     // Create packet manifest
     let manifest = PacketManifest {
         packet_id: packet_id.clone(),
         schema: "proofmail.packet.v1".to_string(),
         created_at: now,
         issuer: issuer.to_string(),
-        receipt_id: receipt_json.get("receipt_id").and_then(|v| v.as_str()).unwrap_or("unknown").to_string(),
+        receipt_id: receipt_json
+            .get("receipt_id")
+            .and_then(|v| v.as_str())
+            .unwrap_or("unknown")
+            .to_string(),
         receipt_hash,
         attachments: attachment_refs,
         integrity: PacketIntegrity {
@@ -463,10 +515,14 @@ pub fn create_packet(
             hash: String::new(), // Will be filled after packet creation
         },
     };
-    
+
     // Create recipient manifest
     let recipient_manifest = RecipientManifest {
-        manifest_id: format!("urn:proofmail:recipients:{}:{}", now, uuid::Uuid::new_v4().simple()),
+        manifest_id: format!(
+            "urn:proofmail:recipients:{}:{}",
+            now,
+            uuid::Uuid::new_v4().simple()
+        ),
         schema: "proofmail.recipients.v1".to_string(),
         packet_id: packet_id.clone(),
         recipients,
@@ -482,18 +538,18 @@ pub fn create_packet(
             encryption: EncryptionPolicy::TlsOnly,
         },
     };
-    
+
     let mut packet = ProofMailPacket {
         manifest,
         recipient_manifest,
         receipt_json,
         attachments,
     };
-    
+
     // Compute and set the integrity hash
     let hash = compute_packet_hash(&packet);
     packet.manifest.integrity.hash = hash;
-    
+
     packet
 }
 
@@ -509,26 +565,33 @@ pub fn send_packet(
         delivered_count: 0,
         failed_count: 0,
         pending_count: packet.recipient_manifest.recipients.len(),
-        last_updated: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
+        last_updated: SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs(),
         recipient_statuses: HashMap::new(),
     };
-    
+
     // Store packet with immutable hash
     service.packet_store.store(packet)?;
-    
+
     // Prepare email content
     let subject = format!("MAND8 Verification Packet: {}", packet.manifest.receipt_id);
     let body = build_email_body(packet);
-    
+
     // Prepare attachments
-    let email_attachments: Vec<EmailAttachment> = packet.attachments.iter()
+    let email_attachments: Vec<EmailAttachment> = packet
+        .attachments
+        .iter()
         .map(|(name, data)| EmailAttachment {
             filename: name.clone(),
-            content_type: mime_guess::from_path(name).first_or_octet_stream().to_string(),
+            content_type: mime_guess::from_path(name)
+                .first_or_octet_stream()
+                .to_string(),
             data: data.clone(),
         })
         .collect();
-    
+
     // Add receipt JSON as attachment
     let receipt_bytes = serde_json::to_vec_pretty(&packet.receipt_json).unwrap_or_default();
     let mut all_attachments = email_attachments;
@@ -537,34 +600,45 @@ pub fn send_packet(
         content_type: "application/json".to_string(),
         data: receipt_bytes,
     });
-    
+
     // Send to each recipient
     for recipient in &packet.recipient_manifest.recipients {
         let recipient_emails = vec![recipient.email.clone()];
-        
+
         let audit_entry = DeliveryAuditEntry {
-            audit_id: format!("urn:proofmail:audit:{}:{}", 
-                SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
-                uuid::Uuid::new_v4().simple()),
+            audit_id: format!(
+                "urn:proofmail:audit:{}:{}",
+                SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs(),
+                uuid::Uuid::new_v4().simple()
+            ),
             packet_id: packet.manifest.packet_id.clone(),
             recipient_id: recipient.recipient_id.clone(),
-            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
+            timestamp: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_secs(),
             attempt: 1,
             status: DeliveryStatus::Pending,
             smtp_response: None,
             error: None,
             message_id: None,
         };
-        
+
         // Record initial audit entry
         service.audit_store.append(&audit_entry)?;
-        
+
         // Send email
-        match service.adapter.send(&recipient_emails, &subject, &body, &all_attachments) {
+        match service
+            .adapter
+            .send(&recipient_emails, &subject, &body, &all_attachments)
+        {
             Ok(result) => {
                 status.sent_count += 1;
                 status.pending_count -= 1;
-                
+
                 // Update audit entry with success
                 let mut updated_entry = audit_entry;
                 updated_entry.status = DeliveryStatus::Sent;
@@ -575,25 +649,32 @@ pub fn send_packet(
                     server: "proofmail".to_string(),
                 });
                 service.audit_store.append(&updated_entry)?;
-                
-                status.recipient_statuses.insert(recipient.recipient_id.clone(), DeliveryStatus::Sent);
+
+                status
+                    .recipient_statuses
+                    .insert(recipient.recipient_id.clone(), DeliveryStatus::Sent);
             }
             Err(e) => {
                 status.failed_count += 1;
                 status.pending_count -= 1;
-                
+
                 // Update audit entry with failure
                 let mut updated_entry = audit_entry;
                 updated_entry.status = DeliveryStatus::Failed;
                 updated_entry.error = Some(e.to_string());
                 service.audit_store.append(&updated_entry)?;
-                
-                status.recipient_statuses.insert(recipient.recipient_id.clone(), DeliveryStatus::Failed);
+
+                status
+                    .recipient_statuses
+                    .insert(recipient.recipient_id.clone(), DeliveryStatus::Failed);
             }
         }
     }
-    
-    status.last_updated = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+
+    status.last_updated = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
     Ok(status)
 }
 
@@ -676,21 +757,21 @@ impl ProofMailService {
         if entries.is_empty() {
             return Ok(None);
         }
-        
+
         let mut statuses = HashMap::new();
         let mut sent = 0;
         let mut delivered = 0;
         let mut failed = 0;
         let mut pending = 0;
-        
+
         for entry in &entries {
-            let current = statuses.get(&entry.recipient_id).cloned().unwrap_or(DeliveryStatus::Pending);
             // Use the latest status for each recipient
-            if entry.timestamp > 0 { // Always true, but keeps logic clear
+            if entry.timestamp > 0 {
+                // Always true, but keeps logic clear
                 statuses.insert(entry.recipient_id.clone(), entry.status.clone());
             }
         }
-        
+
         for status in statuses.values() {
             match status {
                 DeliveryStatus::Sent | DeliveryStatus::Delivered | DeliveryStatus::Opened => {
@@ -703,7 +784,7 @@ impl ProofMailService {
                 DeliveryStatus::Pending => pending += 1,
             }
         }
-        
+
         Ok(Some(SendStatus {
             packet_id: packet_id.to_string(),
             total_recipients: statuses.len(),
@@ -711,18 +792,30 @@ impl ProofMailService {
             delivered_count: delivered,
             failed_count: failed,
             pending_count: pending,
-            last_updated: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
+            last_updated: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_secs(),
             recipient_statuses: statuses,
         }))
     }
 
-    pub fn get_audit_trail(&self, packet_id: &str) -> Result<Vec<DeliveryAuditEntry>, ProofMailError> {
+    pub fn get_audit_trail(
+        &self,
+        packet_id: &str,
+    ) -> Result<Vec<DeliveryAuditEntry>, ProofMailError> {
         Ok(self.audit_store.get_for_packet(packet_id)?)
     }
 
     pub fn verify_packet_integrity(&self, packet_id: &str) -> Result<bool, ProofMailError> {
-        let packet = self.packet_store.get(packet_id)?.ok_or_else(|| ProofMailError::InvalidPacket("Packet not found".to_string()))?;
-        let stored_hash = self.packet_store.get_hash(packet_id)?.ok_or_else(|| ProofMailError::InvalidPacket("Hash not found".to_string()))?;
+        let packet = self
+            .packet_store
+            .get(packet_id)?
+            .ok_or_else(|| ProofMailError::InvalidPacket("Packet not found".to_string()))?;
+        let stored_hash = self
+            .packet_store
+            .get_hash(packet_id)?
+            .ok_or_else(|| ProofMailError::InvalidPacket("Hash not found".to_string()))?;
         let computed_hash = compute_packet_hash(&packet);
         Ok(stored_hash == computed_hash)
     }
@@ -741,22 +834,20 @@ mod tests {
             "action_id": "test-action",
             "decision": "pass"
         });
-        
-        let recipients = vec![
-            Recipient {
-                recipient_id: "rec-1".to_string(),
-                email: "reviewer@example.com".to_string(),
-                name: Some("Primary Reviewer".to_string()),
-                role: RecipientRole::PrimaryReviewer,
-                delivery_status: DeliveryStatus::Pending,
-            }
-        ];
-        
+
+        let recipients = vec![Recipient {
+            recipient_id: "rec-1".to_string(),
+            email: "reviewer@example.com".to_string(),
+            name: Some("Primary Reviewer".to_string()),
+            role: RecipientRole::PrimaryReviewer,
+            delivery_status: DeliveryStatus::Pending,
+        }];
+
         let mut attachments = HashMap::new();
         attachments.insert("evidence.pdf".to_string(), b"fake pdf content".to_vec());
-        
+
         let packet = create_packet(receipt, "test-issuer", recipients, attachments);
-        
+
         assert_eq!(packet.manifest.schema, "proofmail.packet.v1");
         assert_eq!(packet.manifest.receipt_id, "urn:ink:receipt:test-123");
         assert_eq!(packet.manifest.attachments.len(), 1);
@@ -764,61 +855,63 @@ mod tests {
     }
 
     #[test]
-    fn test_packet_hash_deterministic() {
+    fn test_packet_integrity_hash_is_stable_for_the_packet() {
         let receipt = json!({
             "schema": "ink.receipt.v2",
             "receipt_id": "urn:ink:receipt:test-123",
         });
-        
-        let recipients = vec![
-            Recipient {
-                recipient_id: "rec-1".to_string(),
-                email: "a@example.com".to_string(),
-                name: None,
-                role: RecipientRole::PrimaryReviewer,
-                delivery_status: DeliveryStatus::Pending,
-            }
-        ];
-        
+
+        let recipients = vec![Recipient {
+            recipient_id: "rec-1".to_string(),
+            email: "a@example.com".to_string(),
+            name: None,
+            role: RecipientRole::PrimaryReviewer,
+            delivery_status: DeliveryStatus::Pending,
+        }];
+
         let mut attachments = HashMap::new();
         attachments.insert("a.txt".to_string(), b"content a".to_vec());
         attachments.insert("b.txt".to_string(), b"content b".to_vec());
-        
-        let packet1 = create_packet(receipt.clone(), "issuer", recipients.clone(), attachments.clone());
-        let packet2 = create_packet(receipt, "issuer", recipients, attachments);
-        
-        assert_eq!(packet1.manifest.integrity.hash, packet2.manifest.integrity.hash);
+
+        let packet = create_packet(receipt, "issuer", recipients, attachments);
+        assert_eq!(packet.manifest.integrity.hash, compute_packet_hash(&packet));
+
+        let mut tampered = packet.clone();
+        tampered
+            .attachments
+            .insert("c.txt".to_string(), b"content c".to_vec());
+        assert_ne!(
+            packet.manifest.integrity.hash,
+            compute_packet_hash(&tampered)
+        );
     }
 
     #[test]
     fn test_in_memory_stores() {
-        let audit_store = InMemoryAuditStore::new();
         let packet_store = InMemoryPacketStore::new();
-        
+
         let receipt = json!({"receipt_id": "test"});
-        let recipients = vec![
-            Recipient {
-                recipient_id: "rec-1".to_string(),
-                email: "test@example.com".to_string(),
-                name: None,
-                role: RecipientRole::PrimaryReviewer,
-                delivery_status: DeliveryStatus::Pending,
-            }
-        ];
+        let recipients = vec![Recipient {
+            recipient_id: "rec-1".to_string(),
+            email: "test@example.com".to_string(),
+            name: None,
+            role: RecipientRole::PrimaryReviewer,
+            delivery_status: DeliveryStatus::Pending,
+        }];
         let mut attachments = HashMap::new();
         attachments.insert("test.txt".to_string(), b"test".to_vec());
-        
+
         let packet = create_packet(receipt, "issuer", recipients, attachments);
         let packet_id = packet.manifest.packet_id.clone();
-        
+
         // Store packet
         let stored_id = packet_store.store(&packet).unwrap();
         assert_eq!(stored_id, packet_id);
-        
+
         // Verify hash
         let hash = packet_store.get_hash(&packet_id).unwrap().unwrap();
         assert_eq!(hash, packet.manifest.integrity.hash);
-        
+
         // Retrieve packet
         let retrieved = packet_store.get(&packet_id).unwrap().unwrap();
         assert_eq!(retrieved.manifest.packet_id, packet_id);

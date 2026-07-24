@@ -12,7 +12,12 @@
 //! remote adapter (e.g. HSM, KMS, or hosted signer) that implements
 //! [`SignerProvider`].
 
-use std::collections::HashMap;
+use ed25519_dalek::{Signer, SigningKey};
+use ink_core::bounded::PublicKeyId;
+use ink_core::{
+    canon, AttestationEnvelope, Ed25519Signature, ReceiptEnvelope, Result as InkResult,
+    SignatureProfileId, ValidityWindow,
+};
 use std::fmt;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -125,7 +130,8 @@ impl LocalSigner {
         LocalSigner {
             key_id: key_id.to_string(),
             algorithm: "ed25519".to_string(),
-            public_key_pem: "-----BEGIN PUBLIC KEY-----\nDEMO\n-----END PUBLIC KEY-----".to_string(),
+            public_key_pem: "-----BEGIN PUBLIC KEY-----\nDEMO\n-----END PUBLIC KEY-----"
+                .to_string(),
             created_at,
             rotation: RotationState::Stable,
             revoked: false,
@@ -244,7 +250,10 @@ pub enum IssuanceMode {
 }
 
 /// Factory that returns the signer provider for a given mode.
-pub fn signer_for_mode(mode: IssuanceMode, remote: Option<RemoteSigner>) -> Box<dyn SignerProvider> {
+pub fn signer_for_mode(
+    mode: IssuanceMode,
+    remote: Option<RemoteSigner>,
+) -> Box<dyn SignerProvider> {
     match mode {
         IssuanceMode::Demo => Box::new(LocalSigner::new("demo-signer")),
         IssuanceMode::Production => {
@@ -256,6 +265,32 @@ pub fn signer_for_mode(mode: IssuanceMode, remote: Option<RemoteSigner>) -> Box<
             Box::new(remote)
         }
     }
+}
+
+/// Backward-compatible factory exported by the crate root.
+pub fn create_signer(mode: IssuanceMode, remote: Option<RemoteSigner>) -> Box<dyn SignerProvider> {
+    signer_for_mode(mode, remote)
+}
+
+/// Attach an Ed25519 attestation to a kernel receipt envelope.
+pub fn attest_receipt(
+    receipt: ReceiptEnvelope,
+    profile_id: SignatureProfileId,
+    public_key_id: PublicKeyId,
+    signing_key: &SigningKey,
+    validity_window: Option<ValidityWindow>,
+) -> InkResult<ReceiptEnvelope> {
+    let signed_message_hash = canon::compute_signed_message_hash(&receipt, profile_id)?;
+    let signature = signing_key.sign(signed_message_hash.as_bytes());
+    receipt.with_attestation(AttestationEnvelope {
+        profile_id,
+        issuer_id: receipt.issuer_id,
+        public_key_id,
+        signature: Ed25519Signature(signature.to_bytes()),
+        signed_message_hash,
+        sequence: receipt.sequence,
+        validity_window,
+    })
 }
 
 #[cfg(test)]

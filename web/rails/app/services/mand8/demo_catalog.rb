@@ -1,5 +1,7 @@
 module Mand8
   class DemoCatalog
+    CANONICAL_EXTERNAL_SCENARIO = "lloyds_incident_to_renewal".freeze
+
     SCENARIOS = {
       "lloyds_cyber_happy_path" => {
         "workspace" => {
@@ -308,6 +310,10 @@ module Mand8
 
     def self.available_scenarios
       SCENARIOS.keys.sort
+    end
+
+    def self.external_scenarios
+      [CANONICAL_EXTERNAL_SCENARIO]
     end
 
     def self.fetch(name)

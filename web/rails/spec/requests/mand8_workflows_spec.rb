@@ -83,6 +83,8 @@ RSpec.describe "MAND8 workflows", type: :request do
     bundle = JSON.parse(response.body)
     expect(bundle.dig("manifest", "case_id")).to eq(case_id)
     expect(bundle.dig("manifest", "underwriter_summary", "incident_count")).to eq(1)
+    expect(bundle.dig("manifest", "underwriter_summary", "renewal_ready")).to eq(false)
+    expect(bundle.dig("manifest", "underwriter_summary", "defensibility_annotation")).to be_nil
     expect(bundle.dig("manifest", "verifier_handoff", "available")).to eq(false)
     expect(bundle.dig("manifest", "verifier_handoff", "reason_code")).to eq("PORTABLE_RECEIPT_MISSING")
     expect(bundle.dig("manifest", "verifier_handoff", "artifact_url")).to be_nil

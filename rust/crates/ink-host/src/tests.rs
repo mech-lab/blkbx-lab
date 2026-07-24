@@ -616,6 +616,8 @@ fn hosted_issue_receipt_emits_portable_v2_receipt_with_file_signer() {
 
     let receipt = response.receipt;
     assert_eq!(receipt["schema"], "ink.receipt.v2");
+    assert_eq!(response.manifest["schema"], "ink.manifest.v2");
+    assert_eq!(response.manifest["action_id"], "urn:ink:action:test-hosted");
     assert_eq!(receipt["signing"]["key_id"], json!(signer.key_id));
     assert_eq!(response.key_id, signer.key_id);
     assert_eq!(response.manifest_hash.algorithm, "sha-256");

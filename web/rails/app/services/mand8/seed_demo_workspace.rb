@@ -16,6 +16,7 @@ module Mand8
 
       definition = DemoCatalog.fetch(@scenario)
       risk_receipt = upsert_insurability_receipt(definition.fetch("risk_receipt"))
+      issue_portable_companion!(risk_receipt)
       authority_receipts = Array(definition["authority_receipts"]).map.with_index do |body, index|
         upsert_authority_receipt(body, index)
       end
@@ -42,7 +43,9 @@ module Mand8
         receipt_ids: [risk_receipt, *authority_receipts, *incident_receipts].map(&:id),
         bundle_id: bundle.id,
         review_request_id: review_request.id,
-        shared_bundle_id: shared_bundle.id
+        shared_bundle_id: shared_bundle.id,
+        portable_companion_available: risk_receipt.reload.portable_receipt.present?,
+        signing_key_identifier: risk_receipt.signing_key_identifier
       }
     end
 
@@ -150,7 +153,7 @@ module Mand8
     def upsert_bundle(definition, receipts)
       title = definition.fetch("bundle_title")
       bundle = @workspace.evidence_bundles.find_by(title: title, bundle_type: "mand8_renewal")
-      return bundle if bundle
+      return BuildRenewalBundle.update_manifest!(bundle: bundle, workspace: @workspace, receipts: receipts) if bundle
 
       BuildRenewalBundle.call(
         organization: @organization,
@@ -159,6 +162,10 @@ module Mand8
         receipts: receipts,
         title: title
       )
+    end
+
+    def issue_portable_companion!(receipt)
+      Ink::HostedIssueReceipt.call(receipt: receipt) if Ink::HostedIssueReceipt.enabled?
     end
 
     def upsert_review_request(definition, bundle)

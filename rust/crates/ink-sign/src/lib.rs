@@ -6,6 +6,6 @@
 mod signer;
 
 pub use signer::{
-    create_signer, HealthReport, HealthStatus, IssuanceMode, KeyMetadata, LocalSigner,
-    RemoteSigner, RotationState, SignerError, SignerProvider,
+    attest_receipt, create_signer, HealthReport, HealthStatus, IssuanceMode, KeyMetadata,
+    LocalSigner, RemoteSigner, RotationState, SignerError, SignerProvider,
 };
