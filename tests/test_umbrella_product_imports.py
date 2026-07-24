@@ -82,6 +82,7 @@ def test_research_and_experimental_namespaces_report_extra_contract() -> None:
 
     assert research["extra"] == "research"
     assert research["dependencies"] == ["markdown_it"]
+    assert research["modules"] == ["actuarial"]
     assert experimental["extra"] == "experimental"
     assert experimental["dependencies"] == ["rich"]
     assert ml.research.describe()["extra"] == "research"

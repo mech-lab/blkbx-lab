@@ -6,6 +6,7 @@ from importlib.util import find_spec
 
 EXTRA_NAME = "research"
 OPTIONAL_DEPENDENCIES = ("markdown_it",)
+AVAILABLE_MODULES = ("actuarial",)
 
 
 def dependency_status() -> dict[str, bool]:
@@ -29,9 +30,18 @@ def describe() -> dict[str, object]:
     return {
         "extra": EXTRA_NAME,
         "dependencies": list(OPTIONAL_DEPENDENCIES),
+        "modules": list(AVAILABLE_MODULES),
         "available": available(),
         "scope": "Research helpers and reproducibility-side tooling stay outside the default install contract.",
     }
 
 
-__all__ = ["EXTRA_NAME", "OPTIONAL_DEPENDENCIES", "available", "dependency_status", "describe", "require_dependencies"]
+__all__ = [
+    "AVAILABLE_MODULES",
+    "EXTRA_NAME",
+    "OPTIONAL_DEPENDENCIES",
+    "available",
+    "dependency_status",
+    "describe",
+    "require_dependencies",
+]

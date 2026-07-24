@@ -59,6 +59,7 @@ module Mand8
       bundles = @workspace.evidence_bundles.select { |bundle| bundle.manifest["case_id"] == case_id }
       review_requests = @workspace.review_requests.select { |request| request.evidence_bundle&.manifest&.[]("case_id") == case_id }
       verification_runs = receipts.flat_map(&:verification_runs).sort_by { |run| run.verified_at || Time.at(0) }
+      defensibility_annotation = ActuarialAnnotation.call(receipts: receipts, verification_reports: verification_runs)
 
       event_trail = Array(risk_receipt&.body_json&.[]("event_trail"))
       latest_incident_payload = incident_receipts.last&.body_json || event_payloads(event_trail, "incident_recorded").last || {}
@@ -94,6 +95,7 @@ module Mand8
           }
         end,
         "bundle_ids" => bundles.map(&:id),
+        "defensibility_annotation" => defensibility_annotation,
         "verifier_handoff" => VerifierHandoff.payload(workspace: @workspace, case_id: case_id)
       }
     end

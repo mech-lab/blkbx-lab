@@ -19,10 +19,22 @@ RSpec.describe "MAND8 dashboard", type: :request do
     expect(response).to have_http_status(:ok)
     parsed = JSON.parse(response.body)
     expect(parsed.dig("summary", "case_count")).to eq(1)
+    expect(parsed.dig("summary", "ready_for_renewal_count")).to eq(0)
     expect(parsed.dig("cases", 0, "case_id")).to eq("case_mand8_lloyds_incident_003")
     expect(parsed.dig("cases", 0, "authority_status")).to eq("within_authority")
     expect(parsed.dig("cases", 0, "incident_count")).to eq(1)
     expect(parsed.dig("cases", 0, "latest_verification_status")).to eq("warning")
+    expect(parsed.dig("cases", 0, "renewal_ready")).to eq(false)
+    annotation = parsed.dig("cases", 0, "defensibility_annotation")
+    expect(annotation.fetch("schema")).to eq("ink.actuarial_annotation.v1")
+    expect(annotation.fetch("status")).to eq("research_unvalidated")
+    expect(annotation.fetch("badge")).to eq("Research / unvalidated")
+    expect(annotation.dig("engine", "profile")).to eq("mand8_case_v1")
+    expect(annotation.fetch("completeness_score")).to be_between(0.0, 1.0).inclusive
+    expect(annotation.fetch("defensibility_score")).to be_between(0.0, 1.0).inclusive
+    expect(annotation.fetch("evidence_penalty")).to be >= 1.0
+    expect(annotation).not_to have_key("integrity")
+    expect(annotation).not_to have_key("signature")
     expect(parsed.dig("verifier_handoff", "product")).to eq("mand8")
     expect(parsed.dig("verifier_handoff", "available")).to eq(false)
     expect(parsed.dig("verifier_handoff", "reason_code")).to eq("PORTABLE_RECEIPT_MISSING")
