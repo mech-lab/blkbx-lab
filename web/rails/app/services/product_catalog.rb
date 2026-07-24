@@ -48,6 +48,7 @@ class ProductCatalog
       { product_type: "blkbxs", workflow_kind: "vendor_onboarding", name: "Vendor onboarding evidence", schema_keys: ["blkbxs.vendor_onboarding_receipt.v1"], configuration: { bundle_type: "blkbxs_bank_diligence" } },
       { product_type: "blkbxs", workflow_kind: "control_execution", name: "Bank control evidence", schema_keys: ["blkbxs.control_receipt.v1"], configuration: { bundle_type: "blkbxs_bank_diligence" } },
       { product_type: "blkbxs", workflow_kind: "underwriting_decision", name: "Underwriting decision evidence", schema_keys: ["blkbxs.underwriting_decision_receipt.v1"], configuration: { bundle_type: "blkbxs_bank_diligence" } },
+      { product_type: "blkbxs", workflow_kind: "ubr_event", name: "Universal banking event evidence", schema_keys: ["blkbxs.ubr.receipt.v1"], configuration: { bundle_type: "blkbxs_ubr_graph" } },
       { product_type: "mand8", workflow_kind: "insurability", name: "Insurability evidence", schema_keys: ["mand8.risk_receipt.v1"], configuration: { bundle_type: "mand8_insurability" } },
       { product_type: "mand8", workflow_kind: "authority", name: "Authority and binder evidence", schema_keys: ["mand8.authority_receipt.v1"], configuration: { bundle_type: "mand8_renewal" } },
       { product_type: "mand8", workflow_kind: "incident", name: "Incident evidence", schema_keys: ["mand8.incident_receipt.v1"], configuration: { bundle_type: "mand8_renewal" } },

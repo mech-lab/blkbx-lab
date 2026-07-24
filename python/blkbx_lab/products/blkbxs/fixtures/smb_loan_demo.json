@@ -1,0 +1,534 @@
+{
+  "schema": "blkbxs.ubr.demo_fixture.v1",
+  "fixture_id": "blkbxs_smb_loan_demo_2026_07_22",
+  "generated_by": "blkbx_lab.products.blkbxs.scenarios.smb_loan_demo_fixture",
+  "source_bundle": "ubr_smb_loan_demo_bundle.zip",
+  "source_bundle_sha256": "sha256:86bba2d4c4d3cee21e1518446280dcb3cf0c66efecf7dca4edd5240adbea7de0",
+  "generated_at": "2026-07-22T17:05:00Z",
+  "signature_policy": "UBR-native synthetic proof values are intentionally omitted; Rails must issue ink.receipt.v2 companions before persistence.",
+  "evidence_manifest": {
+    "bundle_id": "urn:ubr-bundle:demo:smb-loan:APP-2026-00019381",
+    "evidence": [
+      {
+        "id": "urn:evidence:consent-proof-001",
+        "type": "customer_consent",
+        "hash": "sha256:9b673ed5d198ced5e5e51843126f8e103ebf044605445ef2d0423ead8370d738",
+        "disclosure": "summary",
+        "available_to_verifier": true
+      },
+      {
+        "id": "urn:evidence:kyb-report-001",
+        "type": "kyb_report",
+        "hash": "sha256:c54018e6cb64652acbe30147bc50873869c32106d43325fd3d054cc2e5bf2898",
+        "disclosure": "summary",
+        "available_to_verifier": true
+      },
+      {
+        "id": "urn:evidence:bank-statements-q2-2026",
+        "type": "bank_statement_bundle",
+        "hash": "sha256:1bb1dc1cbbacd20b0ee50c404e0dc61cdd0d5c28666bab4fc871c39cde62e35c",
+        "disclosure": "restricted",
+        "available_to_verifier": false
+      },
+      {
+        "id": "urn:evidence:tax-return-2025",
+        "type": "tax_document",
+        "hash": "sha256:28f8f858d0bbed4da4227b70ee8b5271c173ef74f2f7ae936fd8c79b7fee6bcd",
+        "disclosure": "restricted",
+        "available_to_verifier": false
+      },
+      {
+        "id": "urn:evidence:cashflow-analysis-001",
+        "type": "derived_cashflow_analysis",
+        "hash": "sha256:fe9a1558a13445453541435f8bc9d1828ab9422f6845726a264cbdeab4562a3c",
+        "disclosure": "summary",
+        "available_to_verifier": true
+      },
+      {
+        "id": "urn:evidence:ai-recommendation-001",
+        "type": "ai_recommendation_output",
+        "hash": "sha256:3a051e541ce575823aba4718d610b4bf4028c0564effeb0558de386629e99d4c",
+        "disclosure": "summary",
+        "available_to_verifier": true
+      },
+      {
+        "id": "urn:evidence:human-review-001",
+        "type": "credit_officer_review",
+        "hash": "sha256:3fad7a6e03ff6584e35e741ec118cdf5caaddc432af5ef69db7a3601c9cda221",
+        "disclosure": "summary",
+        "available_to_verifier": true
+      },
+      {
+        "id": "urn:evidence:conditional-approval-notice-001",
+        "type": "conditional_approval_notice",
+        "hash": "sha256:395537dbaef3ff568182eb9a1d985b6c892352f45557406fd5df8a94d130f3c3",
+        "disclosure": "summary",
+        "available_to_verifier": true
+      }
+    ]
+  },
+  "receipts": [
+    {
+      "id": "urn:ubr:demo:consent-granted:0001",
+      "type": "UniversalBankingReceipt",
+      "version": "0.1.0",
+      "profile": ["ubr.core.v0", "ubr.consent.v0"],
+      "issued_at": "2026-07-22T16:01:00Z",
+      "jurisdiction": ["US"],
+      "language": "en-US",
+      "operation": {
+        "domain": "consent",
+        "name": "consent.granted",
+        "phase": "authorization",
+        "action": "granted",
+        "status": "completed",
+        "business_process_id": "urn:bank-process:loan-origination:APP-2026-00019381"
+      },
+      "parties": [
+        { "role": "issuer", "type": "financial_institution", "name": "Example Bank, N.A.", "lei": "549300EXAMPLEBANK123", "id": "did:web:example-bank.test" },
+        { "role": "applicant_business", "type": "legal_entity", "name": "Acme Supplies LLC", "lei": "254900EXAMPLEACME99", "id": "did:example:acme-supplies-llc" }
+      ],
+      "authority": {
+        "basis": "customer_request",
+        "scope": ["retrieve_bank_transactions", "analyze_cash_flow", "verify_tax_documents", "generate_loan_offer"]
+      },
+      "state_transition": {
+        "subject": { "type": "consent", "id": "consent-2026-000882" },
+        "before": { "status": "none" },
+        "after": { "status": "active", "expires_at": "2026-08-21T16:00:00Z" }
+      },
+      "evidence": [
+        { "id": "urn:evidence:consent-proof-001", "type": "customer_consent", "hash": "sha256:9b673ed5d198ced5e5e51843126f8e103ebf044605445ef2d0423ead8370d738", "disclosure": "summary" }
+      ],
+      "compliance": { "regimes": ["customer_permissioned_data_access"], "policy_refs": ["data-access-policy-v2026.02"] },
+      "links": { "bundle_id": "urn:ubr-bundle:demo:smb-loan:APP-2026-00019381", "previous_receipt_hash": null, "parent_receipts": [], "related_iso20022_messages": [], "related_bian_service_domains": [] },
+      "ai_assistance": { "used": false, "systems": [], "risk_controls": {} },
+      "verification": {
+        "canonicalization": "demo-jcs-compatible-json-sort-keys",
+        "digest_alg": "SHA-256",
+        "signature_alg": "Ed25519",
+        "verification_method": "did:web:example-bank.test#ubr-issuer-2026-07",
+        "status": { "state": "active", "status_purpose": "revocation" },
+        "timestamp": { "method": "signed_issued_at_demo", "value": "2026-07-22T16:01:00Z" },
+        "digest": "sha256:71e1c9b937d6bcfeac8094e2dbae560851a3a76c6795517ed38de7655c60deb5",
+        "proofs": []
+      },
+      "demo_note": "Synthetic UBR fixture. UBR-native proof values are omitted; trust must come from the linked ink.receipt.v2 companion."
+    },
+    {
+      "id": "urn:ubr:demo:kyb-verified:0002",
+      "type": "UniversalBankingReceipt",
+      "version": "0.1.0",
+      "profile": ["ubr.core.v0", "ubr.kyb.v0"],
+      "issued_at": "2026-07-22T16:12:00Z",
+      "jurisdiction": ["US"],
+      "language": "en-US",
+      "operation": {
+        "domain": "identity",
+        "name": "kyb.verified",
+        "phase": "onboarding",
+        "action": "verified",
+        "status": "completed",
+        "business_process_id": "urn:bank-process:loan-origination:APP-2026-00019381"
+      },
+      "parties": [
+        { "role": "issuer", "type": "financial_institution", "name": "Example Bank, N.A.", "lei": "549300EXAMPLEBANK123", "id": "did:web:example-bank.test" },
+        { "role": "applicant_business", "type": "legal_entity", "name": "Acme Supplies LLC", "lei": "254900EXAMPLEACME99", "id": "did:example:acme-supplies-llc" }
+      ],
+      "authority": { "basis": "customer_consent_and_bank_onboarding_policy", "scope": ["verify_business_identity", "screen_beneficial_owners"] },
+      "state_transition": {
+        "subject": { "type": "business_identity", "id": "did:example:acme-supplies-llc" },
+        "before": { "kyb_status": "pending" },
+        "after": { "kyb_status": "verified", "beneficial_ownership": "attested", "sanctions_screening": "clear" }
+      },
+      "evidence": [
+        { "id": "urn:evidence:kyb-report-001", "type": "kyb_report", "hash": "sha256:c54018e6cb64652acbe30147bc50873869c32106d43325fd3d054cc2e5bf2898", "disclosure": "summary" }
+      ],
+      "compliance": { "regimes": ["BSA_AML", "beneficial_ownership", "institutional_onboarding_policy"], "policy_refs": ["kyb-policy-v2026.01"] },
+      "links": { "bundle_id": "urn:ubr-bundle:demo:smb-loan:APP-2026-00019381", "previous_receipt_hash": "sha256:71e1c9b937d6bcfeac8094e2dbae560851a3a76c6795517ed38de7655c60deb5", "parent_receipts": ["urn:ubr:demo:consent-granted:0001"], "related_iso20022_messages": [], "related_bian_service_domains": [] },
+      "ai_assistance": { "used": false, "systems": [], "risk_controls": {} },
+      "verification": {
+        "canonicalization": "demo-jcs-compatible-json-sort-keys",
+        "digest_alg": "SHA-256",
+        "signature_alg": "Ed25519",
+        "verification_method": "did:web:example-bank.test#ubr-issuer-2026-07",
+        "status": { "state": "active", "status_purpose": "revocation" },
+        "timestamp": { "method": "signed_issued_at_demo", "value": "2026-07-22T16:12:00Z" },
+        "digest": "sha256:b64a6e36ad3d0ce71318822dbcf4d47bf91f59e1319136ec3a9843979ec48b0a",
+        "proofs": []
+      },
+      "demo_note": "Synthetic UBR fixture. UBR-native proof values are omitted; trust must come from the linked ink.receipt.v2 companion."
+    },
+    {
+      "id": "urn:ubr:demo:documents-received:0003",
+      "type": "UniversalBankingReceipt",
+      "version": "0.1.0",
+      "profile": ["ubr.core.v0", "ubr.loan.smb.v0"],
+      "issued_at": "2026-07-22T16:18:00Z",
+      "jurisdiction": ["US"],
+      "language": "en-US",
+      "operation": {
+        "domain": "loan",
+        "name": "documents.received",
+        "phase": "application",
+        "action": "received",
+        "status": "completed",
+        "business_process_id": "urn:bank-process:loan-origination:APP-2026-00019381"
+      },
+      "parties": [
+        { "role": "issuer", "type": "financial_institution", "name": "Example Bank, N.A.", "lei": "549300EXAMPLEBANK123", "id": "did:web:example-bank.test" },
+        { "role": "applicant_business", "type": "legal_entity", "name": "Acme Supplies LLC", "lei": "254900EXAMPLEACME99", "id": "did:example:acme-supplies-llc" }
+      ],
+      "authority": { "basis": "customer_submission", "scope": ["receive_application_documents"] },
+      "state_transition": {
+        "subject": { "type": "loan_application", "id": "APP-2026-00019381" },
+        "before": { "document_status": "incomplete" },
+        "after": { "document_status": "received", "documents": ["bank_statements_q2_2026", "tax_return_2025"] }
+      },
+      "evidence": [
+        { "id": "urn:evidence:bank-statements-q2-2026", "type": "bank_statement_bundle", "hash": "sha256:1bb1dc1cbbacd20b0ee50c404e0dc61cdd0d5c28666bab4fc871c39cde62e35c", "disclosure": "restricted" },
+        { "id": "urn:evidence:tax-return-2025", "type": "tax_document", "hash": "sha256:28f8f858d0bbed4da4227b70ee8b5271c173ef74f2f7ae936fd8c79b7fee6bcd", "disclosure": "restricted" }
+      ],
+      "compliance": { "regimes": ["ECOA_RegB", "Section1071", "institutional_credit_policy"], "policy_refs": ["application-intake-policy-v2026.03"] },
+      "links": { "bundle_id": "urn:ubr-bundle:demo:smb-loan:APP-2026-00019381", "previous_receipt_hash": "sha256:b64a6e36ad3d0ce71318822dbcf4d47bf91f59e1319136ec3a9843979ec48b0a", "parent_receipts": ["urn:ubr:demo:kyb-verified:0002"], "related_iso20022_messages": [], "related_bian_service_domains": ["Commercial Loan", "Customer Offer", "Credit Risk Assessment"] },
+      "ai_assistance": { "used": false, "systems": [], "risk_controls": {} },
+      "verification": {
+        "canonicalization": "demo-jcs-compatible-json-sort-keys",
+        "digest_alg": "SHA-256",
+        "signature_alg": "Ed25519",
+        "verification_method": "did:web:example-bank.test#ubr-issuer-2026-07",
+        "status": { "state": "active", "status_purpose": "revocation" },
+        "timestamp": { "method": "signed_issued_at_demo", "value": "2026-07-22T16:18:00Z" },
+        "digest": "sha256:baf87ae5ee6ccadf59f10f98c12a85ea3b10d887f5036790e7a1774f2d96b7d9",
+        "proofs": []
+      },
+      "demo_note": "Synthetic UBR fixture. UBR-native proof values are omitted; trust must come from the linked ink.receipt.v2 companion."
+    },
+    {
+      "id": "urn:ubr:demo:cashflow-analysis-completed:0004",
+      "type": "UniversalBankingReceipt",
+      "version": "0.1.0",
+      "profile": ["ubr.core.v0", "ubr.loan.smb.v0", "ubr.ai.assisted.v0"],
+      "issued_at": "2026-07-22T16:29:00Z",
+      "jurisdiction": ["US"],
+      "language": "en-US",
+      "operation": {
+        "domain": "loan",
+        "name": "cashflow.analysis_completed",
+        "phase": "underwriting",
+        "action": "analyzed",
+        "status": "completed",
+        "business_process_id": "urn:bank-process:loan-origination:APP-2026-00019381"
+      },
+      "parties": [
+        { "role": "issuer", "type": "financial_institution", "name": "Example Bank, N.A.", "lei": "549300EXAMPLEBANK123", "id": "did:web:example-bank.test" },
+        { "role": "applicant_business", "type": "legal_entity", "name": "Acme Supplies LLC", "lei": "254900EXAMPLEACME99", "id": "did:example:acme-supplies-llc" },
+        { "role": "ai_agent", "type": "software_agent", "id": "did:example:agent-loan-assistant-7", "mode": "recommendation_with_human_approval" }
+      ],
+      "authority": { "agent_authorization": { "delegation_id": "agent-delegation-2026-0881", "allowed_actions": ["extract_documents", "summarize_cash_flow", "recommend_terms", "draft_customer_notice"], "prohibited_actions": ["final_credit_approval_without_human", "move_funds", "change_customer_legal_identity"] } },
+      "state_transition": {
+        "subject": { "type": "loan_application", "id": "APP-2026-00019381" },
+        "before": { "cashflow_status": "pending" },
+        "after": { "cashflow_status": "completed", "dscr_post_close": "1.42", "result": "pass" }
+      },
+      "evidence": [
+        { "id": "urn:evidence:bank-statements-q2-2026", "type": "bank_statement_bundle", "hash": "sha256:1bb1dc1cbbacd20b0ee50c404e0dc61cdd0d5c28666bab4fc871c39cde62e35c", "disclosure": "restricted" },
+        { "id": "urn:evidence:cashflow-analysis-001", "type": "derived_cashflow_analysis", "hash": "sha256:fe9a1558a13445453541435f8bc9d1828ab9422f6845726a264cbdeab4562a3c", "disclosure": "summary" }
+      ],
+      "compliance": { "regimes": ["ECOA_RegB", "Section1071", "model_risk_management"], "policy_refs": ["credit-policy-smb-v2026.04"] },
+      "links": { "bundle_id": "urn:ubr-bundle:demo:smb-loan:APP-2026-00019381", "previous_receipt_hash": "sha256:baf87ae5ee6ccadf59f10f98c12a85ea3b10d887f5036790e7a1774f2d96b7d9", "parent_receipts": ["urn:ubr:demo:documents-received:0003"], "related_iso20022_messages": [], "related_bian_service_domains": ["Commercial Loan", "Credit Risk Assessment"] },
+      "ai_assistance": {
+        "used": true,
+        "systems": [{ "system_id": "loan-assistant-v4", "model_family": "large_language_model", "model_version": "2026-06-15", "role": "document_extraction_and_cashflow_summary", "human_review_required": true, "human_review_completed": false }],
+        "risk_controls": { "prompt_injection_check": "passed", "pii_minimization_check": "passed" }
+      },
+      "verification": {
+        "canonicalization": "demo-jcs-compatible-json-sort-keys",
+        "digest_alg": "SHA-256",
+        "signature_alg": "Ed25519",
+        "verification_method": "did:web:example-bank.test#ubr-issuer-2026-07",
+        "status": { "state": "active", "status_purpose": "revocation" },
+        "timestamp": { "method": "signed_issued_at_demo", "value": "2026-07-22T16:29:00Z" },
+        "digest": "sha256:10ebc033d6f5af2c9cb0b8c31238bd5b48cff2a321d332d4b1c244b5808a5dbd",
+        "proofs": []
+      },
+      "demo_note": "Synthetic UBR fixture. UBR-native proof values are omitted; trust must come from the linked ink.receipt.v2 companion."
+    },
+    {
+      "id": "urn:ubr:demo:ai-recommendation-generated:0005",
+      "type": "UniversalBankingReceipt",
+      "version": "0.1.0",
+      "profile": ["ubr.core.v0", "ubr.loan.smb.v0", "ubr.ai.assisted.v0"],
+      "issued_at": "2026-07-22T16:34:00Z",
+      "jurisdiction": ["US"],
+      "language": "en-US",
+      "operation": {
+        "domain": "ai_governance",
+        "name": "ai.recommendation_generated",
+        "phase": "underwriting",
+        "action": "recommended",
+        "status": "completed",
+        "business_process_id": "urn:bank-process:loan-origination:APP-2026-00019381"
+      },
+      "parties": [
+        { "role": "issuer", "type": "financial_institution", "name": "Example Bank, N.A.", "lei": "549300EXAMPLEBANK123", "id": "did:web:example-bank.test" },
+        { "role": "applicant_business", "type": "legal_entity", "name": "Acme Supplies LLC", "lei": "254900EXAMPLEACME99", "id": "did:example:acme-supplies-llc" },
+        { "role": "ai_agent", "type": "software_agent", "id": "did:example:agent-loan-assistant-7", "mode": "recommendation_with_human_approval" }
+      ],
+      "authority": { "institutional_policy": { "policy_id": "credit-policy-smb-v2026.04", "control_set": ["kyb_required", "beneficial_ownership_required", "cashflow_model_review", "human_approval_required_above_100k", "conditional_approval_notice_required"] } },
+      "state_transition": {
+        "subject": { "type": "loan_application", "id": "APP-2026-00019381" },
+        "before": { "ai_recommendation": "none" },
+        "after": { "ai_recommendation": "conditional_approval", "recommended_amount": { "currency": "USD", "value": "250000.00" }, "term_months": 48, "apr": "0.1125" }
+      },
+      "evidence": [
+        { "id": "urn:evidence:cashflow-analysis-001", "type": "derived_cashflow_analysis", "hash": "sha256:fe9a1558a13445453541435f8bc9d1828ab9422f6845726a264cbdeab4562a3c", "disclosure": "summary" },
+        { "id": "urn:evidence:ai-recommendation-001", "type": "ai_recommendation_output", "hash": "sha256:3a051e541ce575823aba4718d610b4bf4028c0564effeb0558de386629e99d4c", "disclosure": "summary" }
+      ],
+      "compliance": { "regimes": ["ECOA_RegB", "Section1071", "model_risk_management", "institutional_credit_policy"], "policy_refs": ["credit-policy-smb-v2026.04"] },
+      "links": { "bundle_id": "urn:ubr-bundle:demo:smb-loan:APP-2026-00019381", "previous_receipt_hash": "sha256:10ebc033d6f5af2c9cb0b8c31238bd5b48cff2a321d332d4b1c244b5808a5dbd", "parent_receipts": ["urn:ubr:demo:cashflow-analysis-completed:0004"], "related_iso20022_messages": [], "related_bian_service_domains": [] },
+      "ai_assistance": {
+        "used": true,
+        "systems": [{ "system_id": "loan-assistant-v4", "model_family": "large_language_model", "model_version": "2026-06-15", "role": "recommendation_generation", "human_review_required": true, "human_review_completed": false }],
+        "risk_controls": { "prohibited_final_approval": "enforced", "credit_policy_consistency_check": "passed", "human_approval_required_above_100k": true }
+      },
+      "verification": {
+        "canonicalization": "demo-jcs-compatible-json-sort-keys",
+        "digest_alg": "SHA-256",
+        "signature_alg": "Ed25519",
+        "verification_method": "did:web:example-bank.test#ubr-issuer-2026-07",
+        "status": { "state": "active", "status_purpose": "revocation" },
+        "timestamp": { "method": "signed_issued_at_demo", "value": "2026-07-22T16:34:00Z" },
+        "digest": "sha256:a25601df3f655d40bb411b0b9d7e86e9f05a8077d8dcb27aef56c9bcc0d3ab2f",
+        "proofs": []
+      },
+      "demo_note": "Synthetic UBR fixture. UBR-native proof values are omitted; trust must come from the linked ink.receipt.v2 companion."
+    },
+    {
+      "id": "urn:ubr:demo:human-credit-review-completed:0006",
+      "type": "UniversalBankingReceipt",
+      "version": "0.1.0",
+      "profile": ["ubr.core.v0", "ubr.loan.smb.v0", "ubr.human_review.v0"],
+      "issued_at": "2026-07-22T16:43:00Z",
+      "jurisdiction": ["US"],
+      "language": "en-US",
+      "operation": {
+        "domain": "loan",
+        "name": "human_credit_review.completed",
+        "phase": "decision",
+        "action": "approved_conditionally",
+        "status": "completed",
+        "business_process_id": "urn:bank-process:loan-origination:APP-2026-00019381"
+      },
+      "parties": [
+        { "role": "issuer", "type": "financial_institution", "name": "Example Bank, N.A.", "lei": "549300EXAMPLEBANK123", "id": "did:web:example-bank.test" },
+        { "role": "applicant_business", "type": "legal_entity", "name": "Acme Supplies LLC", "lei": "254900EXAMPLEACME99", "id": "did:example:acme-supplies-llc" },
+        { "role": "human_approver", "type": "person", "id": "did:example:bank-officer-44", "employee_role": "commercial_credit_officer" }
+      ],
+      "authority": { "institutional_policy": { "policy_id": "credit-policy-smb-v2026.04" } },
+      "state_transition": {
+        "subject": { "type": "loan_application", "id": "APP-2026-00019381" },
+        "before": { "ai_recommendation": "conditional_approval", "human_review_status": "pending" },
+        "after": { "human_review_status": "completed", "review_outcome": "approved_conditionally", "changed_ai_recommendation": false }
+      },
+      "evidence": [
+        { "id": "urn:evidence:ai-recommendation-001", "type": "ai_recommendation_output", "hash": "sha256:3a051e541ce575823aba4718d610b4bf4028c0564effeb0558de386629e99d4c", "disclosure": "summary" },
+        { "id": "urn:evidence:human-review-001", "type": "credit_officer_review", "hash": "sha256:3fad7a6e03ff6584e35e741ec118cdf5caaddc432af5ef69db7a3601c9cda221", "disclosure": "summary" }
+      ],
+      "compliance": { "regimes": ["ECOA_RegB", "Section1071", "institutional_credit_policy"], "policy_refs": ["credit-policy-smb-v2026.04"] },
+      "links": { "bundle_id": "urn:ubr-bundle:demo:smb-loan:APP-2026-00019381", "previous_receipt_hash": "sha256:a25601df3f655d40bb411b0b9d7e86e9f05a8077d8dcb27aef56c9bcc0d3ab2f", "parent_receipts": ["urn:ubr:demo:ai-recommendation-generated:0005"], "related_iso20022_messages": [], "related_bian_service_domains": ["Commercial Loan", "Customer Offer", "Credit Risk Assessment"] },
+      "ai_assistance": { "used": false, "systems": [], "risk_controls": {} },
+      "verification": {
+        "canonicalization": "demo-jcs-compatible-json-sort-keys",
+        "digest_alg": "SHA-256",
+        "signature_alg": "Ed25519",
+        "verification_method": "did:web:example-bank.test#ubr-issuer-2026-07",
+        "status": { "state": "active", "status_purpose": "revocation" },
+        "timestamp": { "method": "signed_issued_at_demo", "value": "2026-07-22T16:43:00Z" },
+        "digest": "sha256:00b4a1897e7067f70111f8fb03c24da07b788268c3588fc97b52240c0d4aeb1b",
+        "proofs": []
+      },
+      "demo_note": "Synthetic UBR fixture. UBR-native proof values are omitted; trust must come from the linked ink.receipt.v2 companion."
+    },
+    {
+      "id": "urn:ubr:demo:loan-application-decisioned:0007",
+      "type": "UniversalBankingReceipt",
+      "version": "0.1.0",
+      "profile": ["ubr.core.v0", "ubr.loan.smb.v0", "ubr.ai.assisted.v0"],
+      "issued_at": "2026-07-22T16:47:00Z",
+      "jurisdiction": ["US"],
+      "language": "en-US",
+      "operation": {
+        "domain": "loan",
+        "name": "loan.application_decisioned",
+        "phase": "decision",
+        "action": "approved_conditionally",
+        "status": "completed",
+        "business_process_id": "urn:bank-process:loan-origination:APP-2026-00019381",
+        "external_reference": { "bank_application_id": "APP-2026-00019381", "core_system_reference": "LOS-998188" }
+      },
+      "parties": [
+        { "role": "issuer", "type": "financial_institution", "name": "Example Bank, N.A.", "lei": "549300EXAMPLEBANK123", "id": "did:web:example-bank.test" },
+        { "role": "applicant_business", "type": "legal_entity", "name": "Acme Supplies LLC", "lei": "254900EXAMPLEACME99", "id": "did:example:acme-supplies-llc" },
+        { "role": "ai_agent", "type": "software_agent", "id": "did:example:agent-loan-assistant-7", "mode": "recommendation_with_human_approval" },
+        { "role": "human_approver", "type": "person", "id": "did:example:bank-officer-44", "employee_role": "commercial_credit_officer" }
+      ],
+      "authority": { "institutional_policy": { "policy_id": "credit-policy-smb-v2026.04", "control_set": ["kyb_required", "beneficial_ownership_required", "cashflow_model_review", "human_approval_required_above_100k", "conditional_approval_notice_required"] } },
+      "state_transition": {
+        "subject": { "type": "loan_application", "id": "APP-2026-00019381" },
+        "before": { "application_status": "under_review" },
+        "after": {
+          "application_status": "conditionally_approved",
+          "approved_amount": { "currency": "USD", "value": "250000.00" },
+          "term_months": 48,
+          "interest_rate": { "type": "fixed", "apr": "0.1125" },
+          "conditions": ["final_tax_return_verification", "ucc_lien_filing", "business_insurance_certificate"]
+        }
+      },
+      "evidence": [
+        { "id": "urn:evidence:kyb-report-001", "type": "kyb_report", "hash": "sha256:c54018e6cb64652acbe30147bc50873869c32106d43325fd3d054cc2e5bf2898", "disclosure": "summary" },
+        { "id": "urn:evidence:cashflow-analysis-001", "type": "derived_cashflow_analysis", "hash": "sha256:fe9a1558a13445453541435f8bc9d1828ab9422f6845726a264cbdeab4562a3c", "disclosure": "summary" },
+        { "id": "urn:evidence:ai-recommendation-001", "type": "ai_recommendation_output", "hash": "sha256:3a051e541ce575823aba4718d610b4bf4028c0564effeb0558de386629e99d4c", "disclosure": "summary" },
+        { "id": "urn:evidence:human-review-001", "type": "credit_officer_review", "hash": "sha256:3fad7a6e03ff6584e35e741ec118cdf5caaddc432af5ef69db7a3601c9cda221", "disclosure": "summary" }
+      ],
+      "compliance": { "regimes": ["ECOA_RegB", "Section1071", "BSA_AML", "UDAAP", "institutional_credit_policy", "model_risk_management"], "policy_refs": ["credit-policy-smb-v2026.04"], "notices_required": ["conditional_approval_notice"], "reporting_flags": { "section_1071_reportable": true, "hmda_reportable": false, "cra_relevant": "unknown" } },
+      "links": { "bundle_id": "urn:ubr-bundle:demo:smb-loan:APP-2026-00019381", "previous_receipt_hash": "sha256:00b4a1897e7067f70111f8fb03c24da07b788268c3588fc97b52240c0d4aeb1b", "parent_receipts": ["urn:ubr:demo:human-credit-review-completed:0006"], "related_iso20022_messages": [], "related_bian_service_domains": ["Commercial Loan", "Customer Offer", "Credit Risk Assessment"] },
+      "ai_assistance": {
+        "used": true,
+        "systems": [{ "system_id": "loan-assistant-v4", "model_family": "large_language_model", "model_version": "2026-06-15", "role": "prior_recommendation_referenced_for_human_decision", "human_review_required": true, "human_review_completed": true }],
+        "risk_controls": { "final_credit_approval_without_human": "blocked_by_policy", "human_approval_required_above_100k": true, "human_review_receipt": "urn:ubr:demo:human-credit-review-completed:0006" }
+      },
+      "verification": {
+        "canonicalization": "demo-jcs-compatible-json-sort-keys",
+        "digest_alg": "SHA-256",
+        "signature_alg": "Ed25519",
+        "verification_method": "did:web:example-bank.test#ubr-issuer-2026-07",
+        "status": { "state": "active", "status_purpose": "revocation" },
+        "timestamp": { "method": "signed_issued_at_demo", "value": "2026-07-22T16:47:00Z" },
+        "digest": "sha256:2d50cf5ab5f2d6273437f0452db04d5a35385ae2c6b91c25b82725e0d8b05e21",
+        "proofs": []
+      },
+      "demo_note": "Synthetic UBR fixture. UBR-native proof values are omitted; trust must come from the linked ink.receipt.v2 companion."
+    },
+    {
+      "id": "urn:ubr:demo:conditional-approval-notice-generated:0008",
+      "type": "UniversalBankingReceipt",
+      "version": "0.1.0",
+      "profile": ["ubr.core.v0", "ubr.loan.smb.v0", "ubr.notice.v0"],
+      "issued_at": "2026-07-22T16:52:00Z",
+      "jurisdiction": ["US"],
+      "language": "en-US",
+      "operation": {
+        "domain": "compliance",
+        "name": "conditional_approval_notice.generated",
+        "phase": "notice",
+        "action": "generated_and_delivered",
+        "status": "completed",
+        "business_process_id": "urn:bank-process:loan-origination:APP-2026-00019381"
+      },
+      "parties": [
+        { "role": "issuer", "type": "financial_institution", "name": "Example Bank, N.A.", "lei": "549300EXAMPLEBANK123", "id": "did:web:example-bank.test" },
+        { "role": "applicant_business", "type": "legal_entity", "name": "Acme Supplies LLC", "lei": "254900EXAMPLEACME99", "id": "did:example:acme-supplies-llc" },
+        { "role": "human_approver", "type": "person", "id": "did:example:bank-officer-44", "employee_role": "commercial_credit_officer" }
+      ],
+      "authority": { "basis": "institutional_credit_policy_and_human_decision", "scope": ["generate_conditional_approval_notice", "deliver_notice"] },
+      "state_transition": {
+        "subject": { "type": "loan_application_notice", "id": "NOTICE-2026-00019381" },
+        "before": { "notice_status": "not_generated" },
+        "after": { "notice_status": "delivered", "delivery_channel": "secure_portal", "delivered_at": "2026-07-22T16:51:00Z", "contains_adverse_action": false }
+      },
+      "evidence": [
+        { "id": "urn:evidence:conditional-approval-notice-001", "type": "conditional_approval_notice", "hash": "sha256:395537dbaef3ff568182eb9a1d985b6c892352f45557406fd5df8a94d130f3c3", "disclosure": "summary" }
+      ],
+      "compliance": { "regimes": ["ECOA_RegB", "institutional_customer_communication_policy"], "policy_refs": ["notice-policy-v2026.01"] },
+      "links": { "bundle_id": "urn:ubr-bundle:demo:smb-loan:APP-2026-00019381", "previous_receipt_hash": "sha256:2d50cf5ab5f2d6273437f0452db04d5a35385ae2c6b91c25b82725e0d8b05e21", "parent_receipts": ["urn:ubr:demo:loan-application-decisioned:0007"], "related_iso20022_messages": [], "related_bian_service_domains": [] },
+      "ai_assistance": { "used": false, "systems": [], "risk_controls": {} },
+      "verification": {
+        "canonicalization": "demo-jcs-compatible-json-sort-keys",
+        "digest_alg": "SHA-256",
+        "signature_alg": "Ed25519",
+        "verification_method": "did:web:example-bank.test#ubr-issuer-2026-07",
+        "status": { "state": "active", "status_purpose": "revocation" },
+        "timestamp": { "method": "signed_issued_at_demo", "value": "2026-07-22T16:52:00Z" },
+        "digest": "sha256:c21b403890da253c3ec77f41781b75f89f742610b361ce13f0b9e9a637e1a2d3",
+        "proofs": []
+      },
+      "demo_note": "Synthetic UBR fixture. UBR-native proof values are omitted; trust must come from the linked ink.receipt.v2 companion."
+    }
+  ],
+  "verifier_report": {
+    "report_id": "urn:ubr-verifier-report:demo:smb-loan:APP-2026-00019381",
+    "generated_at": "2026-07-22T17:00:00Z",
+    "bundle_id": "urn:ubr-bundle:demo:smb-loan:APP-2026-00019381",
+    "scenario": "AI-assisted $250,000 SMB loan conditional approval",
+    "verifier": {
+      "name": "Bankabil UBR Local Verifier Demo",
+      "version": "0.1.0-fixture",
+      "canonicalization": "demo-jcs-compatible-json-sort-keys"
+    },
+    "summary": {
+      "overall_verified": true,
+      "receipts_checked": 8,
+      "receipts_verified": 8,
+      "graph_valid": true,
+      "evidence_items": 8,
+      "evidence_disclosed_to_verifier": 6,
+      "evidence_committed_only": 2,
+      "critical_failures": 0,
+      "warnings": 0
+    },
+    "decision": {
+      "application_id": "APP-2026-00019381",
+      "business": "Acme Supplies LLC",
+      "amount": { "currency": "USD", "value": "250000.00" },
+      "status": "conditionally_approved",
+      "term_months": 48,
+      "apr": "0.1125",
+      "conditions": ["final_tax_return_verification", "ucc_lien_filing", "business_insurance_certificate"]
+    },
+    "graph_results": {
+      "graph_valid": true,
+      "root_receipt": "urn:ubr:demo:consent-granted:0001",
+      "terminal_receipt": "urn:ubr:demo:conditional-approval-notice-generated:0008",
+      "topological_order": [
+        "urn:ubr:demo:consent-granted:0001",
+        "urn:ubr:demo:kyb-verified:0002",
+        "urn:ubr:demo:documents-received:0003",
+        "urn:ubr:demo:cashflow-analysis-completed:0004",
+        "urn:ubr:demo:ai-recommendation-generated:0005",
+        "urn:ubr:demo:human-credit-review-completed:0006",
+        "urn:ubr:demo:loan-application-decisioned:0007",
+        "urn:ubr:demo:conditional-approval-notice-generated:0008"
+      ],
+      "failures": []
+    },
+    "authority_results": {
+      "representative_authority_verified": true,
+      "customer_consent_active_at_decision": true,
+      "bank_policy_known": true,
+      "ai_final_approval_prohibited": true,
+      "human_approval_completed_for_amount_above_100k": true
+    },
+    "ai_boundary_results": {
+      "ai_used": true,
+      "ai_roles": ["document_extraction_and_cashflow_summary", "recommendation_generation", "prior_recommendation_referenced_for_human_decision"],
+      "ai_recommended_terms": true,
+      "ai_executed_final_credit_decision": false,
+      "human_review_completed": true,
+      "human_changed_ai_recommendation": false
+    },
+    "compliance_results": {
+      "section_1071_reportable": true,
+      "reg_b_notice_path": "conditional_approval_notice_generated",
+      "adverse_action_generated": false,
+      "evidence_firewalling_observed": true,
+      "sensitive_documents_committed_only": ["urn:evidence:bank-statements-q2-2026", "urn:evidence:tax-return-2025"]
+    },
+    "limitations": [
+      "Synthetic data only.",
+      "Canonicalization is demo-stable JSON, not a production RFC 8785 implementation.",
+      "Ed25519 key is generated inside the source fixture and is not institutionally anchored.",
+      "vLEI, DID resolution, RFC 3161 timestamping, and VC status-list checks are represented as profile fields, not live network verification."
+    ]
+  }
+}

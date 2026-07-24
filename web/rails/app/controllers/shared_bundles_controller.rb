@@ -14,6 +14,11 @@ class SharedBundlesController < ApplicationController
         case_summary: Mand8::WorkspaceSnapshot.case_summary_for_bundle(bundle.evidence_bundle),
         verifier_handoff: bundle.evidence_bundle.manifest["verifier_handoff"]
       }
+    elsif bundle.workspace.product_type == "blkbxs"
+      payload[:blkbxs] = {
+        graph_summary: Blkbxs::WorkspaceSnapshot.graph_summary_for_bundle(bundle.evidence_bundle),
+        verifier_handoff: bundle.evidence_bundle.manifest["verifier_handoff"]
+      }
     end
     render json: payload
   end

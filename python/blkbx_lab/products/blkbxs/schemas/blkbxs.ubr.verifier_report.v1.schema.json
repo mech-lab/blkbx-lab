@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BLKBXS UBR Verifier Report",
+  "type": "object",
+  "required": ["report_id", "generated_at", "bundle_id", "verifier", "summary"],
+  "properties": {
+    "report_id": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "bundle_id": { "type": "string" },
+    "scenario": { "type": "string" },
+    "verifier": { "type": "object" },
+    "summary": { "type": "object" },
+    "decision": { "type": "object" },
+    "graph_results": { "type": "object" },
+    "authority_results": { "type": "object" },
+    "ai_boundary_results": { "type": "object" },
+    "compliance_results": { "type": "object" },
+    "limitations": { "type": "array" }
+  },
+  "additionalProperties": true
+}
+

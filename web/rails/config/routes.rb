@@ -44,8 +44,12 @@ Rails.application.routes.draw do
       end
 
       namespace :blkbxs do
+        resource :dashboard, only: :show
+        resource :verifier_artifacts, only: :show
         resources :control_receipts, only: [:create, :show, :index]
         resources :underwriting_decision_receipts, only: [:create, :show, :index]
+        resources :ubr_receipts, only: [:create, :show, :index]
+        resources :ubr_bundles, only: [:create, :show, :index]
         resources :vendor_review_bundles, only: [:create, :show, :index]
         resources :review_requests, only: [:create, :show, :index, :update]
       end

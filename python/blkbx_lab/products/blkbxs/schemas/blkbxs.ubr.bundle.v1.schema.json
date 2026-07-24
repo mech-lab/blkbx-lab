@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BLKBXS UBR Bundle",
+  "type": "object",
+  "required": [
+    "schema",
+    "bundle_id",
+    "business_process_id",
+    "bundle_type",
+    "audience",
+    "generated_at",
+    "graph_validation",
+    "graph_order",
+    "decision_summary",
+    "evidence_summary",
+    "ai_boundary_summary",
+    "receipts",
+    "integrity"
+  ],
+  "properties": {
+    "schema": { "const": "blkbxs.ubr.bundle.v1" },
+    "bundle_id": { "type": "string" },
+    "business_process_id": { "type": "string" },
+    "bundle_type": { "type": "string" },
+    "audience": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "graph_validation": { "type": "object" },
+    "graph_order": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "decision_summary": { "type": "object" },
+    "evidence_summary": { "type": "object" },
+    "ai_boundary_summary": { "type": "object" },
+    "verifier_report_summary": { "type": ["object", "null"] },
+    "receipts": { "type": "array" },
+    "evidence_manifest": { "type": ["object", "null"] },
+    "summary": { "type": "string" },
+    "integrity": { "type": "object" }
+  },
+  "additionalProperties": false
+}
+

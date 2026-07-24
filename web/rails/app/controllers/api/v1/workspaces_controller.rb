@@ -45,8 +45,8 @@ module Api
         authorize @workspace, :update?
         return render json: { error: "workspace product mismatch" }, status: :unprocessable_entity unless @workspace.product_type == "mand8"
 
-        scenario = params[:scenario].presence || @workspace.metadata["demo_scenario"] || "lloyds_cyber_happy_path"
-        result = Mand8::SeedDemoWorkspace.call(workspace: @workspace, scenario: scenario, actor: current_user)
+        scenario = params[:scenario].presence || @workspace.metadata["demo_scenario"] || ::Mand8::DemoCatalog::CANONICAL_EXTERNAL_SCENARIO
+        result = ::Mand8::SeedDemoWorkspace.call(workspace: @workspace, scenario: scenario, actor: current_user)
         render_record(@workspace.reload, extra: workspace_extra(@workspace).merge(seed_result: result))
       end
 
@@ -72,7 +72,9 @@ module Api
           }
         }
         if workspace.product_type == "mand8"
-          extra[:mand8] = Mand8::WorkspaceSnapshot.call(workspace)
+          extra[:mand8] = ::Mand8::WorkspaceSnapshot.call(workspace)
+        elsif workspace.product_type == "blkbxs"
+          extra[:blkbxs] = ::Blkbxs::WorkspaceSnapshot.call(workspace)
         end
         extra
       end
@@ -83,7 +85,7 @@ module Api
         scenario = workspace.metadata["demo_scenario"].presence || workspace.metadata["seed_demo_scenario"].presence
         return if scenario.blank?
 
-        Mand8::SeedDemoWorkspace.call(workspace: workspace, scenario: scenario, actor: current_user)
+        ::Mand8::SeedDemoWorkspace.call(workspace: workspace, scenario: scenario, actor: current_user)
       end
 
       def require_user!

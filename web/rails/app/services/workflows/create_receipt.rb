@@ -1,5 +1,7 @@
 module Workflows
   class CreateReceipt
+    class PortableReceiptRequiredError < StandardError; end
+
     def self.call(options = {})
       new(options).call
     end
@@ -16,6 +18,7 @@ module Workflows
       @domain_metadata = options.fetch(:domain_metadata, {})
       @external_id = options[:external_id]
       @title = options[:title] || "#{@workspace.product_type} #{@workflow_kind.humanize}"
+      @require_portable_receipt = options.fetch(:require_portable_receipt, false)
     end
 
     def call
@@ -63,7 +66,7 @@ module Workflows
           sha256: Digest::SHA256.hexdigest(JSON.generate(@body))
         )
 
-        Ink::HostedIssueReceipt.call(receipt: receipt) if Ink::HostedIssueReceipt.enabled?
+        issue_portable_receipt!(receipt)
 
         UsageEvent.track(
           "receipt.created",
@@ -83,6 +86,28 @@ module Workflows
 
         [workflow_run, receipt]
       end
+    end
+
+    private
+
+    def issue_portable_receipt!(receipt)
+      if @require_portable_receipt
+        unless Ink::HostedIssueReceipt.enabled?
+          raise PortableReceiptRequiredError, "portable ink.receipt.v2 signing is required but INK_ISSUER_SERVICE_URL is not configured"
+        end
+
+        begin
+          Ink::HostedIssueReceipt.call(receipt: receipt)
+        rescue StandardError => error
+          raise PortableReceiptRequiredError, "portable ink.receipt.v2 signing failed: #{error.message}"
+        end
+        unless receipt.reload.portable_receipt.present?
+          raise PortableReceiptRequiredError, "portable ink.receipt.v2 signing is required but the issuer did not return a receipt"
+        end
+        return
+      end
+
+      Ink::HostedIssueReceipt.call(receipt: receipt) if Ink::HostedIssueReceipt.enabled?
     end
   end
 end

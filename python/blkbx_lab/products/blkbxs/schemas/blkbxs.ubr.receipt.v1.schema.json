@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BLKBXS Universal Banking Receipt",
+  "description": "Domain view for a Universal Banking Receipt. The authoritative cryptographic record is the linked ink.receipt.v2 portable receipt.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "version",
+    "profile",
+    "issued_at",
+    "operation",
+    "parties",
+    "authority",
+    "state_transition",
+    "evidence",
+    "compliance",
+    "links",
+    "verification"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "type": { "const": "UniversalBankingReceipt" },
+    "version": { "type": "string", "minLength": 1 },
+    "profile": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "jurisdiction": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "language": { "type": "string" },
+    "operation": {
+      "type": "object",
+      "required": ["domain", "name", "phase", "action", "status", "business_process_id"],
+      "properties": {
+        "domain": { "type": "string" },
+        "name": { "type": "string" },
+        "phase": { "type": "string" },
+        "action": { "type": "string" },
+        "status": { "type": "string" },
+        "business_process_id": { "type": "string" },
+        "external_reference": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "parties": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["role", "type", "id"],
+        "properties": {
+          "role": { "type": "string" },
+          "type": { "type": "string" },
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "lei": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "authority": { "type": "object" },
+    "state_transition": {
+      "type": "object",
+      "required": ["subject", "before", "after"],
+      "properties": {
+        "subject": { "type": "object" },
+        "before": { "type": "object" },
+        "after": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "hash", "disclosure"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+          "disclosure": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "compliance": { "type": "object" },
+    "links": {
+      "type": "object",
+      "required": ["bundle_id", "parent_receipts"],
+      "properties": {
+        "bundle_id": { "type": "string" },
+        "previous_receipt_hash": { "type": ["string", "null"] },
+        "parent_receipts": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "related_iso20022_messages": { "type": "array" },
+        "related_bian_service_domains": { "type": "array" }
+      },
+      "additionalProperties": true
+    },
+    "ai_assistance": {
+      "type": "object",
+      "properties": {
+        "used": { "type": "boolean" },
+        "systems": { "type": "array" },
+        "risk_controls": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "verification": {
+      "type": "object",
+      "required": ["canonicalization", "digest_alg", "signature_alg", "verification_method", "status", "timestamp", "digest"],
+      "properties": {
+        "canonicalization": { "type": "string" },
+        "digest_alg": { "type": "string" },
+        "signature_alg": { "type": "string" },
+        "verification_method": { "type": "string" },
+        "status": { "type": "object" },
+        "timestamp": { "type": "object" },
+        "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "proofs": { "type": "array" }
+      },
+      "additionalProperties": true
+    },
+    "demo_note": { "type": "string" }
+  },
+  "additionalProperties": true
+}
+
